@@ -22,7 +22,7 @@ const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const handleProceed = () => {
-    if (email === "vishal") {
+    if (email === "arjunnanda@yhataw.com") {
       // Replace with your static email
       setIsEmailValid(true);
       setShowPasswordInput(true);
@@ -33,7 +33,7 @@ const LoginScreen = () => {
   };
 
   const handleLogin = () => {
-    if (password === "1234") {
+    if (password === "Arjun@1234") {
       navigation.navigate("Dashboard");
     } else {
     }

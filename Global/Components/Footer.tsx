@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { SimpleLineIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
-import styles from "./Footer.style";
 
 function Footer({ navigate }) {
   const [selectedIcon, setSelectedIcon] = useState(null);
+
   const handleIconPress = (iconName) => {
     setSelectedIcon(iconName);
     if (iconName === "user") {
       navigate("UserProfile"); // Adjust the route name as needed
     }
+    // Add navigation for other icons if needed
   };
+
   const getBorderPosition = () => {
     switch (selectedIcon) {
       case "home":
@@ -25,6 +27,7 @@ function Footer({ navigate }) {
         return 0;
     }
   };
+
   return (
     <>
       <View style={styles.row}>
@@ -51,5 +54,25 @@ function Footer({ navigate }) {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderColor: "#ccc",
+  },
+  borderButton: {
+    position: "absolute",
+    bottom: 0,
+    height: 5,
+    width: 60,
+    backgroundColor: "blue",
+    alignSelf: "center",
+  },
+});
 
 export default Footer;
