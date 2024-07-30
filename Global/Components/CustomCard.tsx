@@ -6,7 +6,7 @@ interface CustomProps {
   cardContent: React.ReactNode;
   cardColor?: string; // Optional prop for card background color
   calendarBackgroundColor?: string; // Optional prop for calendar icon background color
-  calendarText: string;
+  calendarText;
 }
 
 const CustomCard: React.FC<CustomProps> = ({

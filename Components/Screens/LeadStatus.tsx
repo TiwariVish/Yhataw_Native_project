@@ -9,17 +9,22 @@ import {
 import CustomInput from "../../Global/Components/CustomInput";
 import Feather from "@expo/vector-icons/Feather";
 
+
+interface LeadStatusProps {
+  selectedCard: number;
+  setSelectedCard: (id: number) => void;
+}
 const leadStatus = [
   { id: 1, content: "All Leads" },
-  { id: 2, content: "Just Now" },
+  { id: 0, content: "Just Now" },
   { id: 3, content: "My Leads" },
   { id: 4, content: "Site Visit" },
   { id: 5, content: "Pipeline" },
   { id: 6, content: "Reminders" },
 ];
 
-function LeadStatus() {
-  const [selectedCard, setSelectedCard] = useState<number>(1);
+function LeadStatus({ selectedCard, setSelectedCard }) {
+  // const [selectedCard, setSelectedCard] = useState<number>(1);
 
   const handleCardPress = (id: number) => {
     setSelectedCard(id);
@@ -56,7 +61,7 @@ function LeadStatus() {
         ))}
       </ScrollView>
       <View style={styles.searchContainer}>
-        <CustomInput placeHolder="Search..." style={styles.searchInput} />
+        <CustomInput placeHolder="Search..." style={styles.searchInput} onChange={undefined} />
         <TouchableOpacity style={styles.sliderIcon}>
           <Feather
             name="sliders"

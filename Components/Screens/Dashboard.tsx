@@ -5,105 +5,132 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  Modal,
   StyleSheet,
-  TouchableWithoutFeedback,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import CustomCard from "../../Global/Components/CustomCard";
 import Footer from "../../Global/Components/Footer";
-import DashboardModelView from "../../Global/PopAndModels/DashboardModelView";
 import { LoginScreenNavigationProp } from "../type"; // Import the types
+import {
+  getDataAllLead,
+  getDataAttendance,
+  getDataProject,
+} from "./DashboardService";
+import { locationType } from "../../Models/Interface";
+import store from "../../utils/store";
+import { setLeadId } from "../../Redux/authSlice";
+import { useDispatch } from "react-redux";
 
-const data = [
-  { id: 1, content: "Card 1" },
-  { id: 2, content: "Card 2" },
-  { id: 3, content: "Card 3" },
-];
+// Static data moved outside of the component
+const staticData = {
+  leads: [
+    {
+      id: "1",
+      content: "New Leads",
+      cardColor: "#ffa899",
+      calendarBackgroundColor: "#ff2600",
+      leadDataKey: "lead_total_new_count",
+    },
+    {
+      id: "2",
+      content: "Site Visit",
+      cardColor: "#99e6ff",
+      calendarBackgroundColor: "#1a1aff",
+      leadDataKey:""
+    },
+    {
+      id: "3",
+      content: "Pipeline",
+      cardColor: "#c1f0c1",
+      calendarBackgroundColor: "#009900",
+      leadDataKey:"lead_total_pipeline_count"
+    },
+    {
+      id: "4",
+      content: "Cancelled",
+      cardColor: "#c1f0c1",
+      calendarBackgroundColor: "#009900",
+      leadDataKey:""
+    },
+    {
+      id: "5",
+      content: "Done",
+      cardColor: "#c1f0c1",
+      calendarBackgroundColor: "#009900",
+        leadDataKey:""
+    },
+  ],
+  attendance: [
+    { id: 1, content: "Present", attendanceKey:"attendence_present_today"},
+    { id: 2, content: "Absent",attendanceKey:"attendence_absent_today" },
+    { id: 3, content: "Late" ,attendanceKey:"attendence_late_today"},
+    { id: 4, content: "Leave",attendanceKey:"attendence_leave_today" },
+  ],
+  myProjects: [
+    { id: 1, content: "Commercial",projectKey:"projects_commercial" },
+    { id: 2, content: "Residential",projectKey:"projects_residencial" },
+  ],
+};
 
-const leads = [
-  {
-    id: "1",
-    content: "New Leads",
-    cardColor: "#ffa899",
-    calendarBackgroundColor: "#ff2600",
-  },
-  {
-    id: "2",
-    content: "Site Visit",
-    cardColor: "#99e6ff",
-    calendarBackgroundColor: "#1a1aff",
-  },
-  {
-    id: "3",
-    content: "Pipeline",
-    cardColor: "#c1f0c1",
-    calendarBackgroundColor: "#009900",
-  },
-  {
-    id: "4",
-    content: "Cancelled",
-    cardColor: "#c1f0c1",
-    calendarBackgroundColor: "#009900",
-  },
-  {
-    id: "5",
-    content: "Done",
-    cardColor: "#c1f0c1",
-    calendarBackgroundColor: "#009900",
-  },
-];
+interface CustomProps {
+  handleClose?: () => void;
+  location: locationType;
+}
 
-const attendance = [
-  { id: 1, content: "Present" },
-  { id: 2, content: "Absent" },
-  { id: 3, content: "Late" },
-  { id: 4, content: "Leave" },
-];
-
-const myProjects = [
-  { id: 1, content: "Commercial" },
-  { id: 2, content: "Residential" },
-];
-const Dashboard = () => {
-  const [dashboardDataAllLead, setDashboardDataAllLead] = useState<any>([]);
+const Dashboard: React.FC<CustomProps> = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const dispatch = useDispatch();
+  const [dashboardData, setDashboardData] = useState<any>({
+    project: [],
+    allLead: [],
+    attendance: [],
+  });
+
+  const userId = store.getState().auth;
 
   useEffect(() => {
-    // getDataAllLead();
-  }, []);
+    getValuepermission ();
+  }, [userId]);
+  
+  const getValuepermission  = async () => {
+    try {
+      const [allLead, project, attendance] = await Promise.all([
+        getDataAllLead(userId),
+        getDataProject(),
+        getDataAttendance(),
+      ]);
+      setDashboardData({
+        allLead: allLead?.data[0] || [],
+        project: project?.data[0] || [],
+        attendance: attendance?.data[0] || [],
+      });
+    } catch (error) {
+      console.error("Error fetching data", error);
+    }
+  };
+  console.log(dashboardData,':::::::::::::dashboardData');
+  
 
-  const navigateToSection = (item) => {
+  const navigateToSection = (id: number) => {
+    dispatch(setLeadId(id));
     navigation.navigate("Leads");
     setModalVisible(false);
-    console.log("Navigate to:", item.content);
   };
 
-  const hadleprofile = () => {
+  const handleProfile = () => {
     navigation.navigate("MyProfile");
-  };
-
-  const handleCardClick = (item) => {
-    setSelectedItem(item);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-    setSelectedItem(null);
   };
 
   return (
     <>
       <ScrollView>
         {/* Header section */}
-        <View style={styles.row}>
-          <View style={styles.cont}>
+        <View style={styles.header}>
+          <View style={styles.imageContainer}>
             <Image
-              source={require("../../assets/crm_icon.png")}
+              source={require("../../assets/Logo.png")}
               style={styles.image}
             />
           </View>
@@ -119,7 +146,7 @@ const Dashboard = () => {
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScroll}
         >
-          {data.map((item) => (
+          {staticData.leads.map((item) => (
             <View key={item.id} style={styles.card}>
               <Text>{item.content}</Text>
             </View>
@@ -127,29 +154,36 @@ const Dashboard = () => {
         </ScrollView>
 
         {/* Leads section */}
-        <View style={[styles.row, styles.footer]}>
-          <View style={styles.textContainer}>
+        <View style={styles.row}>
+          <View style={styles.textContainerAll}>
             <Text style={styles.name}>All Leads</Text>
-            <Text style={styles.role}>54657 total</Text>
+            <Text style={styles.role}>{dashboardData.allLead.lead_total_count}</Text>
           </View>
-          <AntDesign name="right" size={24} color="black" />
+          <View style={styles.iconFord}>
+            <AntDesign
+              name="right"
+              size={24}
+              color="black"
+              onPress={() => navigateToSection(1)}
+            />
+          </View>
         </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScroll}
         >
-          {leads.map((item) => (
+          {staticData.leads.map((item) => (
             <TouchableOpacity
               key={item.id}
-              onPress={() => handleCardClick(item)}
+              onPress={() => navigateToSection(Number(item.id))}
             >
               <View style={styles.cardContainer}>
                 <CustomCard
                   cardContent={<Text>{item.content}</Text>}
                   cardColor={item.cardColor}
                   calendarBackgroundColor={item.calendarBackgroundColor}
-                  calendarText={""}
+                  calendarText={`${dashboardData.allLead[item.leadDataKey] || 0}`}
                 />
               </View>
             </TouchableOpacity>
@@ -157,108 +191,100 @@ const Dashboard = () => {
         </ScrollView>
 
         {/* Attendance section */}
-        <View style={[styles.row, styles.footer]}>
-          <View style={styles.textContainer}>
+        <View style={styles.row}>
+          <View style={styles.textContainerAll}>
             <Text style={styles.name}>All Attendance</Text>
-            <Text style={styles.role}>days 31</Text>
+            <Text style={styles.role}>{dashboardData.attendance.attendence_total_emp} day</Text>
           </View>
-          <AntDesign name="right" size={24} color="black" />
+          <View style={styles.iconFord}>
+            <AntDesign name="right" size={24} color="black" />
+          </View>
         </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScroll}
         >
-          {attendance.map((item) => (
+          {staticData.attendance.map((item) => (
             <View key={item.id} style={styles.cardContainer}>
               <CustomCard
                 cardContent={<Text>{item.content}</Text>}
-                calendarText={""}
+                calendarText={`${dashboardData.attendance[item.attendanceKey] || 0}`}
               />
             </View>
           ))}
         </ScrollView>
 
         {/* Projects section */}
-        <View style={[styles.row, styles.footer]}>
-          <View style={styles.textContainer}>
+        <View style={styles.row}>
+          <View style={styles.textContainerAll}>
             <Text style={styles.name}>My Project</Text>
-            <Text style={styles.role}>days 31</Text>
+            <Text style={styles.role}>{dashboardData.project.projects_total} Total</Text>
           </View>
-          <AntDesign name="right" size={24} color="black" />
+          <View style={styles.iconFord}>
+            <AntDesign name="right" size={24} color="black" />
+          </View>
         </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScroll}
         >
-          {myProjects.map((item) => (
+          {staticData.myProjects.map((item) => (
             <View key={item.id} style={styles.cardContainer}>
               <CustomCard
                 cardContent={<Text>{item.content}</Text>}
-                calendarText={""}
+                calendarText={`${dashboardData.project[item.projectKey] || 0}`}
               />
             </View>
           ))}
         </ScrollView>
       </ScrollView>
-
-      {/* Modal section */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <DashboardModelView navigateToSection={navigateToSection} />
-              {/* <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity> */}
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-      <Footer navigate={hadleprofile} />
+      <Footer navigate={handleProfile} />
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    margin: 10,
-  },
-  row: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    margin: 15,
-    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    marginTop: 20,
   },
-  image: {
-    width: 35,
-    height: 35,
-  },
-  textContainer: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  role: {
-    fontSize: 14,
-    color: "gray",
-  },
-  cont: {
+  imageContainer: {
+    marginRight: 12,
     borderWidth: 1,
     borderColor: "gray",
     borderRadius: 5,
     padding: 5,
     justifyContent: "center",
     alignItems: "center",
+  },
+  image: {
+    width: 35,
+    height: 35,
+  },
+  textContainer: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    flex: 1,
+  },
+  textContainerAll:{
+    flexDirection: "row",
+    alignItems: "flex-start",
+    flex: 1,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 15,
+  },
+  role: {
+    fontSize: 14,
+    color: "gray",
+    marginLeft: 15,
   },
   card: {
     backgroundColor: "gray",
@@ -270,39 +296,20 @@ const styles = StyleSheet.create({
     height: 135,
     width: 350,
   },
+  cardContainer: {
+    margin: 10,
+  },
   horizontalScroll: {
     flexDirection: "row",
   },
-  footer: {
+  row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: 10,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: 415,
-    height: 627,
-    marginTop: 225,
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    alignItems: "center",
-  },
-  closeButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: "#2196F3",
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: "white",
-    fontWeight: "bold",
+  iconFord: {
+    marginRight: 20,
   },
 });
 

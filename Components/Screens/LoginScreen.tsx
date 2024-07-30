@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,166 +6,225 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
+  Animated,
+  TextInput,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons"; // Assuming you're using Expo Icons
 import CustomInput from "../../Global/Components/CustomInput";
 import CustomButton from "../../Global/Components/CustomButton";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import styles from "./LoginScreen.style";
-import { LoginScreenNavigationProp } from "../type"; // Import the types
-const LoginScreen = () => {
+import { useDispatch, useSelector } from "react-redux";
+import { loginAction } from "../../Redux//authSlice";
+import { RootState } from "../../utils/store";
+import { login } from "./LoginScreenService";
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const [IsLoading, setIsLoading] = useState(true);
+  const [mobilePattern, setMobilePattern] = useState(false);
 
-  const handleProceed = () => {
-    if (email === "arjunnanda@yhataw.com") {
-      // Replace with your static email
-      setIsEmailValid(true);
-      setShowPasswordInput(true);
-    } else {
+  const dispatch = useDispatch();
+  const { authenticated } = useSelector((state: RootState) => state.auth);
+
+  const handleProceed = async () => {
+    const isValid = validateEmail(email);
+    if (!isValid) {
       setIsEmailValid(false);
-      setShowPasswordInput(false);
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const response = await login(email, password);
+      if (response?.message?.settings?.success) {
+        setIsEmailValid(true);
+        setShowPasswordInput(true);
+      } else {
+        console.log("Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleLogin = () => {
-    if (password === "Arjun@1234") {
-      navigation.navigate("Dashboard");
-    } else {
+  const handleLogin = async () => {
+    try {
+      setIsLoading(true);
+      const response = await login(email, password);
+      console.log(response, "password--------------------");
+      if (response?.message?.settings?.success) {
+        const { accessToken, fullName, role, _id } =
+        response?.message?.data?.user;
+        dispatch(loginAction({
+          authenticated: true,
+          accessToken: accessToken,
+          userName: fullName,
+          email: response.message.data.user.email,
+          role,
+          userId: _id,
+          privileges: response.message.data.user?.role_privileges || {},
+        }));
+        if (authenticated) {
+          navigation.navigate("Dashboard");
+        }
+      } else {
+        console.log("Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword((prevState) => !prevState);
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
+
+  // const handleOnChangeInputField = (event) => {
+  //   const { value } = event.target;
+  //   setEmail(value);
+  //   const isNumeric = /^[0-9]+$/.test(value);
+  //   setMobilePattern(isNumeric);
+  // };
+
+  const handleOnChangeInputField = (text: string) => {
+    setEmail(text);
+    const isNumeric = /^[0-9]+$/.test(text);
+    setMobilePattern(isNumeric);
+  };
+
+  // const handleOnChangePasswordField = (event) => {
+  //   const { value } = event.target;
+  //   setPassword(value);
+  // };
+
+  const handleOnChangePasswordField = (text: string) => {
+    setPassword(text);
+  };
+
+  function handleTogglePasswordVisibility() {
+    setShowPassword(!showPassword);
+  }
+
+  useEffect(() => {}, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Image
-          source={require("../../assets/crm_icon.png")}
-          style={styles.image}
-        />
-        <View style={styles.textContainer}>
-          <Text style={styles.cardTitle}>Sign in</Text>
-          <Text style={styles.crmTitle}>to access Pulse CRM</Text>
+        <View style={styles.header}>
+          <Image
+            source={require("../../assets/Logo.png")}
+            style={styles.image}
+          />
+          <View style={styles.textContainer}>
+            <Text
+              style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm]}
+            >
+              Sign in
+            </Text>
+            <Text style={[globalStyles.h8, globalStyles.fs4]}>
+              to access Pulse CRM
+            </Text>
+          </View>
         </View>
         <View style={styles.inputContainer}>
-          <CustomInput
-            style={styles.input}
-            placeHolder="Email or mobile number"
-            id="email"
-            type="email"
-            name="email"
-            onChange={setEmail}
-            value={email}
-          />
-          {!isEmailValid && (
+          <View style={styles.inlineInput}>
+            <Image
+              source={require("../../assets/User_box_light.png")}
+              style={styles.icon}
+            />
+            {/* <CustomInput
+              style={styles.input}
+              placeHolder="Email or mobile number"
+              id="email"
+              type="email"
+              name="email"
+              onChange={handleOnChangeInputField}
+              value={email}
+            /> */}
+
+            <TextInput
+              style={styles.input}
+              placeholder="Email or mobile number"
+              onChangeText={handleOnChangeInputField}
+              value={email}
+            />
+            {mobilePattern && (
+              <View style={styles.inputAdornment}>
+                <Text style={styles.startText}>+91</Text>
+              </View>
+            )}
+          </View>
+          {/* {!isEmailValid && (
+            <Text style={styles.errorText}>
+              This is not a valid email. Please contact system administrator.
+            </Text>
+          )} */}
+        </View>
+        <View>
+        {!isEmailValid && (
             <Text style={styles.errorText}>
               This is not a valid email. Please contact system administrator.
             </Text>
           )}
-          {showPasswordInput && (
-            <View style={styles.viewCont}>
-              <CustomInput
-                style={styles.passwordInput}
+        </View>
+        {showPasswordInput && (
+          <View style={styles.viewCont}>
+            <View style={styles.inlineInput}>
+              <Image
+                source={require("../../assets/Lock_icon.png")}
+                style={styles.icon}
+              />
+              {/* <CustomInput
+                style={styles.input}
                 placeHolder="Password"
                 id="password"
                 type="password"
                 name="password"
-                secureTextEntry={!showPassword}
-                onChange={setPassword}
+                onChange={handleOnChangePasswordField}
                 value={password}
-              />
+                secureTextEntry={!showPassword}
+              /> */}
+               <TextInput
+              style={styles.input}
+              placeholder="Password"
+              onChangeText={handleOnChangePasswordField}
+              value={password}
+                secureTextEntry={!showPassword}
+            />
               <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={handleTogglePasswordVisibility}
               >
-                <Ionicons
-                  name={showPassword ? "eye-outline" : "eye-off-outline"}
-                  size={24}
-                  color="gray"
+                <Image
+                  source={
+                    showPassword
+                      ? require("../../assets/View_light.png")
+                      : require("../../assets/View_hide_light.png")
+                  }
                 />
               </TouchableOpacity>
             </View>
-          )}
-          <View style={styles.viewcustomButton}>
-            <CustomButton
-              label={showPasswordInput ? "Log In" : "Proceed"}
-              buttonType="primaryBtn"
-              labelStyle={styles.labelStyle}
-              onClick={showPasswordInput ? handleLogin : handleProceed}
-            />
           </View>
+        )}
+        <View style={styles.viewcustomButton}>
+          <CustomButton
+            label={showPasswordInput ? "Log In" : "Proceed"}
+            buttonType="iconBtn"
+            labelStyle={styles.labelStyle}
+            onClick={showPasswordInput ? handleLogin : handleProceed}
+            style={styles.button}
+          />
         </View>
       </View>
     </SafeAreaView>
   );
 };
-
-// const styles = StyleSheet.create({
-//   safeArea: {
-//     flex: 1,
-//   },
-//   container: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     padding: 20,
-//   },
-//   textContainer: {
-//     width: "100%",
-//     alignItems: "flex-start",
-//   },
-//   cardTitle: {
-//     fontSize: 26,
-//     fontWeight: "bold",
-//     marginBottom: 5,
-//   },
-//   crmTitle: {
-//     marginBottom: 18,
-//   },
-//   footerText: {
-//     marginTop: 20,
-//     textAlign: "center",
-//   },
-//   inputContainer: {
-//     width: "100%",
-//   },
-//   input: {
-//     width: "100%",
-//     marginBottom: 10,
-//   },
-//   labelStyle: {
-//     color: "white",
-//     fontWeight: "bold",
-//   },
-//   errorText: {
-//     marginBottom: 10,
-//     color: "red",
-//   },
-//   passwordInput: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     position: "relative",
-//     // marginBottom: 5,
-//   },
-//   viewCont: {
-//     bottom: 35,
-//   },
-//   viewcustomButton: {
-//     bottom: 15,
-//   },
-//   eyeIcon: {
-//     position: "absolute",
-//     top: 40,
-//     right: 10,
-//     padding: 5,
-//   },
-// });
 
 export default LoginScreen;

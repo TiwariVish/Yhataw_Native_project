@@ -1,5 +1,4 @@
 import { createTheme } from "@mui/material/styles";
-// import { CSSProperties } from "@mui/styled-engine-sc";
 
 const primaryWhiteColor = "#FFF";
 const primaryBlueColor = "#3D48E5";
@@ -66,7 +65,7 @@ const theme = createTheme({
   },
   typography: {
     fontSize: 16, // Define the appropriate font size for your application
-
+  
     fontFamily: [
       "-apple-system",
       "BlinkMacSystemFont",

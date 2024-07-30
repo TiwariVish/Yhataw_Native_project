@@ -41,7 +41,5 @@
 
 // export const selectPunchInUserId = (state: RootState) =>
 //   state.userData.punchInId;
-// export const selectPunchInTime = (state: RootState) => state.userData.punchIin;
-// export const selectIsDrawerOpen = (state: RootState) => state.userData.status;
 
 // export default userDataSlice.reducer;

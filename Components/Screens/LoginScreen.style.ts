@@ -1,82 +1,93 @@
+import { StyleSheet, Dimensions } from "react-native";
 
-import { StyleSheet } from "react-native";
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: "#fff",
   },
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     padding: 20,
+    justifyContent: "center",
+    // gap: 10,
   },
-  textContainer: {
-    width: "100%",
-    alignItems: "flex-start",
-  },
-  cardTitle: {
-    fontSize: 26,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  containerImg:{
-  
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-
+  header: {
+    // alignItems: 'center',
+    marginBottom: 20,
   },
   image: {
-    marginRight:350,
-    marginBottom:10,
-    width: 30, // Set the desired width
-    height: 30, // Set the desired height
+    // width: width * 0.4, // Adjust the size of the logo
+    // height: height * 0.1,
+    marginBottom: 15,
   },
-  crmTitle: {
-    marginBottom: 18,
-  },
-  footerText: {
-    marginTop: 20,
-    textAlign: "center",
+  textContainer: {
+    // alignItems: 'center',
   },
   inputContainer: {
-    width: "100%",
+    // marginVertical: 10,
   },
-  input: {
-    width: "100%",
-    marginBottom: 10,
-    borderWidth: 0, 
-    borderBottomWidth: 1, 
-    borderBottomColor: '#000', 
-  },
-  labelStyle: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  errorText: {
-    marginBottom: 10,
-    color: "red",
-  },
-  passwordInput: {
+  inlineInput: {
     flexDirection: "row",
     alignItems: "center",
-    position: "relative",
-    // marginBottom: 5,
-    borderWidth: 0, 
-    borderBottomWidth: 1, 
-    borderBottomColor: '#000', 
+    borderBottomWidth: 1,
+    borderBottomColor: "#DFE1E8",
+    paddingBottom: 5,
+  },
+  icon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    padding: 10,
+  },
+  labelStyle: {
+    height: 48,
+    width:"100%",
+    borderRadius: 8,
+    backgroundColor: "#3D48E5",
+    color: "white",
+    fontWeight: "bold",
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
+  errorText: {
+    marginVertical: 10,
+    color: "red",
+    textAlign: 'center',
   },
   viewCont: {
-    bottom: 35,
+    marginBottom: 20,
   },
   viewcustomButton: {
-    bottom: 5,
+    marginTop: 20,
+  },
+  button: {
+    // width: "100%",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   eyeIcon: {
     position: "absolute",
-    top: 40,
+    top: 10,
     right: 10,
     padding: 5,
   },
+  inputAdornment: {
+    position: "absolute",
+    left: 22,
+    top: 0,
+    bottom: 5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  startText: {
+    fontSize: 16,
+    color: "#000",
+  },
 });
-  export default styles;
+
+export default styles;

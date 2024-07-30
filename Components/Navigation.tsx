@@ -5,18 +5,30 @@ import LoginScreen from "./Screens/LoginScreen";
 import Dashboard from "./Screens/Dashboard";
 import Leads from "./Screens/Leads";
 import MyProfile from "./Screens/MyProfile";
-import { RootStackParamList } from "./type"; // Import the types
+import { RootStackParamList, RootStackParamList1 } from "./type"; // Import the types
+import { useSelector } from "react-redux";
+import { RootState } from "../utils/store";
+import LeadInfoScreen from "./Screens/LeadInfoScreen";
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator();
 
 const Navigation: React.FC = () => {
+  const { authenticated } = useSelector((state: RootState) => state.auth);
+  console.log(authenticated,"sdpkfvndefovndfjobndjobdb");
+  
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Dashboard" component={Dashboard} />
-        <Stack.Screen name="Leads" component={Leads} />
-        <Stack.Screen name="MyProfile" component={MyProfile} />
+      <Stack.Navigator >
+        {authenticated ? (
+          <>
+            <Stack.Screen name="Dashboard" component={Dashboard}   options={{ headerShown: false }} />
+            <Stack.Screen name="Leads" component={Leads} />
+            <Stack.Screen name="MyProfile" component={MyProfile} />
+            <Stack.Screen name="LeadInfoScreen" component={LeadInfoScreen} />
+          </>
+        ) : (
+          <Stack.Screen name="Login" component={LoginScreen}   options={{ headerShown: false }}  />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

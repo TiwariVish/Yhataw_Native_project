@@ -37,7 +37,8 @@ const data = [
   },
 ];
 
-const DashboardModelView = ({ navigateToSection }) => {
+const DashboardModelView = () => { 
+  // { navigateToSection }
   return (
     <ScrollView>
       <View>
@@ -47,7 +48,7 @@ const DashboardModelView = ({ navigateToSection }) => {
         <TouchableOpacity
           key={item.id}
           style={[styles.card, item.color]}
-          onPress={() => navigateToSection(item)}
+          // onPress={() => navigateToSection(item)}
         >
           <Image source={item.image} style={styles.image} />
           <View style={styles.textContainer}>

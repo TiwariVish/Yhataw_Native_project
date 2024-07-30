@@ -9,8 +9,8 @@ interface InputRangeTypes {
 interface CustomProps {
   label?: string;
   placeHolder?: string;
-  value?: string | number;
-  onChange?: (text: string) => void;
+  value?: any;
+  onChange
   type?: string;
   name?: string;
   select?: boolean;
@@ -38,7 +38,7 @@ const CustomInput = (props: CustomProps) => {
   const {
     label,
     placeHolder,
-    value,
+    value="",
     onChange,
     secureTextEntry,
     type,
@@ -64,13 +64,15 @@ const CustomInput = (props: CustomProps) => {
       <TextInput
         style={[styles.textInput, style, error ? styles.errorBorder : null]}
         placeholder={placeHolder}
-        value={value?.toString()}
-        onChangeText={onChange}
+        // value={value||""}
+        value={value}
+        onChange={onChange}
         secureTextEntry={type === "password" && secureTextEntry}
         editable={!disabled}
         maxLength={maxLength}
         onPressIn={onClick}
         keyboardType={type === "number" ? "numeric" : "default"}
+     
       />
       {error && <Text style={styles.errorText}>{helperText || error}</Text>}
     </View>
