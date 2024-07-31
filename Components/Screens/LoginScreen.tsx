@@ -249,6 +249,7 @@ import { login } from "./LoginScreenService";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import { loginAction } from "../../Redux/authSlice";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 const { width } = Dimensions.get("window");
 
@@ -343,8 +344,8 @@ const LoginScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Image source={require("../../assets/Logo.png")} style={styles.image} />
-        <Text style={styles.headerText}>Sign in</Text>
-        <Text style={styles.subHeaderText}>to access Pulse CRM</Text>
+        <Text  style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm]}>Sign in</Text>
+        <Text style={[globalStyles.h8, globalStyles.fs4,globalStyles.fontfm]}>to access Pulse CRM</Text>
       </View>
       <View style={styles.inputContainer}>
         <View style={styles.inlineInput}>
@@ -353,20 +354,20 @@ const LoginScreen = ({ navigation }) => {
             style={styles.icon}
           />
           <TextInput
-            style={[styles.input]}
+             style={[styles.input,globalStyles.fontfm,globalStyles.h6]}
             placeholder="Email or mobile number"
             onChangeText={handleOnChangeInputField}
             value={email}
           />
            {mobilePattern && (
               <View style={styles.inputAdornment}>
-                <Text>+91</Text>
+                <Text style={[globalStyles.fontfm,globalStyles.h5,globalStyles.fs4]}>+91</Text>
               </View>
             )}
         </View>
         <View>
           {(!isEmailValid || backendEmailError) && (
-            <Text>
+            <Text  style={[styles.errorText,globalStyles.fontfm,globalStyles.h6,globalStyles.fs4]}>
               This is not a valid email. Please contact system administrator.
               {"\n"}
               The email id is not correct. Please try again
@@ -381,7 +382,7 @@ const LoginScreen = ({ navigation }) => {
                 style={styles.icon}
               />
               <TextInput
-                style={styles.input}
+                 style={[styles.input,globalStyles.fontfm,globalStyles.h6]}
                 placeholder="Password"
                 onChangeText={handleOnChangePasswordField}
                 value={password}
@@ -470,10 +471,11 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#3D48E5",
     borderRadius: 8,
-    paddingVertical: 10,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
+    marginTop:20
   },
   buttonText: {
     color: "white",
@@ -481,7 +483,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "red",
-    fontSize: 12,
   },
   inputAdornment: {
     position: "absolute",
