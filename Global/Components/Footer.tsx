@@ -4,11 +4,13 @@ import { SimpleLineIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
 import DashboardModelView from "../PopAndModels/DashboardModelView";
+import BottomSheetModal from "../PopAndModels/BottomSheetModal";
 
 function Footer({ navigate }) {
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleIconPress = (iconName) => {
     setSelectedIcon(iconName);
@@ -17,7 +19,8 @@ function Footer({ navigate }) {
     }
     if(iconName === "pluscircle"){
       setSelectedItem(iconName);
-      setModalVisible(true);
+      // setModalVisible(true);
+      setIsVisible(true)
     }
   
   };
@@ -63,7 +66,7 @@ function Footer({ navigate }) {
         <View style={[styles.borderButton, { left: getBorderPosition() }]}  />
       </View>
        {/* Modal section */}
-       <Modal
+       {/* <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
@@ -76,7 +79,8 @@ function Footer({ navigate }) {
             </View>
           </View>
         </TouchableWithoutFeedback>
-      </Modal>
+      </Modal> */}
+      <BottomSheetModal  visible={isVisible} onClose={() => setIsVisible(false)}></BottomSheetModal>
     </>
   );
 }

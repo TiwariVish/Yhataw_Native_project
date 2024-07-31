@@ -36,9 +36,7 @@ export const globalStyles = StyleSheet.create({
   fs4: {
     fontWeight: 400,
   },
-
-
-  fontfm:{
-    fontFamily:"Inter Regular",
-  }
+   fontfm: {
+    fontFamily: 'Inter_400Regular',
+  },
 });

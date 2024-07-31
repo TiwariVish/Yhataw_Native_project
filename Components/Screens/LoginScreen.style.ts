@@ -14,19 +14,16 @@ const styles = StyleSheet.create({
     // gap: 10,
   },
   header: {
-    // alignItems: 'center',
     marginBottom: 20,
   },
   image: {
-    // width: width * 0.4, // Adjust the size of the logo
-    // height: height * 0.1,
     marginBottom: 15,
   },
   textContainer: {
-    // alignItems: 'center',
+  
   },
   inputContainer: {
-    // marginVertical: 10,
+
   },
   inlineInput: {
     flexDirection: "row",
@@ -39,8 +36,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   input: {
-    flex: 1,
-    padding: 10,
+   padding:15,
+   marginLeft:10
   },
   labelStyle: {
     height: 48,
@@ -57,7 +54,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginVertical: 10,
     color: "red",
-    textAlign: 'center',
+    // textAlign: 'center',
   },
   viewCont: {
     marginBottom: 20,
@@ -83,10 +80,6 @@ const styles = StyleSheet.create({
     bottom: 5,
     justifyContent: "center",
     alignItems: "center",
-  },
-  startText: {
-    fontSize: 16,
-    color: "#000",
   },
 });
 

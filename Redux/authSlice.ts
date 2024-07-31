@@ -75,8 +75,7 @@ export const authSlice = createSlice({
 
 export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad } = authSlice.actions;
 
-export const selectAuthenticated = (state: RootState) =>
-  state.auth.authenticated;
+export const selectAuthenticated = (state: RootState) =>state.auth.authenticated;
 export const selectAccessToken = (state: RootState) => state.auth.accessToken;
 export const selectLoading = (state: RootState) => state.auth.loading;
 export const selectEmail = (state: RootState) => state.auth.email;
