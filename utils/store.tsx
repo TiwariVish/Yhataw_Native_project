@@ -17,14 +17,14 @@ const persistedReducer = persistReducer(persistConfig, combineReducers(rootReduc
 
 export const store = configureStore({
   reducer: persistedReducer,
-  // middleware: (getDefaultMiddleware) =>
-  //   getDefaultMiddleware({
-  //   serializableCheck: {
-  //     ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
-  //     ignoredActionPaths: ['payload', 'meta.arg'],
-  //     ignoredPaths: ['auth.register'], // Adjust this based on your actual paths
-  //   },
-  //   }),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+    serializableCheck: {
+      ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      ignoredActionPaths: ['payload', 'meta.arg'],
+      ignoredPaths: ['auth.register'], // Adjust this based on your actual paths
+    },
+    }),
 });
 
 

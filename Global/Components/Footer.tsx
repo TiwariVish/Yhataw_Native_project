@@ -1,9 +1,5 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Modal, TouchableWithoutFeedback , Image, TouchableOpacity } from "react-native";
-import { SimpleLineIcons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
-import { EvilIcons } from "@expo/vector-icons";
-import DashboardModelView from "../PopAndModels/DashboardModelView";
 import BottomSheetModal from "../PopAndModels/BottomSheetModal";
 
 function Footer({ navigate }) {

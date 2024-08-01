@@ -12,7 +12,6 @@ import { useDispatch } from "react-redux";
 
 function Leads() {
   const dispatch = useDispatch();
-
   const { currLead } = useSelector((state: RootState) => state.auth);
   const [selectedCard, setSelectedCard] = useState<number>(currLead || 1);
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -33,13 +32,10 @@ function Leads() {
         return leadData;
     }
   };
-  const id = open ? "simple-popover" : undefined;
+  // const id = open ? "simple-popover" : undefined;
   useEffect(() => {
-    getAllLeadsData(id)
+    getAllLeadsData()
   }, []);
-
-  
-
   const payload = {
     userId: store.getState().auth.userId,
     lead_id:offialDetailState.team_id?.id,
@@ -47,7 +43,7 @@ function Leads() {
     pageSize: paginationModel.pageSize,
   };
 
-  const getAllLeadsData = async(id: any) =>{
+  const getAllLeadsData = async() =>{
     try{
       setLoading(true);
       const response = await getAllUsers(payload);
@@ -77,7 +73,7 @@ function Leads() {
       <View style={styles.content}>
         <LeadStatus selectedCard={selectedCard} setSelectedCard={setSelectedCard} />
         {filteredLeads?.map((item) => (
-          <View key={item.id} style={styles.cardContainer}>
+          <View key={item._id} style={styles.cardContainer}>
             <TouchableOpacity style={styles.card} onPress={() => handleCardDataLeads(item)}>
               <View style={styles.textContainer}>
                 <Text style={styles.name}>{item.leadName}</Text>

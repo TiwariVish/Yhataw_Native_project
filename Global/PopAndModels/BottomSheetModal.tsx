@@ -16,6 +16,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
+import { useNavigation } from "@react-navigation/native";
+import { LoginScreenNavigationProp } from "../../Components/type";
 
 interface BottomSheetModalProps {
   visible: boolean;
@@ -49,6 +51,8 @@ const data = [
   },
 ];
 
+
+
 const { height: screenHeight } = Dimensions.get("window");
 
 const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
@@ -69,7 +73,16 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
       transform: [{ translateY: translateY.value }],
     };
   });
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
+  const handleCardPress = (id: number) => {
+    if (id === 4) { 
+      console.log("stttttttttttt");
+      // navigation.navigate("CustomerFeedback");
+      navigation.navigate("CustomerFeedback");
+      
+    }
+  };
   return (
     <>
       {visible && (
@@ -89,7 +102,7 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
                     Browse Category
                   </Text>
                   {data.map((item) => (
-                    <TouchableOpacity
+                    <TouchableOpacity   onPress={() => handleCardPress(item.id)}
                       key={item.id}
                       style={[styles.card, item.color]}
                     >

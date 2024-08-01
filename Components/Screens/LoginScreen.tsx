@@ -279,8 +279,10 @@ const LoginScreen = ({ navigation }) => {
 
       if (response?.message?.settings?.success) {
         setIsEmailValid(true);
+        setBackendEmailError(false); 
         setShowPasswordInput(true);
       } else {
+        setBackendEmailError(true); 
         console.log("Login failed. Please check your credentials.");
       }
     } catch (error) {
@@ -293,6 +295,12 @@ const LoginScreen = ({ navigation }) => {
     setEmail(text);
     const isNumeric = /^[0-9]+$/.test(text);
     setMobilePattern(isNumeric);
+    setIsEmailValid(true); 
+    setBackendEmailError(false); 
+    if (text === "") {
+      setIsEmailValid(true);
+      setBackendEmailError(false);
+    }
   };
 
     const handleOnChangePasswordField = (text: string) => {

@@ -110,8 +110,7 @@ const Dashboard: React.FC<CustomProps> = () => {
       console.error("Error fetching data", error);
     }
   };
-  console.log(dashboardData,':::::::::::::dashboardData');
-  
+
 
   const navigateToSection = (id: number) => {
     dispatch(setLeadId(id));

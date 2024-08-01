@@ -9,6 +9,7 @@ import { RootStackParamList, RootStackParamList1 } from "./type"; // Import the 
 import { useSelector } from "react-redux";
 import { RootState } from "../utils/store";
 import LeadInfoScreen from "./Screens/LeadInfoScreen";
+import CustomerFeedback from "./Screens/CustomerFeedback";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ const Navigation: React.FC = () => {
             <Stack.Screen name="Leads" component={Leads} />
             <Stack.Screen name="MyProfile" component={MyProfile} />
             <Stack.Screen name="LeadInfoScreen" component={LeadInfoScreen} />
+            <Stack.Screen name="CustomerFeedback" component={CustomerFeedback} />
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen}   options={{ headerShown: false }}  />

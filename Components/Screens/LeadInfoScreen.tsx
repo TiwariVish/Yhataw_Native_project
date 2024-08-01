@@ -10,6 +10,8 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
+import BottomSheetModal from "../../Global/PopAndModels/BottomSheetModal";
+import ReminderBottomSheetModal from "../../Global/PopAndModels/ReminderBottomSheetModal";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
@@ -18,22 +20,37 @@ const leadInfoStatus = [
   { id: 4, content: "Site Visit" },
 ];
 
+const reminders = [
+  {
+    date: '2024-03-14 12:42 PM',
+    title: 'Call Back',
+    description: 'Customer asked to call back tomorrow. He is busy today. However, he said he is interested.',
+  },
+  {
+    date: '2024-03-14 12:42 PM',
+    title: 'Make Call',
+    description: 'Message',
+  },
+];
+
 const LeadInfoScreen = () => {
   const { leadData } = useSelector((state: RootState) => state.auth);
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleCardPress = (id: number) => {
-    setSelectedCards((prevSelected) =>
-      prevSelected.includes(id)
-        ? prevSelected.filter((cardId) => cardId !== id)
-        : [...prevSelected, id]
-    );
+    setSelectedCards([id]);
   };
+
+  const handleCare_Reminder = () =>{
+    setIsVisible(true)
+    
+  }
 
   const renderContent = () => {
     return (
       <>
-        {selectedCards.includes(1) && selectedCards.length === 1 && (
+        {selectedCards.includes(1) && (
           <View style={styles.infoContainer}>
             <Text style={styles.label}>Lead ID</Text>
             <Text style={styles.value}>{leadData.uid}</Text>
@@ -66,85 +83,116 @@ const LeadInfoScreen = () => {
           <View style={styles.contactContainer}>
             <Text style={styles.value}>Contact Info</Text>
             <View>
-            <Text style={styles.label}>{leadData.leadPhone}</Text>
-            <Text style={styles.label}>{leadData.leadEmail}</Text>
+              <Text style={styles.label}>{leadData.leadPhone}</Text>
+              <Text style={styles.label}>{leadData.leadEmail}</Text>
             </View>
           </View>
         )}
+        {selectedCards.includes(3)&&(
+           <View style={styles.containerRem}>
+           <View style={styles.headerRem}>
+             <Text style={styles.headerText}>Reminders</Text>
+             <TouchableOpacity  onPress={() => handleCare_Reminder()}>
+               <Text style={styles.addNew}>Add New</Text>
+             </TouchableOpacity>
+           </View>
+           <ScrollView style={styles.remindersList}>
+             {reminders.map((reminder, index) => (
+               <View key={index} style={styles.reminderItem}>
+                 <Text style={styles.dateText}>{reminder.date}</Text>
+                 <Text style={styles.titleText}>{reminder.title}</Text>
+                 <Text style={styles.descriptionText}>{reminder.description}</Text>
+               </View>
+             ))}
+           </ScrollView>
+         </View>
+        )}
+         
       </>
     );
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.name}>{leadData.leadName}</Text>
-          <Text style={styles.date}>19 Mar, 2024</Text>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>Just Now</Text>
+    <>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.name}>{leadData.leadName}</Text>
+            <Text style={styles.date}>19 Mar, 2024</Text>
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusText}>Just Now</Text>
+            </View>
+          </View>
+          <View style={styles.iconContainer}>
+            <Image
+              source={require("../../assets/blue_call_icon.png")}
+              style={styles.icon}
+            />
+            <Image
+              source={require("../../assets/whatsapp_icon.png")}
+              style={styles.icon}
+            />
           </View>
         </View>
-        <View style={styles.iconContainer}>
-          <Image
-            source={require("../../assets/blue_call_icon.png")}
-            style={styles.icon}
-          />
-          <Image
-            source={require("../../assets/whatsapp_icon.png")}
-            style={styles.icon}
-          />
-        </View>
-      </View>
 
-      <ScrollView
-        horizontal
-        style={styles.buttonContainer}
-        showsHorizontalScrollIndicator={false}
-      >
-        {leadInfoStatus.map((label) => (
-          <TouchableOpacity
-            key={label.id}
-            onPress={() => handleCardPress(label.id)}
-          >
-            <View
-              style={[
-                styles.card,
-                selectedCards.includes(label.id) && styles.selectedCard,
-              ]}
+        <ScrollView
+          horizontal
+          style={styles.buttonContainer}
+          showsHorizontalScrollIndicator={false}
+        >
+          {leadInfoStatus.map((label) => (
+            <TouchableOpacity
+              key={label.id}
+              onPress={() => handleCardPress(label.id)}
             >
-              <Text
+              <View
                 style={[
-                  styles.cardText,
-                  selectedCards.includes(label.id) && styles.selectedCardText,
+                  styles.card,
+                  selectedCards.includes(label.id) && styles.selectedCard,
                 ]}
               >
-                {label.content}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+                <Text
+                  style={[
+                    styles.cardText,
+                    selectedCards.includes(label.id) && styles.selectedCardText,
+                  ]}
+                >
+                  {label.content}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {renderContent()}
       </ScrollView>
 
-      {renderContent()}
-
-      <TouchableOpacity
-        style={[
-          styles.submitButton,
-          selectedCards.length > 1 && styles.activeSubmitButton,
-        ]}
-      >
-        <Text style={styles.submitButtonText}>Submit</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      {selectedCards.includes(1) && (
+        <View style={styles.submitButtonContainer}>
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              selectedCards.length > 1 && styles.activeSubmitButton,
+            ]}
+          >
+            <Text style={styles.submitButtonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+     <ReminderBottomSheetModal  visible={isVisible} onClose={() => setIsVisible(false)}></ReminderBottomSheetModal>
+     </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#FFF",
+  },
+  scrollView: {
+    padding: 20,
   },
   header: {
     flexDirection: "row",
@@ -161,7 +209,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   date: {
-    fontSize: 14,
     color: "#888",
   },
   statusBadge: {
@@ -240,6 +287,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  submitButtonContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: "#FFF",
+  },
   submitButton: {
     backgroundColor: "#A0A0A0",
     borderRadius: 8,
@@ -253,6 +308,47 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  containerRem: {
+    padding: 10,
+    // borderWidth: 1,
+    // borderColor: '#ccc',
+  },
+  headerRem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  addNew: {
+    fontSize: 14,
+    color: '#007BFF',
+  },
+  remindersList: {
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+  },
+  reminderItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 5,
+  },
+  titleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#555',
   },
 });
 
