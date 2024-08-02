@@ -77,10 +77,7 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 
   const handleCardPress = (id: number) => {
     if (id === 4) { 
-      console.log("stttttttttttt");
-      // navigation.navigate("CustomerFeedback");
       navigation.navigate("CustomerFeedback");
-      
     }
   };
   return (
@@ -148,7 +145,7 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "100%",
-    height: "60%",
+    height: "75%",
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,

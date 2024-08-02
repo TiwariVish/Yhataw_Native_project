@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -6,12 +6,12 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  ScrollView
+  ScrollView,
 } from "react-native";
-import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import VerifyCustomerBottomSheetModal from "../../Global/PopAndModels/VerifyCustomerBottomSheetModal";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
-function CustomerFeedback() {
+const CustomerFeedback = () => {
   const ratingIcons = [
     require("../../assets/group_green_icon.png"),
     require("../../assets/group_light_green_icon.png"),
@@ -19,40 +19,35 @@ function CustomerFeedback() {
     require("../../assets/group_orange_icon.png"),
     require("../../assets/group_red_icon.png"),
   ];
+
+
   const [mobileNumber, setMobileNumber] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
 
-  const handleMobileNumberChange = (text) => {
-    setMobileNumber(text);
-  };
   const handleCare_Verify = () => {
-    console.log("remider::::::::::::::::::;;;;;");
     setIsVisible(true);
   };
   const handleVerifySuccess = () => {
     setIsVerified(true);
   };
-  
-
+  const handleMobileNumberChange = (text) => {
+    setMobileNumber(text);
+  };
   const renderRatingIcons = () => {
     return ratingIcons.map((icon, index) => (
       <Image key={index} source={icon} style={styles.icon} />
     ));
   };
-  
-
-
   const showPrefix = mobileNumber.length > 0;
-
-  return (
+    return (
     <>
       {isVerified ? (
         <>
           <View style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.header}>
-              <Text style={[styles.value, globalStyles.fs1, globalStyles.h5]}>
+              <Text >
                 Feedback Form
               </Text>
               <Text style={styles.description}>
@@ -91,38 +86,28 @@ function CustomerFeedback() {
         </>
       ) : (
         <View style={styles.contactContainer}>
-          <Text style={[styles.value, globalStyles.fs1, globalStyles.h5]}>
+          <Text  style={[styles.value, globalStyles.fs1,globalStyles.h1]}>
             Verify Customer
-          </Text>
+          </Text >
           <View>
-            <Text style={[styles.label, globalStyles.fs3, globalStyles.h7]}>
+            <Text  style={[globalStyles.fs1,globalStyles.h6]}>
               Mobile No.
             </Text>
             <View style={styles.inlineInput}>
               {showPrefix && (
                 <View style={styles.inputAdornment}>
                   <Text
-                    style={[
-                      globalStyles.fontfm,
-                      globalStyles.h5,
-                      globalStyles.fs4,
-                    ]}
-                  >
+                  style={[globalStyles.fs1,globalStyles.h6,styles.textInput]} >
                     +91
                   </Text>
                 </View>
               )}
               <TextInput
-                style={[
-                  styles.input,
-                  globalStyles.fontfm,
-                  globalStyles.h5,
-                  globalStyles.fs4,
-                ]}
                 placeholder="Mobile number"
                 value={mobileNumber}
                 onChangeText={handleMobileNumberChange}
                 keyboardType="phone-pad"
+                style ={styles.textInput}
               />
             </View>
             <Text style={styles.label}>
@@ -147,14 +132,14 @@ function CustomerFeedback() {
       ></VerifyCustomerBottomSheetModal>
     </>
   );
-}
+};
 
 const styles = StyleSheet.create({
   contactContainer: {
     flex: 1,
     padding: 16,
-    borderRadius: 8,
-    margin: 16,
+    // borderRadius: 8,
+    // margin: 16,
   },
   value: {
     color: "#3D48E5",
@@ -174,7 +159,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#DFE1E8",
     paddingBottom: 5,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   submitButtonContainer: {
     position: "absolute",
@@ -240,6 +225,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 8,
   },
+  textInput:{
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop:25
+  }
 });
-
 export default CustomerFeedback;
