@@ -21,6 +21,7 @@ import { locationType } from "../../Models/Interface";
 import store from "../../utils/store";
 import { setLeadId } from "../../Redux/authSlice";
 import { useDispatch } from "react-redux";
+import { getPerosnalDetails } from "./MyProfileService";
 
 // Static data moved outside of the component
 const staticData = {
@@ -88,12 +89,15 @@ const Dashboard: React.FC<CustomProps> = () => {
     attendance: [],
   });
 
+  const [userData, setUserData] = useState<any>(null);
+
   const userId = store.getState().auth;
 
   useEffect(() => {
     getValuepermission ();
+    fetchUserData()
   }, [userId]);
-  
+
   const getValuepermission  = async () => {
     try {
       const [allLead, project, attendance] = await Promise.all([
@@ -108,6 +112,15 @@ const Dashboard: React.FC<CustomProps> = () => {
       });
     } catch (error) {
       console.error("Error fetching data", error);
+    }
+  };
+
+  const fetchUserData = async () => {
+    try {
+      const response = await getPerosnalDetails(store.getState().auth?.userId);
+      setUserData(response.data);
+    } catch (error: any) {
+      console.error("Error fetching user details:", error);
     }
   };
 
@@ -134,8 +147,8 @@ const Dashboard: React.FC<CustomProps> = () => {
             />
           </View>
           <View style={styles.textContainer}>
-            <Text style={styles.name}>Vishal Tiwari</Text>
-            <Text style={styles.role}>Sales Executive</Text>
+            <Text style={styles.name}>{userData?.name }</Text>
+            <Text style={styles.role}>{userData?.position || "Team Leader"}</Text>
           </View>
         </View>
 

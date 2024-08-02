@@ -84,7 +84,7 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
     <>
       {visible && (
         <TouchableWithoutFeedback onPress={onClose}>
-          <BlurView intensity={80} style={styles.blurView}>
+          <BlurView intensity={200} style={styles.blurView}>
             <TouchableWithoutFeedback onPress={() => {}}>
               <Animated.View style={[styles.container, animatedStyle]}>
                 <ScrollView contentContainerStyle={styles.scrollViewContent}>

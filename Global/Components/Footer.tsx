@@ -1,24 +1,45 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Modal, TouchableWithoutFeedback , Image, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Modal,
+  TouchableWithoutFeedback,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import BottomSheetModal from "../PopAndModels/BottomSheetModal";
+import { getPerosnalDetails } from "../../Components/Screens/MyProfileService";
+import store from "../../utils/store";
 
 function Footer({ navigate }) {
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await getPerosnalDetails(store.getState().auth?.userId);
+      setUserData(response.data);
+    } catch (error: any) {
+      console.error("Error fetching user details:", error);
+    }
+  };
 
   const handleIconPress = (iconName) => {
     setSelectedIcon(iconName);
     if (iconName === "user") {
-      navigate("UserProfile"); 
+      navigate("UserProfile");
     }
-    if(iconName === "pluscircle"){
+    if (iconName === "pluscircle") {
       setSelectedItem(iconName);
-      // setModalVisible(true);
-      setIsVisible(true)
+      setIsVisible(true);
     }
-  
   };
 
   const closeModal = () => {
@@ -31,7 +52,6 @@ function Footer({ navigate }) {
     // setModalVisible(false);
     console.log("Navigate to:", item.content);
   };
-
 
   const getBorderPosition = () => {
     switch (selectedIcon) {
@@ -48,35 +68,37 @@ function Footer({ navigate }) {
 
   return (
     <>
-         <View style={styles.footer}>
-         <TouchableOpacity onPress={() => handleIconPress("home")}>
-          <Image source={require("../../assets/home_icon.png")} style={styles.image} />
+      <View style={styles.footer}>
+        <TouchableOpacity onPress={() => handleIconPress("home")}>
+          <Image
+            source={require("../../assets/home_icon.png")}
+            style={styles.imageHome}
+          />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleIconPress("pluscircle")}>
-          <Image source={require("../../assets/action_button.png")} style={styles.image2} />
+          <Image
+            source={require("../../assets/action_button.png")}
+            style={styles.image2}
+          />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleIconPress("user")}>
-          <Image source={require("../../assets/user_icon.png")} style={styles.image} />
+          <Image
+            source={
+              userData?.profile_image
+                ? { uri: userData.profile_image }
+                : require("../../assets/user_icon.png")
+            }
+            style={styles.image}
+          />
         </TouchableOpacity>
         <View style={[styles.borderButton, { left: getBorderPosition() }]} />
-        <View style={[styles.borderButton, { left: getBorderPosition() }]}  />
+        <View style={[styles.borderButton, { left: getBorderPosition() }]} />
       </View>
-       {/* Modal section */}
-       {/* <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <DashboardModelView  />
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal> */}
-      <BottomSheetModal  visible={isVisible} onClose={() => setIsVisible(false)}></BottomSheetModal>
+      {/* Modal section */}
+      <BottomSheetModal
+        visible={isVisible}
+        onClose={() => setIsVisible(false)}
+      ></BottomSheetModal>
     </>
   );
 }
@@ -100,7 +122,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    height:85
+    height: 85,
   },
   borderButton: {
     position: "absolute",
@@ -125,14 +147,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
   },
-  image:{
-    height:35,
-    width:35
+  image: {
+    borderRadius: 30,
+    height: 45,
+    width: 45,
   },
-  image2:{
-    height:50,
-    width:50
-  }
+  image2: {
+    height: 55,
+    width: 55,
+  },
+  imageHome: {
+    height: 35,
+    width: 35,
+  },
 });
 
 export default Footer;

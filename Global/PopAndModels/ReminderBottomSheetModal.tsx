@@ -43,7 +43,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
   return (
     <>
       {visible && (
-        <BlurView intensity={80} style={styles.blurView}>
+        <BlurView intensity={200} style={styles.blurView}>
           <TouchableOpacity style={styles.overlay} onPress={onClose}>
             <Animated.View style={[styles.container, animatedStyle]}>
               <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
