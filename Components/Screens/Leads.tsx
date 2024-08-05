@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Text, ScrollView } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text, ScrollView, ActivityIndicator } from "react-native";
 import LeadStatus from "./LeadStatus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSelector, useDispatch } from "react-redux";
 import { selectCurrLead, setLeadDatad } from "../../Redux/authSlice";
-import { useSelector } from "react-redux";
 import store, { RootState } from "../../utils/store";
 import { getAllUsers } from "./LeadsService";
 import { useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
-import { useDispatch } from "react-redux";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 
 function Leads() {
@@ -18,6 +17,7 @@ function Leads() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const [leadData, setLeadData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [offialDetailState, setOffialDetailState] = useState<any>({});
   const [paginationModel, setPaginationModel] = useState({
     pageSize: 25,
@@ -35,14 +35,23 @@ function Leads() {
     pageSize: paginationModel.pageSize,
   };
 
-  const getAllLeadsData = async () => {
+  const getAllLeadsData = async (isLoadMore = false) => {
     try {
-      setLoading(true);
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
       const response = await getAllUsers(payload);
       setLeadData((prevLeads) => [...prevLeads, ...response.data]);
-      setLoading(false);
+      if (isLoadMore) {
+        setLoadingMore(false);
+      } else {
+        setLoading(false);
+      }
     } catch {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -64,16 +73,35 @@ function Leads() {
 
   const filteredLeads = getFilteredLeads();
 
+  const handleLoadMore = () => {
+    if (!loadingMore) {
+      setPaginationModel((prevModel) => ({
+        ...prevModel,
+        page: prevModel.page + 1,
+      }));
+      getAllLeadsData(true);
+    }
+  };
+
   return (
     <>
-      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContainer}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 20) {
+            handleLoadMore();
+          }
+        }}
+        scrollEventThrottle={16}
+      >
         <View style={styles.content}>
           <LeadStatus selectedCard={selectedCard} setSelectedCard={setSelectedCard} />
-          {loading ? (
+          {loading && !loadingMore ? (
             <LeadsSkeleton />
           ) : (
-            filteredLeads?.map((item) => (
-              <View key={item._id} style={styles.cardContainer}>
+            filteredLeads?.map((item,index) => (
+              <View  key={`${item._id}-${index}`} style={styles.cardContainer}>
                 <TouchableOpacity style={styles.card} onPress={() => handleCardDataLeads(item)}>
                   <View style={styles.textContainer}>
                     <Text style={styles.name}>{item.leadName}</Text>
@@ -85,6 +113,11 @@ function Leads() {
                 </TouchableOpacity>
               </View>
             ))
+          )}
+          {loadingMore && (
+            <View style={styles.loadingMore}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
           )}
         </View>
       </ScrollView>
@@ -134,6 +167,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 5,
+  },
+  loadingMore: {
+    marginVertical: 20,
+    alignItems: "center",
   },
 });
 
