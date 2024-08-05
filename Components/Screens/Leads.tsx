@@ -5,10 +5,11 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { selectCurrLead, setLeadDatad } from "../../Redux/authSlice";
 import { useSelector } from "react-redux";
 import store, { RootState } from "../../utils/store";
-import { getAllTeamData, getAllUsers } from "./LeadsService";
+import { getAllUsers } from "./LeadsService";
 import { useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { useDispatch } from "react-redux";
+import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 
 function Leads() {
   const dispatch = useDispatch();
@@ -18,76 +19,75 @@ function Leads() {
   const [leadData, setLeadData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [offialDetailState, setOffialDetailState] = useState<any>({});
-   const [paginationModel, setPaginationModel] = React.useState({
+  const [paginationModel, setPaginationModel] = useState({
     pageSize: 25,
     page: 0,
   });
-  const getFilteredLeads = () => {
-    switch (selectedCard) {
-      case 1: 
-        return leadData;
-      case 2: 
-        return leadData;
-      default: 
-        return leadData;
-    }
-  };
-  // const id = open ? "simple-popover" : undefined;
+
   useEffect(() => {
-    getAllLeadsData()
+    getAllLeadsData();
   }, []);
+
   const payload = {
     userId: store.getState().auth.userId,
-    lead_id:offialDetailState.team_id?.id,
+    lead_id: offialDetailState.team_id?.id,
     pageNo: paginationModel.page,
     pageSize: paginationModel.pageSize,
   };
 
-  const getAllLeadsData = async() =>{
-    try{
+  const getAllLeadsData = async () => {
+    try {
       setLoading(true);
       const response = await getAllUsers(payload);
-      // setLeadData(response.data);
-      setLeadData(prevLeads => [...prevLeads, ...response.data]);
+      setLeadData((prevLeads) => [...prevLeads, ...response.data]);
+      setLoading(false);
+    } catch {
       setLoading(false);
     }
-    catch{
-      setLoading(false);
+  };
+
+  const getFilteredLeads = () => {
+    switch (selectedCard) {
+      case 1:
+        return leadData;
+      case 2:
+        return leadData;
+      default:
+        return leadData;
     }
-  }
-  console.log(leadData,'leadDataleadData================');
+  };
 
   const handleCardDataLeads = (item: any) => {
-    console.log(item,":::::::::::::::::::");
-    // setLeadData(item);
     dispatch(setLeadDatad(item));
     navigation.navigate("LeadInfoScreen");
   };
-  
 
   const filteredLeads = getFilteredLeads();
 
   return (
     <>
-    <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-      <View style={styles.content}>
-        <LeadStatus selectedCard={selectedCard} setSelectedCard={setSelectedCard} />
-        {filteredLeads?.map((item) => (
-          <View key={item._id} style={styles.cardContainer}>
-            <TouchableOpacity style={styles.card} onPress={() => handleCardDataLeads(item)}>
-              <View style={styles.textContainer}>
-                <Text style={styles.name}>{item.leadName}</Text>
-                <Text style={styles.location}>{item.form_name}</Text>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.content}>
+          <LeadStatus selectedCard={selectedCard} setSelectedCard={setSelectedCard} />
+          {loading ? (
+            <LeadsSkeleton />
+          ) : (
+            filteredLeads?.map((item) => (
+              <View key={item._id} style={styles.cardContainer}>
+                <TouchableOpacity style={styles.card} onPress={() => handleCardDataLeads(item)}>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.name}>{item.leadName}</Text>
+                    <Text style={styles.location}>{item.form_name}</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.phoneIcon}>
+                  <MaterialCommunityIcons name="phone-outline" size={24} color="black" />
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.phoneIcon}>
-              <MaterialCommunityIcons name="phone-outline" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
-    
+            ))
+          )}
+        </View>
+      </ScrollView>
     </>
   );
 }

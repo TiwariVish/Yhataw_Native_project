@@ -6,23 +6,31 @@ import { logOutAction } from '../../Redux/authSlice';
 import { useDispatch } from 'react-redux';
 import { getPerosnalDetails } from './MyProfileService';
 import store from '../../utils/store';
+import { MyProfileSkeleton } from '../../Global/Components/SkeletonStructures';
 
 const Profile = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false); 
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
+    setLoading(true)
     try {
       const response = await getPerosnalDetails(store.getState().auth?.userId);
       setUserData(response.data);
     } catch (error: any) {
       console.error("Error fetching user details:", error);
+      setLoading(false)
     }
+    finally{
+      setLoading(false)
+    }
+    
   };
 
   const handleLogout = () => {
@@ -40,7 +48,7 @@ const Profile = ({ navigation }) => {
 
   return (
     <>
-      <View style={styles.wrapper}>
+    {loading ? (<MyProfileSkeleton />) : (<View style={styles.wrapper}>
         <View style={styles.container}>
           <View style={styles.profileContainer}>
             <Image
@@ -82,7 +90,8 @@ const Profile = ({ navigation }) => {
             customStyles={styles.logoutButton}
           />
         </View>
-      </View>
+      </View>)}
+      
       {/* Modal section */}
       <Modal
         animationType="slide"

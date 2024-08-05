@@ -22,6 +22,9 @@ import store from "../../utils/store";
 import { setLeadId } from "../../Redux/authSlice";
 import { useDispatch } from "react-redux";
 import { getPerosnalDetails } from "./MyProfileService";
+import { DashboardSkeleton } from "../../Global/Components/SkeletonStructures";
+
+
 
 // Static data moved outside of the component
 const staticData = {
@@ -90,6 +93,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   });
 
   const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(false); 
 
   const userId = store.getState().auth;
 
@@ -99,6 +103,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   }, [userId]);
 
   const getValuepermission  = async () => {
+    setLoading(true)
     try {
       const [allLead, project, attendance] = await Promise.all([
         getDataAllLead(userId),
@@ -112,6 +117,10 @@ const Dashboard: React.FC<CustomProps> = () => {
       });
     } catch (error) {
       console.error("Error fetching data", error);
+      setLoading(false)
+    }
+    finally{
+      setLoading(false)
     }
   };
 
@@ -137,7 +146,7 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   return (
     <>
-      <ScrollView>
+    {loading ? (<DashboardSkeleton />) :( <ScrollView>
         {/* Header section */}
         <View style={styles.header}>
           <View style={styles.imageContainer}>
@@ -251,7 +260,7 @@ const Dashboard: React.FC<CustomProps> = () => {
             </View>
           ))}
         </ScrollView>
-      </ScrollView>
+      </ScrollView>)}
       <Footer navigate={handleProfile} />
     </>
   );
