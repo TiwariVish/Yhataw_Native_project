@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -30,35 +30,35 @@ import { DashboardSkeleton } from "../../Global/Components/SkeletonStructures";
 const staticData = {
   leads: [
     {
-      id: "1",
-      content: "New Leads",
+      id: 2,
+      content: "Just Now",
       cardColor: "#ffa899",
       calendarBackgroundColor: "#ff2600",
       leadDataKey: "lead_total_new_count",
     },
     {
-      id: "2",
+      id: 4,
       content: "Site Visit",
       cardColor: "#99e6ff",
       calendarBackgroundColor: "#1a1aff",
       leadDataKey:""
     },
     {
-      id: "3",
+      id: 5,
       content: "Pipeline",
       cardColor: "#c1f0c1",
       calendarBackgroundColor: "#009900",
       leadDataKey:"lead_total_pipeline_count"
     },
     {
-      id: "4",
+      id: 3,
       content: "Cancelled",
       cardColor: "#c1f0c1",
       calendarBackgroundColor: "#009900",
       leadDataKey:""
     },
     {
-      id: "5",
+      id: 1,
       content: "Done",
       cardColor: "#c1f0c1",
       calendarBackgroundColor: "#009900",
@@ -94,7 +94,6 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false); 
-
   const userId = store.getState().auth;
 
   useEffect(() => {
@@ -193,11 +192,15 @@ const Dashboard: React.FC<CustomProps> = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScroll}
+         
         >
           {staticData.leads.map((item) => (
             <TouchableOpacity
               key={item.id}
-              onPress={() => navigateToSection(Number(item.id))}
+              onPress={() => {
+                navigateToSection(Number(item.id));
+              }}
+          
             >
               <View style={styles.cardContainer}>
                 <CustomCard

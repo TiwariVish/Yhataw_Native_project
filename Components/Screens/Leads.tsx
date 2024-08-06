@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, StyleSheet, TouchableOpacity, Text, ScrollView, ActivityIndicator } from "react-native";
 import LeadStatus from "./LeadStatus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import { getAllUsers } from "./LeadsService";
 import { useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
+import { getDataMylead } from "./DashboardService";
 
 function Leads() {
   const dispatch = useDispatch();
@@ -18,11 +19,14 @@ function Leads() {
   const [leadData, setLeadData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([])
   const [offialDetailState, setOffialDetailState] = useState<any>({});
   const [paginationModel, setPaginationModel] = useState({
     pageSize: 25,
     page: 0,
   });
+
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     getAllLeadsData();
@@ -44,6 +48,8 @@ function Leads() {
       }
       const response = await getAllUsers(payload);
       setLeadData((prevLeads) => [...prevLeads, ...response.data]);
+      // const response2 = await getDataMylead();
+      // setDashboardDataMyLead((prevLeads) => [...prevLeads, ...response2.data]);
       if (isLoadMore) {
         setLoadingMore(false);
       } else {
@@ -55,14 +61,20 @@ function Leads() {
     }
   };
 
+
+  
+
+
   const getFilteredLeads = () => {
     switch (selectedCard) {
       case 1:
         return leadData;
       case 2:
-        return leadData;
+        return [];
+      case 3:
+        return dashboardDataMyLead;
       default:
-        return leadData;
+        return [];
     }
   };
 
@@ -83,6 +95,12 @@ function Leads() {
     }
   };
 
+  const scrollToCard = (index: number) => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: index * 135, animated: true });
+    }
+  };
+
   return (
     <>
       <ScrollView
@@ -100,8 +118,8 @@ function Leads() {
           {loading && !loadingMore ? (
             <LeadsSkeleton />
           ) : (
-            filteredLeads?.map((item,index) => (
-              <View  key={`${item._id}-${index}`} style={styles.cardContainer}>
+            filteredLeads?.map((item, index) => (
+              <View key={`${item._id}-${index}`} style={styles.cardContainer}>
                 <TouchableOpacity style={styles.card} onPress={() => handleCardDataLeads(item)}>
                   <View style={styles.textContainer}>
                     <Text style={styles.name}>{item.leadName}</Text>

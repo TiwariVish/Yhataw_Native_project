@@ -1,41 +1,68 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ScrollView,
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
+  TextInput,
+  Image,
 } from "react-native";
-import CustomInput from "../../Global/Components/CustomInput";
-import Feather from "@expo/vector-icons/Feather";
-
 
 interface LeadStatusProps {
   selectedCard: number;
   setSelectedCard: (id: number) => void;
 }
+
 const leadStatus = [
   { id: 1, content: "All Leads" },
-  { id: 0, content: "Just Now" },
+  { id: 2, content: "Just Now" },
   { id: 3, content: "My Leads" },
   { id: 4, content: "Site Visit" },
   { id: 5, content: "Pipeline" },
   { id: 6, content: "Reminders" },
 ];
 
-function LeadStatus({ selectedCard, setSelectedCard }) {
-  // const [selectedCard, setSelectedCard] = useState<number>(1);
-
+function LeadStatus({ selectedCard, setSelectedCard }: LeadStatusProps) {
+  const scrollViewRef = useRef<ScrollView>(null);
   const handleCardPress = (id: number) => {
     setSelectedCard(id);
   };
 
+  useEffect(() => {
+    const index = leadStatus.findIndex(item => item.id === selectedCard);
+    if (index === -1) {
+      return;
+    }
+    const cardWidth = 125; 
+    const margin = 10; 
+    const offset = (cardWidth + margin) * index;
+    console.log('Scrolling to offset::::::::', offset);
+    if (scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ x: offset, animated: true });
+      }, 100);
+    }
+  }, [selectedCard]);
+
   return (
     <View style={styles.container}>
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.horizontalScroll}
+        onContentSizeChange={() => {
+          if (scrollViewRef.current) {
+            const index = leadStatus.findIndex(item => item.id === selectedCard);
+            if (index !== -1) {
+              const cardWidth = 125;
+              const margin = 10;
+              const offset = (cardWidth + margin) * index;
+              scrollViewRef.current.scrollTo({ x: offset, animated: true });
+            }
+          }
+        }}
       >
         {leadStatus.map((item) => (
           <TouchableOpacity
@@ -61,15 +88,14 @@ function LeadStatus({ selectedCard, setSelectedCard }) {
         ))}
       </ScrollView>
       <View style={styles.searchContainer}>
-        <CustomInput placeHolder="Search..." style={styles.searchInput} onChange={undefined} />
-        <TouchableOpacity style={styles.sliderIcon}>
-          <Feather
-            name="sliders"
-            size={24}
-            color="black"
-            style={styles.feather}
-          />
-        </TouchableOpacity>
+        <TextInput
+          placeholder="Search..."
+          style={styles.textInput}
+        />
+        <Image
+          source={require("../../assets/filter_icon.png")}
+          style={styles.filterIcon}
+        />
       </View>
     </View>
   );
@@ -80,7 +106,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   horizontalScroll: {
-    // marginLeft: 10,
     flexDirection: "row",
   },
   card: {
@@ -108,23 +133,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   searchContainer: {
-    // flexDirection: "row",
-    // alignItems: "center",
-    marginTop: 10,
-  },
-  searchInput: {
     flexDirection: "row",
     alignItems: "center",
-    position: "relative",
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginTop: 10,
   },
-  sliderIcon: {
+  textInput: {
+    flex: 1,
+    height: 40,
+  },
+  filterIcon: {
+    width: 20,
+    height: 20,
     marginLeft: 10,
-  },
-  feather: {
-    position: "absolute",
-    bottom: 15,
-    right: 15,
-    padding: 5,
   },
 });
 
