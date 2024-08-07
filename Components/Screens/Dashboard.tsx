@@ -15,14 +15,16 @@ import { LoginScreenNavigationProp } from "../type"; // Import the types
 import {
   getDataAllLead,
   getDataAttendance,
+  getDataMylead,
   getDataProject,
 } from "./DashboardService";
 import { locationType } from "../../Models/Interface";
-import store from "../../utils/store";
+import store, { RootState } from "../../utils/store";
 import { setLeadId } from "../../Redux/authSlice";
 import { useDispatch } from "react-redux";
 import { getPerosnalDetails } from "./MyProfileService";
 import { DashboardSkeleton } from "../../Global/Components/SkeletonStructures";
+import { useSelector } from "react-redux";
 
 
 
@@ -35,34 +37,43 @@ const staticData = {
       cardColor: "#ffa899",
       calendarBackgroundColor: "#ff2600",
       leadDataKey: "lead_total_new_count",
+      myleadKey : "lead_my_new_count",
+      lead_my_pipeline_count: ""
     },
     {
       id: 4,
       content: "Site Visit",
       cardColor: "#99e6ff",
       calendarBackgroundColor: "#1a1aff",
-      leadDataKey:""
+      leadDataKey:"",
+      myleadKey : "",
+       lead_my_pipeline_count: ""
     },
     {
       id: 5,
       content: "Pipeline",
       cardColor: "#c1f0c1",
       calendarBackgroundColor: "#009900",
-      leadDataKey:"lead_total_pipeline_count"
+      leadDataKey:"lead_total_pipeline_count",
+      myleadKey : "",
+       lead_my_pipeline_count: "lead_my_pipeline_count"
     },
     {
       id: 3,
       content: "Cancelled",
       cardColor: "#c1f0c1",
       calendarBackgroundColor: "#009900",
-      leadDataKey:""
+      leadDataKey:"",
+      myleadKey : "",
+       lead_my_pipeline_count: "lead_my_pipeline_count"
     },
     {
       id: 1,
       content: "Done",
       cardColor: "#c1f0c1",
       calendarBackgroundColor: "#009900",
-        leadDataKey:""
+        leadDataKey:"",
+        myleadKey : ""
     },
   ],
   attendance: [
@@ -94,12 +105,22 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false); 
+  const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([])
+  const [dashboardDataProject, setDashboardDataProject] = useState<any>([])
+  const [dashboardDataAttendance, setDashboardDataAttendance] = useState<any>([])
+  const [dashboardDataAllLead, setDashboardDataAllLead] = useState<any>([])
+  const [dashboardView, setDashboardView] = useState<any>(["HR","CRM","MY-Dashboard","ADMIN"])
   const userId = store.getState().auth;
+  const user = store.getState().auth
+  const { authenticated,role,privileges } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     getValuepermission ();
+    fetchMyDashboardData()
+    fetchDashboardHr()
+    fetchDashboardCRM()
     fetchUserData()
-  }, [userId]);
+  }, [userId,user]);
 
   const getValuepermission  = async () => {
     setLoading(true)
@@ -123,6 +144,71 @@ const Dashboard: React.FC<CustomProps> = () => {
     }
   };
 
+
+  // const fetchAdminData = async (user: any) => {
+  //   if (user.role_privileges.includes("ADMIN")) {
+  //     const [allLead, project, attendance] = await Promise.all([
+  //       getDataAllLead(user._id),
+  //       getDataProject(),
+  //       getDataAttendance(),
+  //     ]);
+  //     setDashboardData({
+  //       allLead: allLead?.data[0] || [],
+  //       project: project?.data[0] || [],
+  //       attendance: attendance?.data[0] || [],
+  //     });
+  //   }
+  // };
+  
+  const fetchMyDashboardData = async () => {
+      const response = await getDataMylead();
+      setDashboardDataMyLead(response?.data[0] || []);
+      const response2 = await getDataProject();
+      setDashboardDataProject(response2?.data[0] || []);
+    }
+    console.log(dashboardDataMyLead,'dashboardDataMyLeaddashboardDataMyLead===========');
+    console.log(dashboardDataProject,'dashboardDataProjectdashboardDataProject====================================');
+   
+    
+    const fetchDashboardHr = async() =>{
+      try{
+        const response = await getDataAttendance();
+        setDashboardDataAttendance(response?.data[0] || []);
+      }catch{
+        console.error("Error fetching user details:");
+      }
+    }
+    console.log(dashboardDataAttendance,'dashboardDataAttendance==========');
+    
+  const fetchDashboardCRM = async () => {
+    try{
+      const response = await getDataAllLead();
+      setDashboardDataAllLead(response?.data[0]|| []);
+    }catch{
+
+    }
+  }
+  // console.log(dashboardDataAllLead,'dashboardDataAllLeaddashboardDataAllLead::::::::::::');
+  
+  // const getValuepermission = async (user: any) => {
+  //   setLoading(true);
+  //   try {
+  //     switch(user.role_privileges) {
+  //       case "ADMIN":
+  //         await fetchAdminData(user);
+  //         break;
+  //       case "":
+  //         await fetchMyDashboardData(user);
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const fetchUserData = async () => {
     try {
       const response = await getPerosnalDetails(store.getState().auth?.userId);
@@ -142,7 +228,17 @@ const Dashboard: React.FC<CustomProps> = () => {
   const handleProfile = () => {
     navigation.navigate("MyProfile");
   };
-
+  const getPermissionForView = () => {
+    const permissionObj: Record<string, boolean> = {};
+    dashboardView?.forEach((view: string) => {
+      const currVal = privileges[view];
+      permissionObj[view] = currVal?.includes("full control") || false;
+    });
+    return permissionObj;
+  };
+  
+console.log(getPermissionForView(),"log for privalages in the dashboard :::::", privileges);
+const permission  = getPermissionForView();
   return (
     <>
     {loading ? (<DashboardSkeleton />) :( <ScrollView>
@@ -174,6 +270,7 @@ const Dashboard: React.FC<CustomProps> = () => {
         </ScrollView>
 
         {/* Leads section */}
+        {permission?.ADMIN || permission.CRM? <>
         <View style={styles.row}>
           <View style={styles.textContainerAll}>
             <Text style={styles.name}>All Leads</Text>
@@ -213,6 +310,45 @@ const Dashboard: React.FC<CustomProps> = () => {
             </TouchableOpacity>
           ))}
         </ScrollView>
+        </>:""}
+        <View style={styles.row}>
+          <View style={styles.textContainerAll}>
+            <Text style={styles.name}>My Leads</Text>
+            <Text style={styles.role}>{dashboardDataMyLead.lead_my_total_count}</Text>
+          </View>
+          <View style={styles.iconFord}>
+            <AntDesign
+              name="right"
+              size={24}
+              color="black"
+            />
+          </View>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScroll}
+         
+        >
+          {staticData.leads.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => {
+                navigateToSection(Number(item.id));
+              }}
+          
+            >
+              <View style={styles.cardContainer}>
+                <CustomCard
+                  cardContent={<Text>{item.content}</Text>}
+                  cardColor={item.cardColor}
+                  calendarBackgroundColor={item.calendarBackgroundColor}
+                  calendarText={`${dashboardDataMyLead[item.myleadKey]  || 0}`}
+                />
+              </View>
+            </TouchableOpacity> 
+          ))}
+        </ScrollView>
 
         {/* Attendance section */}
         <View style={styles.row}>
@@ -238,8 +374,54 @@ const Dashboard: React.FC<CustomProps> = () => {
             </View>
           ))}
         </ScrollView>
+        <View style={styles.row}>
+          <View style={styles.textContainerAll}>
+            <Text style={styles.name}>My Attendance</Text>
+            <Text style={styles.role}>{dashboardData.attendance.attendence_total_emp} day</Text>
+          </View>
+          <View style={styles.iconFord}>
+            <AntDesign name="right" size={24} color="black" />
+          </View>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScroll}
+        >
+          {staticData.attendance.map((item) => (
+            <View key={item.id} style={styles.cardContainer}>
+              <CustomCard
+                cardContent={<Text>{item.content}</Text>}
+                calendarText={`${dashboardData.attendance[item.attendanceKey] || 0}`}
+              />
+            </View>
+          ))}
+        </ScrollView>
 
         {/* Projects section */}
+        <View style={styles.row}>
+          <View style={styles.textContainerAll}>
+            <Text style={styles.name}>All Project</Text>
+            <Text style={styles.role}>{dashboardData.project.projects_total} Total</Text>
+          </View>
+          <View style={styles.iconFord}>
+            <AntDesign name="right" size={24} color="black" />
+          </View>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScroll}
+        >
+          {staticData.myProjects.map((item) => (
+            <View key={item.id} style={styles.cardContainer}>
+              <CustomCard
+                cardContent={<Text>{item.content}</Text>}
+                calendarText={`${dashboardData.project[item.projectKey] || 0}`}
+              />
+            </View>
+          ))}
+        </ScrollView>
         <View style={styles.row}>
           <View style={styles.textContainerAll}>
             <Text style={styles.name}>My Project</Text>

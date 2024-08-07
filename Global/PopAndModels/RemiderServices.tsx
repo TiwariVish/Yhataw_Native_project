@@ -10,3 +10,17 @@ export async function saveReminder(body: any) {
       throw error;
     }
   }
+
+
+  export async function getAllReminder(id: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(
+        urls.UPDATEREMINDER + `/${id?.id}`,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

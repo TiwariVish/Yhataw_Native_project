@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@ant-design/react-native": "^5.2.1",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo/metro-runtime": "~3.2.1",
     "@mui/icons-material": "^5.15.21",
@@ -37,10 +38,12 @@
     "react-dom": "18.2.0",
     "react-native": "0.74.3",
     "react-native-animatable": "^1.4.0",
+    "react-native-datepicker": "^1.7.2",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-mmkv-storage": "^0.9.1",
     "react-native-modal": "^13.0.1",
+    "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-paper": "^5.12.3",
     "react-native-reanimated": "~3.10.1",
     "react-native-responsive-screen": "^1.4.2",

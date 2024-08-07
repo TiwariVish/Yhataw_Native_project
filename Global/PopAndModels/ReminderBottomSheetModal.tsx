@@ -16,9 +16,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import store from "../../utils/store";
-
-import { saveReminder } from "./RemiderServices";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { getAllReminder, saveReminder } from "./RemiderServices";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface ReminderBottomSheetModalProps {
   visible: boolean;
@@ -33,28 +32,32 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
 }) => {
   const translateY = useSharedValue(visible ? 0 : screenHeight);
 
-  const [title, setTitle] = useState('');
-  const [note, setNote] = useState('');
+  const [title, setTitle] = useState("");
+  const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-  const [formattedDate, setFormattedDate] = useState('');
+  const [formattedDate, setFormattedDate] = useState("");
 
   const userId = store.getState().auth.userId;
 
-  const submitReminder = async () => {
+  const submitReminder = async (id:any) => {
     const body = {
       userId,
       title,
       note,
-      date: date.toISOString()
+      date: date.toISOString(),
     };
     try {
       const response = await saveReminder(body);
-      console.log("Response:", response);
+      const res = await getAllReminder(id)
     } catch (error) {
       console.error("Error saving reminder:", error);
     }
   };
+
+  useEffect(() => {
+    submitReminder('')
+  },[])
 
   useEffect(() => {
     translateY.value = withSpring(visible ? 0 : screenHeight, {
@@ -64,15 +67,18 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
   }, [visible]);
 
   const onChange = (event, selectedDate) => {
-    console.log(event,'eventeventevent:::::::::::::::::::::::');
     const currentDate = selectedDate || date;
-    console.log(currentDate,"currentDate::::::::::::::::::::::::");
     setDate(currentDate);
-    const formatted = currentDate.toLocaleDateString('en-GB') + " " + currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const formatted =
+      currentDate.toLocaleDateString("en-GB") +
+      " " +
+      currentDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     setFormattedDate(formatted);
-    // setShow(false);
+    setShow(false);
   };
-  
 
   const showDatePicker = () => {
     setShow(true);
@@ -113,35 +119,35 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                   </View>
 
                   <View style={styles.inputContainer}>
-                    <TouchableOpacity>
-                      <Image
-                        source={require("../../assets/calendar_icon.png")}
-                        style={styles.icon}
-                      />
-                    </TouchableOpacity>
+                    <Image
+                      source={require("../../assets/calendar_icon.png")}
+                      style={styles.icon}
+                    />
                     <View style={styles.textContainer}>
                       <Text style={styles.inputTitle}>Date and Time</Text>
-                      <TextInput
-                        style={styles.inputValue}
-                        value={formattedDate}
-                        editable={false}
-                      />
-                         <TouchableOpacity onPress={showDatePicker}>
-                      <Image
-                        source={require("../../assets/calendar_icon.png")}
-                        style={styles.icon_input}
-                      />
-                    </TouchableOpacity>
+                      <View style={styles.inputWithIconContainer}>
+                        <TextInput
+                          style={styles.inputValueWithIcon}
+                          value={formattedDate}
+                          editable={false}
+                        />
+                        <TouchableOpacity onPress={showDatePicker}>
+                          <Image
+                            source={require("../../assets/calendar_icon.png")}
+                            style={styles.iconInput}
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
 
                   {show && (
                    <DateTimePicker
-                   testID="dateTimePicker"
                    value={date}
-                   mode="datetime"
+                   mode="date"
                    display="default"
                    onChange={onChange}
+                   onTouchCancel={() => setShow(false)} // Add this line to handle dismiss on Android
                  />
                   )}
 
@@ -161,7 +167,10 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                     </View>
                   </View>
                 </View>
-                <TouchableOpacity style={styles.submitButton} onPress={submitReminder}>
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={submitReminder}
+                >
                   <Text style={styles.submitButtonText}>Submit</Text>
                 </TouchableOpacity>
               </TouchableOpacity>
@@ -231,12 +240,24 @@ const styles = StyleSheet.create({
     height: 24,
     marginRight: 10,
   },
-  icon_input:{
-    width: 15,
-    height: 15,
-    position:"absolute",
-    bottom:10,
-    right:50,
+  inputWithIconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
+  },
+  inputValueWithIcon: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+  },
+  iconInput: {
+    position: "absolute",
+    right: 5,
+    width: 20,
+    height: 20,
+    bottom: -10,
   },
   inputTitle: {
     fontSize: 14,

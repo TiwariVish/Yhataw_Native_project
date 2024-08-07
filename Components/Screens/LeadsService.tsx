@@ -27,3 +27,18 @@ export async function getAllTeamData(id: any) {
       throw error;
     }
   }
+
+  export async function getAllUsersMyLead(payload: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      console.log(callParams, "callParams");
+      const response = await makeCall(
+        urls.MYLEAD +
+          `?start_date=&end_date=&id=${payload.userId}&page=${payload.pageNo}&limit=${payload.pageSize}`,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrLead, setLeadDatad } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
-import { getAllUsers } from "./LeadsService";
+import { getAllUsers, getAllUsersMyLead } from "./LeadsService";
 import { useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
@@ -19,7 +19,7 @@ function Leads() {
   const [leadData, setLeadData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([])
+  const [dataMyLead, setDataMyLead] = useState<any>([])
   const [offialDetailState, setOffialDetailState] = useState<any>({});
   const [paginationModel, setPaginationModel] = useState({
     pageSize: 25,
@@ -48,8 +48,10 @@ function Leads() {
       }
       const response = await getAllUsers(payload);
       setLeadData((prevLeads) => [...prevLeads, ...response.data]);
-      // const response2 = await getDataMylead();
-      // setDashboardDataMyLead((prevLeads) => [...prevLeads, ...response2.data]);
+      const response2 = await getAllUsersMyLead(payload);
+      setDataMyLead((prevLeads) => [...prevLeads, ...response2.data]);
+      console.log(response2,'====================================');
+      console.log(response2,'====================================');
       if (isLoadMore) {
         setLoadingMore(false);
       } else {
@@ -61,7 +63,7 @@ function Leads() {
     }
   };
 
-
+  console.log(dataMyLead,'dataMyLead:::::::::::::::::');
   
 
 
@@ -72,7 +74,7 @@ function Leads() {
       case 2:
         return [];
       case 3:
-        return dashboardDataMyLead;
+        return dataMyLead;
       default:
         return [];
     }
