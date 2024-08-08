@@ -50,8 +50,6 @@ function Leads() {
       setLeadData((prevLeads) => [...prevLeads, ...response.data]);
       const response2 = await getAllUsersMyLead(payload);
       setDataMyLead((prevLeads) => [...prevLeads, ...response2.data]);
-      console.log(response2,'====================================');
-      console.log(response2,'====================================');
       if (isLoadMore) {
         setLoadingMore(false);
       } else {
