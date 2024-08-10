@@ -75,10 +75,30 @@ const staticData = {
     },
   ],
   attendance: [
-    { id: 1, content: "Present", attendanceKey: "attendence_present_today" },
-    { id: 2, content: "Absent", attendanceKey: "attendence_absent_today" },
-    { id: 3, content: "Late", attendanceKey: "attendence_late_today" },
-    { id: 4, content: "Leave", attendanceKey: "attendence_leave_today" },
+    {
+      id: 1,
+      content: "Present",
+      attendanceKey: "attendence_present_today",
+      countMy_Attendance: "attendence_my_current_month_present",
+    },
+    {
+      id: 2,
+      content: "Absent",
+      attendanceKey: "attendence_absent_today",
+      countMy_Attendance: "attendence_my_current_month_absent",
+    },
+    {
+      id: 3,
+      content: "Late",
+      attendanceKey: "attendence_late_today",
+      countMy_Attendance: "attendence_my_current_month_late",
+    },
+    {
+      id: 4,
+      content: "Leave",
+      attendanceKey: "attendence_leave_today",
+      countMy_Attendance: "attendence_my_current_month_leave",
+    },
   ],
   myProjects: [
     { id: 1, content: "Commercial", projectKey: "projects_commercial" },
@@ -125,7 +145,23 @@ const Dashboard: React.FC<CustomProps> = () => {
     fetchMyDashboardData();
     fetchDashboardCRM();
     fetchUserData();
+    fetchMy_Attendance();
   }, [userId]);
+
+  const getPermissionForView = () => {
+    const permissionObj: Record<string, boolean> = {};
+    dashboardView?.forEach((view: string) => {
+      const currVal = privileges[view];
+      permissionObj[view] = currVal?.length ? true : false || false;
+    });
+    return permissionObj;
+  };
+  console.log(
+    getPermissionForView(),
+    "log for privalages in the dashboard :::::",
+    privileges
+  );
+  const permission = getPermissionForView();
 
   const getValuepermission = async () => {
     setLoading(true);
@@ -140,9 +176,6 @@ const Dashboard: React.FC<CustomProps> = () => {
         project: project?.data[0] || [],
         attendance: attendance?.data[0] || [],
       });
-
-      const res = await getDataMyAttendance(store.getState().auth?.userId);
-      setDashboardDataAttendance(res?.data || []);
     } catch (error) {
       console.error("Error fetching data", error);
       setLoading(false);
@@ -150,10 +183,15 @@ const Dashboard: React.FC<CustomProps> = () => {
       setLoading(false);
     }
   };
-  console.log(
-    dashboardDataAttendance,
-    "dashboardDataAttendancedashboardDataAttendance"
-  );
+
+  const fetchMy_Attendance = async () => {
+    try {
+      const response = await getDataMyAttendance(store.getState().auth?.userId);
+      setDashboardDataAttendance(response?.data[0] || []);
+    } catch (error) {
+      console.error("Error fetching data", error);
+    }
+  };
 
   const fetchMyDashboardData = async () => {
     const response = await getDataMylead();
@@ -161,12 +199,14 @@ const Dashboard: React.FC<CustomProps> = () => {
     const response2 = await getDataProject();
     setDashboardDataProject(response2?.data[0] || []);
   };
+
   const fetchDashboardCRM = async () => {
     try {
       const response = await getDataAllLead();
       setDashboardDataAllLead(response?.data[0] || []);
     } catch {}
   };
+
   const fetchUserData = async () => {
     try {
       const response = await getPerosnalDetails(store.getState().auth?.userId);
@@ -185,22 +225,6 @@ const Dashboard: React.FC<CustomProps> = () => {
   const handleProfile = () => {
     navigation.navigate("MyProfile");
   };
-
-  const getPermissionForView = () => {
-    const permissionObj: Record<string, boolean> = {};
-    dashboardView?.forEach((view: string) => {
-      const currVal = privileges[view];
-      permissionObj[view] = currVal?.length ? true : false || false;
-    });
-    return permissionObj;
-  };
-  console.log(
-    getPermissionForView(),
-    "log for privalages in the dashboard :::::",
-    privileges
-  );
-
-  const permission = getPermissionForView();
 
   return (
     <>
@@ -370,13 +394,17 @@ const Dashboard: React.FC<CustomProps> = () => {
                 ""
               )}
 
-              {permission?.ADMIN || permission.HR || permission["MY-Dashboard"] || permission.CRM ? (
+              {permission?.ADMIN ||
+              permission.HR ||
+              permission["MY-Dashboard"] ||
+              permission.CRM ? (
                 <>
                   <View style={styles.row}>
                     <View style={styles.textContainerAll}>
                       <Text style={styles.name}>My Attendance</Text>
                       <Text style={styles.role}>
-                        {dashboardData.attendance.attendence_total_emp} day
+                        {dashboardDataAttendance.attendence_my_current_month}{" "}
+                        day
                       </Text>
                     </View>
                     <View style={styles.iconFord}>
@@ -393,7 +421,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                         <CustomCard
                           cardContent={<Text>{item.content}</Text>}
                           calendarText={`${
-                            dashboardData.attendance[item.attendanceKey] || 0
+                            dashboardDataAttendance[item.countMy_Attendance] ||
+                            0
                           }`}
                         />
                       </View>
@@ -405,7 +434,7 @@ const Dashboard: React.FC<CustomProps> = () => {
               )}
 
               {/* Projects section */}
-              {permission?.ADMIN  || permission.CRM ? (
+              {permission?.ADMIN || permission.CRM ? (
                 <>
                   <View style={styles.row}>
                     <View style={styles.textContainerAll}>

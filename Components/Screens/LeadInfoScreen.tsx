@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import BottomSheetModal from "../../Global/PopAndModels/BottomSheetModal";
 import ReminderBottomSheetModal from "../../Global/PopAndModels/ReminderBottomSheetModal";
+import { getAllStage, getTeamList } from "./LeadInfoScreenService";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
@@ -22,14 +23,15 @@ const leadInfoStatus = [
 
 const reminders = [
   {
-    date: '2024-03-14 12:42 PM',
-    title: 'Call Back',
-    description: 'Customer asked to call back tomorrow. He is busy today. However, he said he is interested.',
+    date: "2024-03-14 12:42 PM",
+    title: "Call Back",
+    description:
+      "Customer asked to call back tomorrow. He is busy today. However, he said he is interested.",
   },
   {
-    date: '2024-03-14 12:42 PM',
-    title: 'Make Call',
-    description: 'Message',
+    date: "2024-03-14 12:42 PM",
+    title: "Make Call",
+    description: "Message",
   },
 ];
 
@@ -37,15 +39,98 @@ const LeadInfoScreen = () => {
   const { leadData } = useSelector((state: RootState) => state.auth);
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
   const [isVisible, setIsVisible] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const [dropdownData, setDropdownData] = useState<any>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedTeams, setselectedTeams] = useState<string | null>(null);
+  const [dropdownItems, setDropdownItems] = useState([]);
+
+  useEffect(() => {
+    getLeadStage()
+  }, []);
+
+  const getLeadStage = async () => {
+    try {
+      const res = await getAllStage();
+      setDropdownData(res.data)
+
+      const res2 = await getTeamList()
+      setDropdownItems(res2.data)
+      
+    } catch {}
+  };
+
+const handleCheckboxChange = (id: number) => {
+  setDropdownItems((prevItems) =>
+    prevItems.map((item) =>
+      item.id === id ? { ...item, checked: !item.checked } : item
+    )
+  );
+};
+
+  const handleDropdownItemPress = (statusName: string) => {
+    setSelectedStatus(statusName);
+    setOpenDropdown(null);
+  };
 
   const handleCardPress = (id: number) => {
     setSelectedCards([id]);
   };
 
-  const handleCare_Reminder = () =>{
-    setIsVisible(true)
-    
-  }
+  const handleCare_Reminder = () => {
+    setIsVisible(true);
+  };
+
+  const toggleDropdown = (dropdownId: number) => {
+    setOpenDropdown(openDropdown === dropdownId ? null : dropdownId);
+  };
+
+  const renderCheckboxDropdown = () => {
+    if (openDropdown === 1) {
+      return (
+        <View style={styles.checkboxDropdownMenu}>
+          {dropdownItems.map((item) => (
+            <TouchableOpacity
+              key={item._id}
+              style={styles.checkboxItem}
+              onPress={() => handleCheckboxChange(item.id)}
+            >
+              <View style={styles.checkboxContainer}>
+                <View
+                  style={[
+                    styles.checkbox,
+                    item.checked && styles.checkboxChecked,
+                  ]}
+                />
+                <Text style={styles.checkboxText}>{item.team_name}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const renderDropdown = () => {
+    if (openDropdown === 2) {
+      return (
+        <View style={styles.dropdownMenu}>
+          {dropdownData.map((item) => (
+            <TouchableOpacity
+              key={item._id}
+              onPress={() => {
+                handleDropdownItemPress(item.status_name);
+              }}
+            >
+              <Text style={styles.dropdownItem}>{item.status_name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      );
+    }
+    return null;
+  };
 
   const renderContent = () => {
     return (
@@ -65,17 +150,54 @@ const LeadInfoScreen = () => {
             <Text style={styles.value}>{leadData.source}</Text>
 
             <Text style={styles.label}>Action</Text>
-            <Text style={styles.value}>Assigned To</Text>
-            <TouchableOpacity style={styles.dropdown}>
+            <Text style={styles.label}>Assigned To</Text>
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => toggleDropdown(1)}
+            >
+              <Text style={styles.dropdownText}>{selectedTeams ? selectedTeams : 'Select Team'}</Text>
+              <Icon
+                name="chevron-down-outline"
+                size={20}
+                style={[
+                  styles.dropdownIcon,
+                  openDropdown === 1 && styles.dropdownIconOpen,
+                ]}
+              />
+            </TouchableOpacity>
+            {renderCheckboxDropdown()}
+            {/* <Text style={styles.label}>Assigned To Member</Text>
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => toggleDropdown(1)}
+            >
               <Text style={styles.dropdownText}>Vivek</Text>
-              <Icon name="chevron-down-outline" size={20} />
+              <Icon
+                name="chevron-down-outline"
+                size={20}
+                style={[
+                  styles.dropdownIcon,
+                  openDropdown === 1 && styles.dropdownIconOpen,
+                ]}
+              />
             </TouchableOpacity>
-
+            {renderCheckboxDropdown()} */}
             <Text style={styles.label}>Status</Text>
-            <TouchableOpacity style={styles.dropdown}>
-              <Text style={styles.dropdownText}>Just Now</Text>
-              <Icon name="chevron-down-outline" size={20} />
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => toggleDropdown(2)}
+            >
+              <Text style={styles.dropdownText}> {selectedStatus ? selectedStatus : 'Select Status'}</Text>
+              <Icon
+                name="chevron-down-outline"
+                size={20}
+                style={[
+                  styles.dropdownIcon,
+                  openDropdown === 2 && styles.dropdownIconOpen,
+                ]}
+              />
             </TouchableOpacity>
+            {renderDropdown()}
           </View>
         )}
 
@@ -88,101 +210,106 @@ const LeadInfoScreen = () => {
             </View>
           </View>
         )}
-        {selectedCards.includes(3)&&(
-           <View style={styles.containerRem}>
-           <View style={styles.headerRem}>
-             <Text style={styles.headerText}>Reminders</Text>
-             <TouchableOpacity  onPress={() => handleCare_Reminder()}>
-               <Text style={styles.addNew}>Add New</Text>
-             </TouchableOpacity>
-           </View>
-           <ScrollView style={styles.remindersList}>
-             {reminders.map((reminder, index) => (
-               <View key={index} style={styles.reminderItem}>
-                 <Text style={styles.dateText}>{reminder.date}</Text>
-                 <Text style={styles.titleText}>{reminder.title}</Text>
-                 <Text style={styles.descriptionText}>{reminder.description}</Text>
-               </View>
-             ))}
-           </ScrollView>
-         </View>
+        {selectedCards.includes(3) && (
+          <View style={styles.containerRem}>
+            <View style={styles.headerRem}>
+              <Text style={styles.headerText}>Reminders</Text>
+              <TouchableOpacity onPress={() => handleCare_Reminder()}>
+                <Text style={styles.addNew}>Add New</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.remindersList}>
+              {reminders.map((reminder, index) => (
+                <View key={index} style={styles.reminderItem}>
+                  <Text style={styles.dateText}>{reminder.date}</Text>
+                  <Text style={styles.titleText}>{reminder.title}</Text>
+                  <Text style={styles.descriptionText}>
+                    {reminder.description}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
         )}
-         
       </>
     );
   };
 
   return (
     <>
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.name}>{leadData.leadName}</Text>
-            <Text style={styles.date}>19 Mar, 2024</Text>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>Just Now</Text>
+      <View style={styles.container}>
+        <ScrollView style={styles.scrollView}>
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.name}>{leadData.leadName}</Text>
+              <Text style={styles.date}>19 Mar, 2024</Text>
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusText}>Just Now</Text>
+              </View>
+            </View>
+            <View style={styles.iconContainer}>
+              <Image
+                source={require("../../assets/blue_call_icon.png")}
+                style={styles.icon}
+              />
+              <Image
+                source={require("../../assets/whatsapp_icon.png")}
+                style={styles.icon}
+              />
             </View>
           </View>
-          <View style={styles.iconContainer}>
-            <Image
-              source={require("../../assets/blue_call_icon.png")}
-              style={styles.icon}
-            />
-            <Image
-              source={require("../../assets/whatsapp_icon.png")}
-              style={styles.icon}
-            />
-          </View>
-        </View>
 
-        <ScrollView
-          horizontal
-          style={styles.buttonContainer}
-          showsHorizontalScrollIndicator={false}
-        >
-          {leadInfoStatus.map((label) => (
-            <TouchableOpacity
-              key={label.id}
-              onPress={() => handleCardPress(label.id)}
-            >
-              <View
-                style={[
-                  styles.card,
-                  selectedCards.includes(label.id) && styles.selectedCard,
-                ]}
+          <ScrollView
+            horizontal
+            style={styles.buttonContainer}
+            showsHorizontalScrollIndicator={false}
+          >
+            {leadInfoStatus.map((label) => (
+              <TouchableOpacity
+                key={label.id}
+                onPress={() => handleCardPress(label.id)}
               >
-                <Text
+                <View
                   style={[
-                    styles.cardText,
-                    selectedCards.includes(label.id) && styles.selectedCardText,
+                    styles.card,
+                    selectedCards.includes(label.id) && styles.selectedCard,
                   ]}
                 >
-                  {label.content}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+                  <Text
+                    style={[
+                      styles.cardText,
+                      selectedCards.includes(label.id) &&
+                        styles.selectedCardText,
+                    ]}
+                  >
+                    {label.content}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {renderContent()}
         </ScrollView>
 
-        {renderContent()}
-      </ScrollView>
-
-      {selectedCards.includes(1) && (
-        <View style={styles.submitButtonContainer}>
-          <TouchableOpacity
-            style={[
-              styles.submitButton,
-              selectedCards.length > 1 && styles.activeSubmitButton,
-            ]}
-          >
-            <Text style={styles.submitButtonText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-     <ReminderBottomSheetModal  visible={isVisible} onClose={() => setIsVisible(false)}></ReminderBottomSheetModal>
-     </>
+        {selectedCards.includes(1) && (
+          <View style={styles.submitButtonContainer}>
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                selectedCards.length > 1 && styles.activeSubmitButton,
+              ]}
+            >
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+      <ReminderBottomSheetModal
+        visible={isVisible}
+        onClose={() => setIsVisible(false)}
+      />
+    </>
   );
 };
 
@@ -265,90 +392,133 @@ const styles = StyleSheet.create({
   contactContainer: {
     marginBottom: 20,
   },
-  label: {
-    fontSize: 14,
-    color: "#888",
-    marginTop: 15,
+  containerRem: {
+    marginBottom: 20,
   },
-  value: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  dropdown: {
+  headerRem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    marginBottom: 10,
+  },
+  remindersList: {
+    maxHeight: 200,
+  },
+  reminderItem: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "black",
+    marginTop: 5,
+  },
+  value: {
+    fontSize: 16,
+    color: "black",
+  },
+  dropdown: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderColor: "gray",
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
   },
   dropdownText: {
     fontSize: 16,
-    fontWeight: "bold",
+    color: "black",
   },
-  submitButtonContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 20,
+  dropdownIcon: {
+    marginLeft: 10,
+    transform: [{ rotate: "0deg" }],
+  },
+  dropdownIconOpen: {
+    transform: [{ rotate: "180deg" }],
+  },
+  dropdownMenu: {
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginTop: 5,
+    padding: 10,
     backgroundColor: "#FFF",
   },
+  dropdownItem: {
+    fontSize: 16,
+    paddingVertical: 10,
+    color: "black",
+  },
+  submitButtonContainer: {
+    padding: 20,
+  },
   submitButton: {
-    backgroundColor: "#A0A0A0",
-    borderRadius: 8,
-    paddingVertical: 15,
+    backgroundColor: "#C4C4C4",
+    borderRadius: 10,
+    padding: 15,
     alignItems: "center",
   },
   activeSubmitButton: {
     backgroundColor: "blue",
   },
   submitButtonText: {
-    color: "#FFF",
+    color: "white",
     fontSize: 16,
     fontWeight: "bold",
   },
-  containerRem: {
-    padding: 10,
-    // borderWidth: 1,
-    // borderColor: '#ccc',
-  },
-  headerRem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
+  addNew: {
+    color: "blue",
+    fontWeight: "bold",
   },
   headerText: {
     fontSize: 18,
-    fontWeight: 'bold',
-  },
-  addNew: {
-    fontSize: 14,
-    color: '#007BFF',
-  },
-  remindersList: {
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-  },
-  reminderItem: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    fontWeight: "bold",
   },
   dateText: {
-    fontSize: 12,
-    color: '#888',
-    marginBottom: 5,
+    fontSize: 14,
+    color: "#888",
   },
   titleText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    fontWeight: "bold",
   },
   descriptionText: {
     fontSize: 14,
-    color: '#555',
+    color: "#555",
+  },
+  checkboxDropdownMenu: {
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginTop: 5,
+    padding: 10,
+    backgroundColor: "#FFF",
+  },
+  checkboxItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginRight: 10,
+  },
+  checkboxChecked: {
+    backgroundColor: "blue",
+  },
+  checkboxText: {
+    fontSize: 16,
+    color: "black",
   },
 });
 

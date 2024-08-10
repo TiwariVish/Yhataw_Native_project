@@ -60,11 +60,6 @@ function Leads() {
       setLoadingMore(false);
     }
   };
-
-  console.log(dataMyLead,'dataMyLead:::::::::::::::::');
-  
-
-
   const getFilteredLeads = () => {
     switch (selectedCard) {
       case 1:
