@@ -8,10 +8,13 @@ import {
   TextInput,
   Image,
 } from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "../../utils/store";
 
 interface LeadStatusProps {
   selectedCard: number;
   setSelectedCard: (id: number) => void;
+  onSearchChange: (query: string) => void; 
 }
 
 const leadStatus = [
@@ -23,8 +26,9 @@ const leadStatus = [
   { id: 6, content: "Reminders" },
 ];
 
-function LeadStatus({ selectedCard, setSelectedCard }: LeadStatusProps) {
+function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatusProps) {
   const scrollViewRef = useRef<ScrollView>(null);
+  const { leadData } = useSelector((state: RootState) => state.auth);
   const handleCardPress = (id: number) => {
     setSelectedCard(id);
   };
@@ -91,6 +95,7 @@ function LeadStatus({ selectedCard, setSelectedCard }: LeadStatusProps) {
         <TextInput
           placeholder="Search..."
           style={styles.textInput}
+          onChangeText={(text) => onSearchChange(text)} 
         />
         <Image
           source={require("../../assets/filter_icon.png")}

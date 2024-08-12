@@ -21,3 +21,14 @@ export async function getAllStage() {
       throw error;
     }
   }
+
+
+  export async function getAllTeamMembersData(payload: any) {
+    try {
+      const callParams = await getCallParams("POST", payload);
+      const response = await makeCall(`${urls.GETMEMBERSDROP}`, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

@@ -141,7 +141,17 @@ const Dashboard: React.FC<CustomProps> = () => {
   );
 
   useEffect(() => {
+    const permisionRender =
+      permission?.ADMIN ||
+      permission.CRM ||
+      permission["MY-Dashboard"] ||
+      permission.HR;
+    // switch(permisionRender){
+    //   case true:{
     getValuepermission();
+    //   }
+    // }
+
     fetchMyDashboardData();
     fetchDashboardCRM();
     fetchUserData();

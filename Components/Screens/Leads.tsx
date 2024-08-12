@@ -25,7 +25,7 @@ function Leads() {
     pageSize: 25,
     page: 0,
   });
-
+  const [searchQuery, setSearchQuery] = useState<string>(""); 
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -61,16 +61,30 @@ function Leads() {
     }
   };
   const getFilteredLeads = () => {
+    let leadsToFilter = [];
     switch (selectedCard) {
       case 1:
-        return leadData;
+        leadsToFilter = leadData;
+        break;
       case 2:
-        return [];
+        leadsToFilter = []; 
+        break;
       case 3:
-        return dataMyLead;
+        leadsToFilter = dataMyLead;
+        break;
       default:
-        return [];
+        leadsToFilter = [];
+        break;
     }
+
+    if (searchQuery) {
+      return leadsToFilter.filter((lead) => 
+        lead.leadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        lead.project_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+  
+    return leadsToFilter;
   };
 
   const handleCardDataLeads = (item: any) => {
@@ -109,7 +123,7 @@ function Leads() {
         scrollEventThrottle={16}
       >
         <View style={styles.content}>
-          <LeadStatus selectedCard={selectedCard} setSelectedCard={setSelectedCard} />
+          <LeadStatus selectedCard={selectedCard} setSelectedCard={setSelectedCard}  onSearchChange={(query) => setSearchQuery(query)} />
           {loading && !loadingMore ? (
             <LeadsSkeleton />
           ) : (

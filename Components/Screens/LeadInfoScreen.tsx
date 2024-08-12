@@ -12,7 +12,12 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import BottomSheetModal from "../../Global/PopAndModels/BottomSheetModal";
 import ReminderBottomSheetModal from "../../Global/PopAndModels/ReminderBottomSheetModal";
-import { getAllStage, getTeamList } from "./LeadInfoScreenService";
+import {
+  getAllStage,
+  getAllTeamMembersData,
+  getTeamList,
+} from "./LeadInfoScreenService";
+import StatusPop from "../../Global/PopAndModels/StatusPop";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
@@ -44,35 +49,53 @@ const LeadInfoScreen = () => {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedTeams, setselectedTeams] = useState<string | null>(null);
   const [dropdownItems, setDropdownItems] = useState([]);
+  const [leadOptionMembers, setLeadOptionMembersas] = useState<any>([]);
+  const [dynamicGridValue, setDynamicGridValue] = useState<any>();
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const [leadOptionMember, setleadOptionMember] = useState([
+    { id: 1, name: "vishal", checked: true },
+    { name: "vishal" },
+    { name: "vishal" },
+    { name: "vishal" },
+    { name: "vishal" },
+  ]);
 
   useEffect(() => {
-    getLeadStage()
+    getLeadStage();
   }, []);
 
   const getLeadStage = async () => {
     try {
       const res = await getAllStage();
-      setDropdownData(res.data)
+      setDropdownData(res.data);
 
-      const res2 = await getTeamList()
-      setDropdownItems(res2.data)
-      
+      const res2 = await getTeamList();
+      setDropdownItems(res2.data);
+    } catch {}
+  };
+  const getAssineToMember = async (ids: any) => {
+    try {
+      const payload = {
+        team_id: ids,
+        lead_id: dynamicGridValue?.id,
+      };
+      const response1 = await getAllTeamMembersData(payload);
+      setLeadOptionMembersas(response1.data);
     } catch {}
   };
 
-const handleCheckboxChange = (id: number) => {
-  setDropdownItems((prevItems) =>
-    prevItems.map((item) =>
-      item.id === id ? { ...item, checked: !item.checked } : item
-    )
-  );
-};
-
-  const handleDropdownItemPress = (statusName: string) => {
-    setSelectedStatus(statusName);
-    setOpenDropdown(null);
+  const handleCheckboxChange = (id: number) => {
+    setDropdownItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
   };
 
+  const handleStatusSelect = (status: string) => {
+    setSelectedStatus(status);
+  };
   const handleCardPress = (id: number) => {
     setSelectedCards([id]);
   };
@@ -82,11 +105,12 @@ const handleCheckboxChange = (id: number) => {
   };
 
   const toggleDropdown = (dropdownId: number) => {
+    setModalVisible(true);
     setOpenDropdown(openDropdown === dropdownId ? null : dropdownId);
   };
 
-  const renderCheckboxDropdown = () => {
-    if (openDropdown === 1) {
+  const renderCheckboxDropdown = (type) => {
+    if (type === "teams" && openDropdown === 1) {
       return (
         <View style={styles.checkboxDropdownMenu}>
           {dropdownItems.map((item) => (
@@ -109,28 +133,52 @@ const handleCheckboxChange = (id: number) => {
         </View>
       );
     }
-    return null;
-  };
-
-  const renderDropdown = () => {
-    if (openDropdown === 2) {
+    if (type === "members" && openDropdown === 2) {
       return (
-        <View style={styles.dropdownMenu}>
-          {dropdownData.map((item) => (
+        <View style={styles.checkboxDropdownMenu}>
+          {leadOptionMember.map((item) => (
             <TouchableOpacity
-              key={item._id}
-              onPress={() => {
-                handleDropdownItemPress(item.status_name);
-              }}
+              key={item.name}
+              style={styles.checkboxItem}
+              onPress={() => handleCheckboxChange(item.id)}
             >
-              <Text style={styles.dropdownItem}>{item.status_name}</Text>
+              <View style={styles.checkboxContainer}>
+                <View
+                  style={[
+                    styles.checkbox,
+                    item.checked && styles.checkboxChecked,
+                  ]}
+                />
+                <Text style={styles.checkboxText}>{item.name}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
       );
     }
+
     return null;
   };
+
+  // const renderDropdown = () => {
+  //   if (openDropdown === 3) {
+  //     return (
+  //       <View style={styles.dropdownMenu}>
+  //         {dropdownData.map((item) => (
+  //           <TouchableOpacity
+  //             key={item._id}
+  //             onPress={() => {
+  //               handleDropdownItemPress(item.status_name);
+  //             }}
+  //           >
+  //             <Text style={styles.dropdownItem}>{item.status_name}</Text>
+  //           </TouchableOpacity>
+  //         ))}
+  //       </View>
+  //     );
+  //   }
+  //   return null;
+  // };
 
   const renderContent = () => {
     return (
@@ -155,7 +203,9 @@ const handleCheckboxChange = (id: number) => {
               style={styles.dropdown}
               onPress={() => toggleDropdown(1)}
             >
-              <Text style={styles.dropdownText}>{selectedTeams ? selectedTeams : 'Select Team'}</Text>
+              <Text style={styles.dropdownText}>
+                {selectedTeams ? selectedTeams : "Select Team"}
+              </Text>
               <Icon
                 name="chevron-down-outline"
                 size={20}
@@ -165,39 +215,47 @@ const handleCheckboxChange = (id: number) => {
                 ]}
               />
             </TouchableOpacity>
-            {renderCheckboxDropdown()}
-            {/* <Text style={styles.label}>Assigned To Member</Text>
-            <TouchableOpacity
-              style={styles.dropdown}
-              onPress={() => toggleDropdown(1)}
-            >
-              <Text style={styles.dropdownText}>Vivek</Text>
-              <Icon
-                name="chevron-down-outline"
-                size={20}
-                style={[
-                  styles.dropdownIcon,
-                  openDropdown === 1 && styles.dropdownIconOpen,
-                ]}
-              />
-            </TouchableOpacity>
-            {renderCheckboxDropdown()} */}
+            {renderCheckboxDropdown("teams")}
+            <>
+              <Text style={styles.label}>Assigned To Member</Text>
+              <TouchableOpacity
+                style={styles.dropdown}
+                onPress={() => toggleDropdown(2)}
+              >
+                <Text style={styles.dropdownText}>
+                  {selectedTeams ? selectedTeams : "Assigned To Member"}
+                </Text>
+                <Icon
+                  name="chevron-down-outline"
+                  size={20}
+                  style={[
+                    styles.dropdownIcon,
+                    openDropdown === 2 && styles.dropdownIconOpen,
+                  ]}
+                />
+              </TouchableOpacity>
+              {renderCheckboxDropdown("members")}
+            </>
+
             <Text style={styles.label}>Status</Text>
             <TouchableOpacity
               style={styles.dropdown}
-              onPress={() => toggleDropdown(2)}
+              onPress={() => toggleDropdown(3)}
             >
-              <Text style={styles.dropdownText}> {selectedStatus ? selectedStatus : 'Select Status'}</Text>
+              <Text style={styles.dropdownText}>
+                {" "}
+                {selectedStatus ? selectedStatus : "Select Status"}
+              </Text>
               <Icon
                 name="chevron-down-outline"
                 size={20}
                 style={[
                   styles.dropdownIcon,
-                  openDropdown === 2 && styles.dropdownIconOpen,
+                  openDropdown === 3 && styles.dropdownIconOpen,
                 ]}
               />
             </TouchableOpacity>
-            {renderDropdown()}
+            {/* {renderDropdown()} */}
           </View>
         )}
 
@@ -305,6 +363,11 @@ const handleCheckboxChange = (id: number) => {
           </View>
         )}
       </View>
+      <StatusPop
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        onStatusSelect={handleStatusSelect}
+      />
       <ReminderBottomSheetModal
         visible={isVisible}
         onClose={() => setIsVisible(false)}
