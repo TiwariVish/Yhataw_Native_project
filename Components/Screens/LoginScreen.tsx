@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   View,
@@ -39,13 +38,13 @@ const LoginScreen = ({ navigation }) => {
     try {
       setIsLoading(true);
       const response = await login(email, password);
-      console.log(response,'::::::::::::email::::::::::::');
+      console.log(response, "::::::::::::email::::::::::::");
       if (response?.message?.settings?.success) {
         setIsEmailValid(true);
-        setBackendEmailError(false); 
+        setBackendEmailError(false);
         setShowPasswordInput(true);
       } else {
-        setBackendEmailError(true); 
+        setBackendEmailError(true);
         console.log("Login failed. Please check your credentials.");
       }
     } catch (error) {
@@ -58,15 +57,15 @@ const LoginScreen = ({ navigation }) => {
     setEmail(text);
     const isNumeric = /^[0-9]+$/.test(text);
     setMobilePattern(isNumeric);
-    setIsEmailValid(true); 
-    setBackendEmailError(false); 
+    setIsEmailValid(true);
+    setBackendEmailError(false);
     if (text === "") {
       setIsEmailValid(true);
       setBackendEmailError(false);
     }
   };
 
-    const handleOnChangePasswordField = (text: string) => {
+  const handleOnChangePasswordField = (text: string) => {
     setPassword(text);
   };
 
@@ -114,9 +113,15 @@ const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image source={require("../../assets/Logo.png")} style={styles.image} />
-        <Text  style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm]}>Sign in</Text>
-        <Text style={[globalStyles.h8, globalStyles.fs4,globalStyles.fontfm]}>to access Pulse CRM</Text>
+        <View  style={styles.image}>
+        <Image source={require("../../assets/Logo.png")}  />
+        </View>
+        <Text style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm]}>
+          Sign in
+        </Text>
+        <Text style={[globalStyles.h8, globalStyles.fs4, globalStyles.fontfm]}>
+          to access Pulse CRM
+        </Text>
       </View>
       <View style={styles.inputContainer}>
         <View style={styles.inlineInput}>
@@ -125,22 +130,45 @@ const LoginScreen = ({ navigation }) => {
             style={styles.icon}
           />
           <TextInput
-             style={[styles.input,globalStyles.fontfm,globalStyles.h6]}
+            style={[styles.input, globalStyles.fontfm, globalStyles.h6]}
             placeholder="Email or mobile number"
             onChangeText={handleOnChangeInputField}
             value={email}
           />
-           {mobilePattern && (
-              <View style={styles.inputAdornment}>
-                <Text style={[globalStyles.fontfm,globalStyles.h5,globalStyles.fs4]}>+91</Text>
-              </View>
-            )}
+          {mobilePattern && (
+            <View style={styles.inputAdornment}>
+              <Text
+                style={[globalStyles.fontfm, globalStyles.h5, globalStyles.fs4]}
+              >
+                +91
+              </Text>
+            </View>
+          )}
         </View>
         <View>
-          {(!isEmailValid || backendEmailError) && (
-            <Text  style={[styles.errorText,globalStyles.fontfm,globalStyles.h6,globalStyles.fs4]}>
-              This is not a valid email. Please contact system administrator.
-              {"\n"}
+          {backendEmailError  && (
+            <Text
+              style={[
+                styles.errorText,
+                globalStyles.fontfm,
+                globalStyles.h6,
+                globalStyles.fs4,
+              ]}
+            >
+              This is not a valid email. Please contact the system
+              administrator.
+            </Text>
+          )}
+
+          { !isEmailValid && !backendEmailError && (
+            <Text
+              style={[
+                styles.errorText,
+                globalStyles.fontfm,
+                globalStyles.h6,
+                globalStyles.fs4,
+              ]}
+            >
               The email id is not correct. Please try again
             </Text>
           )}
@@ -153,7 +181,7 @@ const LoginScreen = ({ navigation }) => {
                 style={styles.icon}
               />
               <TextInput
-                 style={[styles.input,globalStyles.fontfm,globalStyles.h6]}
+                style={[styles.input, globalStyles.fontfm, globalStyles.h6]}
                 placeholder="Password"
                 onChangeText={handleOnChangePasswordField}
                 value={password}
@@ -178,7 +206,7 @@ const LoginScreen = ({ navigation }) => {
           onPress={showPasswordInput ? handleLogin : handleProceed}
           style={styles.button}
         >
-          <Text style={styles.buttonText}>
+          <Text style={[styles.buttonText , globalStyles.fs1 ,globalStyles.h6]}>
             {showPasswordInput ? "Log In" : "Proceed"}
           </Text>
         </TouchableOpacity>
@@ -201,6 +229,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   image: {
+    marginBottom:10
     // width: 100,
     // height: 100,
   },
@@ -246,7 +275,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
-    marginTop:20
+    marginTop: 20,
   },
   buttonText: {
     color: "white",

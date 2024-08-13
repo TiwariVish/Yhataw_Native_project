@@ -141,21 +141,20 @@ const Dashboard: React.FC<CustomProps> = () => {
   );
 
   useEffect(() => {
-    const permisionRender =
-      permission?.ADMIN ||
-      permission.CRM ||
-      permission["MY-Dashboard"] ||
-      permission.HR;
-    // switch(permisionRender){
-    //   case true:{
-    getValuepermission();
-    //   }
-    // }
-
-    fetchMyDashboardData();
+    if(permission?.ADMIN || permission.CRM ){
+      getValuepermission();
+    }
+    if(permission?.ADMIN ||
+      permission.HR ||
+      permission["MY-Dashboard"] ||  permission.CRM){
+        fetchMy_Attendance();
+      }
+      if( permission["MY-Dashboard"]){
+        fetchMyDashboardData();
+      }
     fetchDashboardCRM();
     fetchUserData();
-    fetchMy_Attendance();
+  
   }, [userId]);
 
   const getPermissionForView = () => {
