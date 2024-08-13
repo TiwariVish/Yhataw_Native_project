@@ -18,6 +18,7 @@ import {
   getTeamList,
 } from "./LeadInfoScreenService";
 import StatusPop from "../../Global/PopAndModels/StatusPop";
+import MemberPopOver from "../../Global/PopAndModels/MemberPopOver";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
@@ -52,14 +53,8 @@ const LeadInfoScreen = () => {
   const [leadOptionMembers, setLeadOptionMembersas] = useState<any>([]);
   const [dynamicGridValue, setDynamicGridValue] = useState<any>();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isMemberModalVisible, setMemberModalVisible] = useState(false);
 
-  const [leadOptionMember, setleadOptionMember] = useState([
-    { id: 1, name: "vishal", checked: true },
-    { name: "vishal" },
-    { name: "vishal" },
-    { name: "vishal" },
-    { name: "vishal" },
-  ]);
 
   useEffect(() => {
     getLeadStage();
@@ -74,28 +69,28 @@ const LeadInfoScreen = () => {
       setDropdownItems(res2.data);
     } catch {}
   };
-  const getAssineToMember = async (ids: any) => {
-    try {
-      const payload = {
-        team_id: ids,
-        lead_id: dynamicGridValue?.id,
-      };
-      const response1 = await getAllTeamMembersData(payload);
-      setLeadOptionMembersas(response1.data);
-    } catch {}
-  };
-
-  const handleCheckboxChange = (id: number) => {
-    setDropdownItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
-  };
+  // const getAssineToMember = async (ids: any) => {
+  //   try {
+  //     const payload = {
+  //       team_id: ids,
+  //       lead_id: dynamicGridValue?.id,
+  //     };
+  //     const response1 = await getAllTeamMembersData(payload);
+  //     setLeadOptionMembersas(response1.data);
+  //   } catch {}
+  // };
 
   const handleStatusSelect = (status: string) => {
     setSelectedStatus(status);
+    setModalVisible(true);
   };
+
+ const  handleMemberStatusSelect = () =>{
+  console.log("------------");
+  setMemberModalVisible(true)
+
+ }
+
   const handleCardPress = (id: number) => {
     setSelectedCards([id]);
   };
@@ -104,81 +99,6 @@ const LeadInfoScreen = () => {
     setIsVisible(true);
   };
 
-  const toggleDropdown = (dropdownId: number) => {
-    setModalVisible(true);
-    setOpenDropdown(openDropdown === dropdownId ? null : dropdownId);
-  };
-
-  const renderCheckboxDropdown = (type) => {
-    if (type === "teams" && openDropdown === 1) {
-      return (
-        <View style={styles.checkboxDropdownMenu}>
-          {dropdownItems.map((item) => (
-            <TouchableOpacity
-              key={item._id}
-              style={styles.checkboxItem}
-              onPress={() => handleCheckboxChange(item.id)}
-            >
-              <View style={styles.checkboxContainer}>
-                <View
-                  style={[
-                    styles.checkbox,
-                    item.checked && styles.checkboxChecked,
-                  ]}
-                />
-                <Text style={styles.checkboxText}>{item.team_name}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      );
-    }
-    if (type === "members" && openDropdown === 2) {
-      return (
-        <View style={styles.checkboxDropdownMenu}>
-          {leadOptionMember.map((item) => (
-            <TouchableOpacity
-              key={item.name}
-              style={styles.checkboxItem}
-              onPress={() => handleCheckboxChange(item.id)}
-            >
-              <View style={styles.checkboxContainer}>
-                <View
-                  style={[
-                    styles.checkbox,
-                    item.checked && styles.checkboxChecked,
-                  ]}
-                />
-                <Text style={styles.checkboxText}>{item.name}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      );
-    }
-
-    return null;
-  };
-
-  // const renderDropdown = () => {
-  //   if (openDropdown === 3) {
-  //     return (
-  //       <View style={styles.dropdownMenu}>
-  //         {dropdownData.map((item) => (
-  //           <TouchableOpacity
-  //             key={item._id}
-  //             onPress={() => {
-  //               handleDropdownItemPress(item.status_name);
-  //             }}
-  //           >
-  //             <Text style={styles.dropdownItem}>{item.status_name}</Text>
-  //           </TouchableOpacity>
-  //         ))}
-  //       </View>
-  //     );
-  //   }
-  //   return null;
-  // };
 
   const renderContent = () => {
     return (
@@ -201,7 +121,7 @@ const LeadInfoScreen = () => {
             <Text style={styles.label}>Assigned To</Text>
             <TouchableOpacity
               style={styles.dropdown}
-              onPress={() => toggleDropdown(1)}
+              onPress={() =>handleMemberStatusSelect()}
             >
               <Text style={styles.dropdownText}>
                 {selectedTeams ? selectedTeams : "Select Team"}
@@ -215,12 +135,10 @@ const LeadInfoScreen = () => {
                 ]}
               />
             </TouchableOpacity>
-            {renderCheckboxDropdown("teams")}
             <>
               <Text style={styles.label}>Assigned To Member</Text>
               <TouchableOpacity
                 style={styles.dropdown}
-                onPress={() => toggleDropdown(2)}
               >
                 <Text style={styles.dropdownText}>
                   {selectedTeams ? selectedTeams : "Assigned To Member"}
@@ -234,13 +152,12 @@ const LeadInfoScreen = () => {
                   ]}
                 />
               </TouchableOpacity>
-              {renderCheckboxDropdown("members")}
             </>
 
             <Text style={styles.label}>Status</Text>
             <TouchableOpacity
               style={styles.dropdown}
-              onPress={() => toggleDropdown(3)}
+              onPress={() =>handleStatusSelect("")}
             >
               <Text style={styles.dropdownText}>
                 {" "}
@@ -255,7 +172,6 @@ const LeadInfoScreen = () => {
                 ]}
               />
             </TouchableOpacity>
-            {/* {renderDropdown()} */}
           </View>
         )}
 
@@ -363,6 +279,7 @@ const LeadInfoScreen = () => {
           </View>
         )}
       </View>
+      <MemberPopOver     visible={isMemberModalVisible} onClose={() => setMemberModalVisible(false)}  onStatusSelect={handleMemberStatusSelect} />
       <StatusPop
         visible={isModalVisible}
         onClose={() => setModalVisible(false)}
