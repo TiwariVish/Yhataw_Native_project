@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, TouchableOpacity, Text, ScrollView, ActivityIndicator } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import LeadStatus from "./LeadStatus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
@@ -19,13 +26,13 @@ function Leads() {
   const [leadData, setLeadData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [dataMyLead, setDataMyLead] = useState<any>([])
+  const [dataMyLead, setDataMyLead] = useState<any>([]);
   const [offialDetailState, setOffialDetailState] = useState<any>({});
   const [paginationModel, setPaginationModel] = useState({
     pageSize: 25,
     page: 0,
   });
-  const [searchQuery, setSearchQuery] = useState<string>(""); 
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -67,7 +74,7 @@ function Leads() {
         leadsToFilter = leadData;
         break;
       case 2:
-        leadsToFilter = []; 
+        leadsToFilter = [];
         break;
       case 3:
         leadsToFilter = dataMyLead;
@@ -78,12 +85,13 @@ function Leads() {
     }
 
     if (searchQuery) {
-      return leadsToFilter.filter((lead) => 
-        lead.leadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lead.project_name.toLowerCase().includes(searchQuery.toLowerCase())
+      return leadsToFilter.filter(
+        (lead) =>
+          lead.leadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          lead.project_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-  
+
     return leadsToFilter;
   };
 
@@ -116,27 +124,44 @@ function Leads() {
         contentContainerStyle={styles.scrollViewContainer}
         onScroll={({ nativeEvent }) => {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 20) {
+          if (
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 20
+          ) {
             handleLoadMore();
           }
         }}
         scrollEventThrottle={16}
       >
         <View style={styles.content}>
-          <LeadStatus selectedCard={selectedCard} setSelectedCard={setSelectedCard}  onSearchChange={(query) => setSearchQuery(query)} />
+          <LeadStatus
+            selectedCard={selectedCard}
+            setSelectedCard={setSelectedCard}
+            onSearchChange={(query) => setSearchQuery(query)}
+          />
           {loading && !loadingMore ? (
             <LeadsSkeleton />
           ) : (
             filteredLeads?.map((item, index) => (
               <View key={`${item._id}-${index}`} style={styles.cardContainer}>
-                <TouchableOpacity style={styles.card} onPress={() => handleCardDataLeads(item)}>
+                <TouchableOpacity
+                  style={styles.card}
+                  onPress={() => handleCardDataLeads(item)}
+                >
+                  <View style={styles.statusBadge}>
+                    <Text style={styles.statusText}>Just Now</Text>
+                  </View>
                   <View style={styles.textContainer}>
                     <Text style={styles.name}>{item.leadName}</Text>
                     <Text style={styles.location}>{item.form_name}</Text>
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.phoneIcon}>
-                  <MaterialCommunityIcons name="phone-outline" size={24} color="black" />
+                  <MaterialCommunityIcons
+                    name="phone-outline"
+                    size={24}
+                    color="black"
+                  />
                 </TouchableOpacity>
               </View>
             ))
@@ -154,10 +179,12 @@ function Leads() {
 
 const styles = StyleSheet.create({
   scrollViewContainer: {
+    backgroundColor: "white",
     flexGrow: 1,
-    paddingVertical: 20,
+    // paddingVertical: 20,
   },
   content: {
+    backgroundColor: "white",
     paddingHorizontal: 10,
   },
   cardContainer: {
@@ -166,8 +193,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
-    paddingHorizontal: 15,
-    marginHorizontal: 18,
+    paddingHorizontal: 10,
+    // marginHorizontal: 18,
     marginVertical: 10,
     paddingVertical: 10,
   },
@@ -198,6 +225,18 @@ const styles = StyleSheet.create({
   loadingMore: {
     marginVertical: 20,
     alignItems: "center",
+  },
+  statusBadge: {
+    backgroundColor: "#FF6B6B",
+    borderRadius: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    alignSelf: "flex-start",
+    margin: 6,
+  },
+  statusText: {
+    color: "#FFF",
+    fontSize: 12,
   },
 });
 
