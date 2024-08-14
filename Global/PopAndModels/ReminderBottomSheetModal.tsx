@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
   Platform,
+  ScrollView,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -15,9 +16,12 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
-import store from "../../utils/store";
+import store, { RootState } from "../../utils/store";
 import { getAllReminder, saveReminder } from "./RemiderServices";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useSelector } from "react-redux";
 
 interface ReminderBottomSheetModalProps {
   visible: boolean;
@@ -31,7 +35,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
   onClose,
 }) => {
   const translateY = useSharedValue(visible ? 0 : screenHeight);
-
+  const { leadData } = useSelector((state: RootState) => state.auth);
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date());
@@ -40,25 +44,6 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
 
   const userId = store.getState().auth.userId;
 
-  const submitReminder = async (id:any) => {
-    const body = {
-      userId,
-      title,
-      note,
-      date: date.toISOString(),
-    };
-    try {
-      const response = await saveReminder(body);
-      const res = await getAllReminder(id)
-    } catch (error) {
-      console.error("Error saving reminder:", error);
-    }
-  };
-
-  useEffect(() => {
-    submitReminder('')
-  },[])
-
   useEffect(() => {
     translateY.value = withSpring(visible ? 0 : screenHeight, {
       damping: 15,
@@ -66,22 +51,38 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
     });
   }, [visible]);
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setDate(currentDate);
+  const submitReminder = async () => {
+    const body = {
+      leadId: leadData._id,
+      userId,
+      title,
+      note,
+      date: date.toISOString(),
+    };
+  
+    try {
+      await saveReminder(body);
+      onClose();
+    } catch (error) {
+      console.error("Error saving reminder:", error);
+    }
+  };
+
+  const onChange = (date: Date) => {
+    setDate(date);
     const formatted =
-      currentDate.toLocaleDateString("en-GB") +
+      date.toLocaleDateString("en-GB") +
       " " +
-      currentDate.toLocaleTimeString([], {
+      date.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       });
     setFormattedDate(formatted);
-    setShow(false);
+    setShow(false); 
   };
 
   const showDatePicker = () => {
-    setShow(true);
+    setShow(!show); 
   };
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -97,33 +98,29 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
           <TouchableOpacity style={styles.overlay} onPress={onClose}>
             <Animated.View style={[styles.container, animatedStyle]}>
               <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
-                <View style={styles.containerdiv}>
-                  <Text style={styles.header}>Add Reminder</Text>
-                  <Text style={styles.subHeader}>
-                    Add new reminder for the lead
-                  </Text>
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                  <View style={styles.containerdiv}>
+                    <Text style={styles.header}>Add Reminder</Text>
+                    <Text style={styles.subHeader}>
+                      Add new reminder for the lead
+                    </Text>
 
-                  <View style={styles.inputContainer}>
-                    <Image
-                      source={require("../../assets/type_cursor_icon.png")}
-                      style={styles.icon}
-                    />
-                    <View style={styles.textContainer}>
+                    <View style={styles.inputContainer}>
                       <Text style={styles.inputTitle}>Title</Text>
-                      <TextInput
-                        style={styles.inputValue}
-                        value={title}
-                        onChangeText={setTitle}
-                      />
+                      <View style={styles.inputWithIconContainer}>
+                        <Image
+                          source={require("../../assets/type_cursor_icon.png")}
+                          style={styles.iconInsideInput}
+                        />
+                        <TextInput
+                          style={styles.inputValue}
+                          value={title}
+                          onChangeText={setTitle}
+                        />
+                      </View>
                     </View>
-                  </View>
 
-                  <View style={styles.inputContainer}>
-                    <Image
-                      source={require("../../assets/calendar_icon.png")}
-                      style={styles.icon}
-                    />
-                    <View style={styles.textContainer}>
+                    <View style={styles.inputContainer}>
                       <Text style={styles.inputTitle}>Date and Time</Text>
                       <View style={styles.inputWithIconContainer}>
                         <TextInput
@@ -134,45 +131,56 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                         <TouchableOpacity onPress={showDatePicker}>
                           <Image
                             source={require("../../assets/calendar_icon.png")}
-                            style={styles.iconInput}
                           />
                         </TouchableOpacity>
                       </View>
                     </View>
-                  </View>
 
-                  {show && (
-                   <DateTimePicker
-                   value={date}
-                   mode="date"
-                   display="default"
-                   onChange={onChange}
-                   onTouchCancel={() => setShow(false)} // Add this line to handle dismiss on Android
-                 />
-                  )}
-
-                  <View style={styles.inputContainer}>
-                    <Image
-                      source={require("../../assets/note_icon.png")}
-                      style={styles.icon}
-                    />
-                    <View style={styles.textContainer}>
-                      <Text style={styles.inputTitle}>Note</Text>
-                      <TextInput
-                        style={[styles.inputValue, { height: 80 }]}
-                        multiline={true}
-                        value={note}
-                        onChangeText={setNote}
+                    {/* Date Picker for Mobile */}
+                    {show && Platform.OS !== "web" && (
+                      <DateTimePicker
+                        value={date}
+                        mode="datetime"
+                        display="default"
+                        onChange={(event, selectedDate) => onChange(selectedDate || date)}
+                        onTouchCancel={() => setShow(false)}
                       />
+                    )}
+
+                    {/* Date Picker for Web */}
+                    {Platform.OS === "web" && show && (
+                      <DatePicker
+                        selected={date}
+                        onChange={onChange}
+                        showTimeSelect
+                        dateFormat="Pp"
+                        inline
+                      />
+                    )}
+
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.inputTitle}>Note</Text>
+                      <View style={styles.inputWithIconContainer}>
+                        <Image
+                          source={require("../../assets/note_icon.png")}
+                          style={styles.iconInsideInput}
+                        />
+                        <TextInput
+                          style={[styles.inputValue, { height: 80 }]}
+                          multiline={true}
+                          value={note}
+                          onChangeText={setNote}
+                        />
+                      </View>
                     </View>
                   </View>
-                </View>
-                <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={submitReminder}
-                >
-                  <Text style={styles.submitButtonText}>Submit</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={submitReminder}
+                  >
+                    <Text style={styles.submitButtonText}>Submit</Text>
+                  </TouchableOpacity>
+                </ScrollView>
               </TouchableOpacity>
             </Animated.View>
           </TouchableOpacity>
@@ -211,6 +219,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
   containerdiv: {
     flex: 1,
     padding: 16,
@@ -227,49 +239,39 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
     marginBottom: 16,
-  },
-  textContainer: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
   },
   inputWithIconContainer: {
     flexDirection: "row",
     alignItems: "center",
-    position: "relative",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    backgroundColor: "#f9f9f9",
+    paddingHorizontal: 10,
   },
   inputValueWithIcon: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    paddingHorizontal: 10,
+    borderWidth: 0,
+    paddingLeft: 40,
+    height: 35,
   },
-  iconInput: {
+  iconInsideInput: {
     position: "absolute",
-    right: 5,
+    left: 10,
     width: 20,
     height: 20,
-    bottom: -10,
+    tintColor: "#888",
   },
   inputTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 4,
+    fontSize: 12,
+    color: "#555",
+    marginBottom: 8,
   },
   inputValue: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginTop: 4,
+    flex: 1,
+    paddingHorizontal: 30,
+    height: 35,
   },
   submitButton: {
     backgroundColor: "#4A6EF5",
@@ -279,6 +281,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignSelf: "center",
     width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   submitButtonText: {
     color: "#fff",

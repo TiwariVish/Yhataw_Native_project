@@ -54,7 +54,7 @@ const LeadInfoScreen = () => {
   const [dynamicGridValue, setDynamicGridValue] = useState<any>();
   const [isModalVisible, setModalVisible] = useState(false);
   const [isMemberModalVisible, setMemberModalVisible] = useState(false);
-
+  const [isReminders ,setReminders] = useState<any>([])
 
   useEffect(() => {
     getLeadStage();
@@ -85,11 +85,10 @@ const LeadInfoScreen = () => {
     setModalVisible(true);
   };
 
- const  handleMemberStatusSelect = () =>{
-  console.log("------------");
-  setMemberModalVisible(true)
-
- }
+  const handleMemberStatusSelect = () => {
+    console.log("------------");
+    setMemberModalVisible(true);
+  };
 
   const handleCardPress = (id: number) => {
     setSelectedCards([id]);
@@ -98,7 +97,6 @@ const LeadInfoScreen = () => {
   const handleCare_Reminder = () => {
     setIsVisible(true);
   };
-
 
   const renderContent = () => {
     return (
@@ -121,7 +119,7 @@ const LeadInfoScreen = () => {
             <Text style={styles.label}>Assigned To</Text>
             <TouchableOpacity
               style={styles.dropdown}
-              onPress={() =>handleMemberStatusSelect()}
+              onPress={() => handleMemberStatusSelect()}
             >
               <Text style={styles.dropdownText}>
                 {selectedTeams ? selectedTeams : "Select Team"}
@@ -137,9 +135,7 @@ const LeadInfoScreen = () => {
             </TouchableOpacity>
             <>
               <Text style={styles.label}>Assigned To Member</Text>
-              <TouchableOpacity
-                style={styles.dropdown}
-              >
+              <TouchableOpacity style={styles.dropdown}>
                 <Text style={styles.dropdownText}>
                   {selectedTeams ? selectedTeams : "Assigned To Member"}
                 </Text>
@@ -157,7 +153,7 @@ const LeadInfoScreen = () => {
             <Text style={styles.label}>Status</Text>
             <TouchableOpacity
               style={styles.dropdown}
-              onPress={() =>handleStatusSelect("")}
+              onPress={() => handleStatusSelect("")}
             >
               <Text style={styles.dropdownText}>
                 {" "}
@@ -279,7 +275,11 @@ const LeadInfoScreen = () => {
           </View>
         )}
       </View>
-      <MemberPopOver     visible={isMemberModalVisible} onClose={() => setMemberModalVisible(false)}  onStatusSelect={handleMemberStatusSelect} />
+      <MemberPopOver
+        visible={isMemberModalVisible}
+        onClose={() => setMemberModalVisible(false)}
+        onStatusSelect={handleMemberStatusSelect}
+      />
       <StatusPop
         visible={isModalVisible}
         onClose={() => setModalVisible(false)}
