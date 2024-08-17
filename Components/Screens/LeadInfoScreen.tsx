@@ -19,6 +19,7 @@ import {
 } from "./LeadInfoScreenService";
 import StatusPop from "../../Global/PopAndModels/StatusPop";
 import MemberPopOver from "../../Global/PopAndModels/MemberPopOver";
+import AssignedMemberPop from "../../Global/PopAndModels/AssignedMemberPop";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
@@ -50,11 +51,11 @@ const LeadInfoScreen = () => {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedTeams, setselectedTeams] = useState<string | null>(null);
   const [dropdownItems, setDropdownItems] = useState([]);
-  const [leadOptionMembers, setLeadOptionMembersas] = useState<any>([]);
-  const [dynamicGridValue, setDynamicGridValue] = useState<any>();
   const [isModalVisible, setModalVisible] = useState(false);
   const [isMemberModalVisible, setMemberModalVisible] = useState(false);
-  const [isReminders ,setReminders] = useState<any>([])
+  const [isassineMemberModalVisible, setisassineMemberModalVisible] = useState(false);
+
+ 
 
   useEffect(() => {
     getLeadStage();
@@ -86,9 +87,13 @@ const LeadInfoScreen = () => {
   };
 
   const handleMemberStatusSelect = () => {
-    console.log("------------");
     setMemberModalVisible(true);
   };
+
+  const onselectMember = () =>{
+    setisassineMemberModalVisible(true)
+
+  }
 
   const handleCardPress = (id: number) => {
     setSelectedCards([id]);
@@ -135,7 +140,7 @@ const LeadInfoScreen = () => {
             </TouchableOpacity>
             <>
               <Text style={styles.label}>Assigned To Member</Text>
-              <TouchableOpacity style={styles.dropdown}>
+              <TouchableOpacity style={styles.dropdown}  onPress={() => onselectMember()}>
                 <Text style={styles.dropdownText}>
                   {selectedTeams ? selectedTeams : "Assigned To Member"}
                 </Text>
@@ -275,6 +280,9 @@ const LeadInfoScreen = () => {
           </View>
         )}
       </View>
+      <AssignedMemberPop  visible={isassineMemberModalVisible}
+        onClose={() => setisassineMemberModalVisible(false)}
+        onStatusSelect={onselectMember} />
       <MemberPopOver
         visible={isMemberModalVisible}
         onClose={() => setMemberModalVisible(false)}

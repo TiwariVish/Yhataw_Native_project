@@ -149,7 +149,7 @@ function Leads() {
                   onPress={() => handleCardDataLeads(item)}
                 >
                   <View style={styles.statusBadge}>
-                    <Text style={styles.statusText}>Just Now</Text>
+                    <Text style={styles.statusText}>{item.stage}</Text>
                   </View>
                   <View style={styles.textContainer}>
                     <Text style={styles.name}>{item.leadName}</Text>

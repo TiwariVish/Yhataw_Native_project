@@ -20,13 +20,7 @@ interface DropdownItem {
 
 const MemberPopOver: React.FC<MemberPopOverProps> = ({ visible, onClose, onStatusSelect }) => {
   const [memberdropdownItems, setmMemberDropdownItems] = useState<DropdownItem[]>([]);
-  const [leadOptionMember, setleadOptionMember] = useState([
-    { id: 1, name: "vishal", checked: true },
-    {id: 2, name: "vishal" , checked: true},
-    {id: 3, name: "vishal", checked: true },
-    {id: 4, name: "vishal", checked: true },
-    { id:5,name: "vishal" , checked: true},
-  ]);
+
 
   const scale = useSharedValue(visible ? 1 : 0.8);
   const opacity = useSharedValue(visible ? 1 : 0);
