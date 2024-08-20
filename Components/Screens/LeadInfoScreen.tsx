@@ -219,7 +219,7 @@ const LeadInfoScreen = () => {
               <Text style={styles.name}>{leadData.leadName}</Text>
               <Text style={styles.date}>19 Mar, 2024</Text>
               <View style={styles.statusBadge}>
-                <Text style={styles.statusText}>Just Now</Text>
+                <Text style={styles.statusText}>{leadData.stage}</Text>
               </View>
             </View>
             <View style={styles.iconContainer}>
