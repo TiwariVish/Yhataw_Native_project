@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Modal,
-  TouchableWithoutFeedback,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import { View, StyleSheet, Image, TouchableOpacity, Text, Animated } from "react-native";
 import BottomSheetModal from "../PopAndModels/BottomSheetModal";
 import { getPerosnalDetails } from "../../Components/Screens/MyProfileService";
 import store from "../../utils/store";
@@ -14,7 +7,6 @@ import store from "../../utils/store";
 function Footer({ navigate }) {
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [userData, setUserData] = useState<any>(null);
 
@@ -37,129 +29,113 @@ function Footer({ navigate }) {
       navigate("UserProfile");
     }
     if (iconName === "pluscircle") {
-      setSelectedItem(iconName);
-      setIsVisible(true);
-    }
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-    setSelectedItem(null);
-  };
-
-  const navigateToSection = (item) => {
-    // navigation.navigate("Leads");
-    // setModalVisible(false);
-    console.log("Navigate to:", item.content);
-  };
-
-  const getBorderPosition = () => {
-    switch (selectedIcon) {
-      case "home":
-        return 10;
-      case "pluscircle":
-        return 150;
-      case "user":
-        return 309;
-      default:
-        return 0;
+      setIsVisible(true);  // Show modal when plus circle icon is pressed
     }
   };
 
   return (
     <>
-      <View style={styles.footer}>
-        <TouchableOpacity onPress={() => handleIconPress("home")}>
+      <View style={styles.footerContainer}>
+        <TouchableOpacity style={styles.iconContainer} onPress={() => handleIconPress("home")}>
           <Image
             source={require("../../assets/home_icon.png")}
-            style={styles.imageHome}
+            style={styles.icon}
           />
+          <Text style={styles.iconLabel}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleIconPress("pluscircle")}>
-          <Image
-            source={require("../../assets/action_button.png")}
-            style={styles.image2}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleIconPress("user")}>
+
+        <View style={styles.centerIconContainer}>
+          <TouchableOpacity
+            style={styles.centerIconWrapper}
+            onPress={() => handleIconPress("pluscircle")}
+          >
+            <Image
+              source={require("../../assets/action_button.png")}
+              style={styles.centerIcon}
+            />
+          </TouchableOpacity>
+          <View style={styles.curveBackground} />
+        </View>
+
+        <TouchableOpacity style={styles.iconContainer} onPress={() => handleIconPress("user")}>
           <Image
             source={
               userData?.profile_image
                 ? { uri: userData.profile_image }
                 : require("../../assets/user_icon.png")
             }
-            style={styles.image}
+            style={styles.icon}
           />
+          <Text style={styles.iconLabel}>Profile</Text>
         </TouchableOpacity>
-        <View style={[styles.borderButton, { left: getBorderPosition() }]} />
-        <View style={[styles.borderButton, { left: getBorderPosition() }]} />
       </View>
-      {/* Modal section */}
       <BottomSheetModal
         visible={isVisible}
         onClose={() => setIsVisible(false)}
-      ></BottomSheetModal>
+      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
+  footerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-  },
-
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 10,
-    backgroundColor: "#fff",
+    alignItems: "center",
+    backgroundColor: "white",
+    height: 60,
+    paddingHorizontal: 30,
     position: "absolute",
     bottom: 0,
     width: "100%",
-    height: 85,
+    elevation: 5,
   },
-  borderButton: {
+  iconContainer: {
+    alignItems: "center",
+  },
+  icon: {
+    width: 32,
+    height: 32,
+    borderRadius:20
+  },
+  centerIconContainer: {
     position: "absolute",
-    bottom: 10,
-    height: 5,
-    width: 100,
-    backgroundColor: "blue",
-    alignSelf: "center",
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: 415,
-    height: 627,
-    marginTop: 225,
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
+    top: -40,
+    left: "50%",
     alignItems: "center",
   },
-  image: {
-    borderRadius: 30,
-    height: 45,
-    width: 45,
+  centerIconWrapper: {
+    display:"flex",
+    width: 70,
+    height: 85,
+    borderRadius: 35,
+    alignItems:'center',
+    justifyContent:'center',
+    zIndex: 10,
+    // elevation: 3,
   },
-  image2: {
+  curveBackground: {
+    position: "absolute",
+    top: 40,
+    width: "150%",
     height: 55,
-    width: 55,
+    borderBottomLeftRadius: 200,
+    borderBottomRightRadius: 200,
+    backgroundColor: "white",
   },
-  imageHome: {
-    height: 35,
-    width: 35,
+  centerIcon: {
+    width: 60,
+    height: 60,
+  },
+  iconLabel: {
+    color: "blue",
+    fontSize: 12,
+    marginTop: 5,
+    textDecorationLine: "none",
+
   },
 });
 
 export default Footer;
+
+

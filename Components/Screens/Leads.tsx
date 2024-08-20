@@ -6,6 +6,7 @@ import {
   Text,
   ScrollView,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import LeadStatus from "./LeadStatus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -118,6 +119,22 @@ function Leads() {
     }
   };
 
+  const handleDialPress = () => {
+    const phoneNumber = '1234567890'; 
+    const url = `tel:${phoneNumber}`;
+
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          console.log('Phone dialer is not available');
+        }
+      })
+      .catch((err) => console.error('Error opening dialer:', err));
+  };
+
+
   return (
     <>
       <ScrollView
@@ -156,7 +173,7 @@ function Leads() {
                     <Text style={styles.location}>{item.form_name}</Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.phoneIcon}>
+                <TouchableOpacity style={styles.phoneIcon} onPress={handleDialPress}>
                   <MaterialCommunityIcons
                     name="phone-outline"
                     size={24}

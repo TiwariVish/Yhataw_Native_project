@@ -27,14 +27,13 @@ import { getPerosnalDetails } from "./MyProfileService";
 import { DashboardSkeleton } from "../../Global/Components/SkeletonStructures";
 import { useSelector } from "react-redux";
 
-// Static data moved outside of the component
 const staticData = {
   leads: [
     {
       id: 2,
-      content: "Just Now",
-      cardColor: "#ffa899",
-      calendarBackgroundColor: "#ff2600",
+      content: "New",
+      cardColor: "#D4FFEA",
+      calendarBackgroundColor: "#009900",
       leadDataKey: "lead_total_new_count",
       myleadKey: "lead_my_intrested_count",
       lead_my_pipeline_count: "",
@@ -51,14 +50,14 @@ const staticData = {
     {
       id: 5,
       content: "Pipeline",
-      cardColor: "#c1f0c1",
-      calendarBackgroundColor: "#009900",
+      cardColor: "#FFF3DF",
+      calendarBackgroundColor: "#ffff00",
       leadDataKey: "lead_total_pipeline_count",
       myleadKey: "lead_my_pipeline_count",
     },
     {
       id: 3,
-      content: "Cancelled",
+      content: "Visit Cancelled",
       cardColor: "#c1f0c1",
       calendarBackgroundColor: "#009900",
       leadDataKey: "",
@@ -67,11 +66,39 @@ const staticData = {
     },
     {
       id: 1,
-      content: "Done",
+      content: "Visit Done",
       cardColor: "#c1f0c1",
       calendarBackgroundColor: "#009900",
-      leadDataKey: "",
+      leadDataKey: "lead_total_visit_done_count",
       myleadKey: "",
+      visit_done_count : "lead_total_visit_done_count"
+    },
+    {
+      id: 6,
+      content: "Not Answered",
+      cardColor: "#c1f0c1",
+      calendarBackgroundColor: "#009900",
+      leadDataKey: "lead_my_not_answered_count",
+      myleadKey: "",
+      visit_done_count : "lead_total_visit_done_count"
+    },
+    {
+      id: 7,
+      content: "Not Intrested",
+      cardColor: "#c1f0c1",
+      calendarBackgroundColor: "#009900",
+      leadDataKey: "lead_my_not_intrested_count",
+      myleadKey: "",
+      visit_done_count : "lead_total_visit_done_count"
+    },
+    {
+      id: 8,
+      content: "Call Back",
+      cardColor: "#c1f0c1",
+      calendarBackgroundColor: "#009900",
+      leadDataKey: "lead_total_call_back_count",
+      myleadKey: "",
+      visit_done_count : "lead_total_visit_done_count"
     },
   ],
   attendance: [
@@ -141,20 +168,22 @@ const Dashboard: React.FC<CustomProps> = () => {
   );
 
   useEffect(() => {
-    if(permission?.ADMIN || permission.CRM ){
+    if (permission?.ADMIN || permission.CRM) {
       getValuepermission();
     }
-    if(permission?.ADMIN ||
+    if (
+      permission?.ADMIN ||
       permission.HR ||
-      permission["MY-Dashboard"] ||  permission.CRM){
-        fetchMy_Attendance();
-      }
-      if( permission["MY-Dashboard"]){
-        fetchMyDashboardData();
-      }
+      permission["MY-Dashboard"] ||
+      permission.CRM
+    ) {
+      fetchMy_Attendance();
+    }
+    if (permission["MY-Dashboard"]) {
+      fetchMyDashboardData();
+    }
     fetchDashboardCRM();
     fetchUserData();
-  
   }, [userId]);
 
   const getPermissionForView = () => {
@@ -240,7 +269,7 @@ const Dashboard: React.FC<CustomProps> = () => {
       {loading ? (
         <DashboardSkeleton />
       ) : (
-        <ScrollView>
+          <ScrollView>
           {/* Header section */}
           <View style={styles.header}>
             <View style={styles.imageContainer}>
@@ -379,7 +408,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                       </Text>
                     </View>
                     <View style={styles.iconFord}>
-                      <AntDesign name="right" size={24} color="black" />
+                      {/* <AntDesign name="right" size={24} color="black" /> */}
                     </View>
                   </View>
                   <ScrollView
@@ -417,7 +446,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                       </Text>
                     </View>
                     <View style={styles.iconFord}>
-                      <AntDesign name="right" size={24} color="black" />
+                      {/* <AntDesign name="right" size={24} color="black" /> */}
                     </View>
                   </View>
                   <ScrollView
@@ -453,7 +482,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                       </Text>
                     </View>
                     <View style={styles.iconFord}>
-                      <AntDesign name="right" size={24} color="black" />
+                      {/* <AntDesign name="right" size={24} color="black" /> */}
                     </View>
                   </View>
                   <ScrollView
@@ -511,14 +540,17 @@ const Dashboard: React.FC<CustomProps> = () => {
               )}
             </ScrollView>
           </View>
-        </ScrollView>
+          </ScrollView>
       )}
-      <Footer navigate={handleProfile} />
+        <Footer navigate={handleProfile} />
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
