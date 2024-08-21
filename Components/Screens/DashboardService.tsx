@@ -85,3 +85,15 @@ export async function getDataAllLead(roleId?: any) {
       throw error;
     }
   }
+
+  export async function addBanner() {
+    try{
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(urls.ADDBANNER, callParams);
+      return response;
+    }
+    catch (error) {
+      throw error;
+    }
+    
+  }

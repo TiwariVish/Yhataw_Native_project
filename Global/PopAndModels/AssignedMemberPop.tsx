@@ -40,7 +40,7 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
     DropdownItem[]
   >([]);
   const [isteamMembers, setIsteamMembers] = useState<any>([]);
-  const [isuserData,setisuserData] = useState<any>([])
+  const [isUserData,setIsUserData] = useState<any>([])
   const { leadData } = useSelector((state: RootState) => state.auth);
   const assignToIds = leadData.AssignTo.map((item) => item._id);
 
@@ -68,18 +68,14 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
       };
       const res = await getAllTeamMembersData(payload);
       setIsteamMembers(res.data);
+      const userData = res.data.team_members?.flatMap((member: any) => member.users);
+      console.log(userData,'userData');
+      
+      setIsUserData(userData);
     } catch (error) {
       console.error('API Error:', error); 
     }
   };
-  console.log(isteamMembers,'====isteamMembersisteamMembers================================');
-
-
-  const userNames = isteamMembers.team_members?.map((member: any) => member);
-
-  console.log(userNames, 'teamMembers');
-  
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
@@ -105,7 +101,7 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
           <BlurView style={styles.blurView} intensity={200}>
             <Animated.View style={[styles.modal, animatedStyle]}>
               <ScrollView contentContainerStyle={styles.dropdownMenu}>
-                {userNames?.map((name, index) => (
+                {isUserData?.map((name, index) => (
                   <TouchableOpacity
                     key={index}
                     style={styles.checkboxItem}

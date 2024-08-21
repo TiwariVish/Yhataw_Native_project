@@ -31,7 +31,8 @@ const LoginScreen = ({ navigation }) => {
 
   const handleProceed = async () => {
     const isValid = validateEmail(email);
-    if (!isValid) {
+    const isMobileValid = /^[0-9]{10}$/.test(email);
+    if (!isEmailValid && !isMobileValid) {
       setIsEmailValid(false);
       return;
     }

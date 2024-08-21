@@ -242,6 +242,10 @@ class UrlConstants extends StringConstants {
   GETVISITSREPORT = `${this.url_prod}/getVisitReport`;
   GETPROJECTREPORT = `${this.url_prod}/getProjectReport`;
   GETCLOSUREREPORT = `${this.url_prod}/getClosureReport`;
+
+
+  // Banner
+  ADDBANNER = `${this.url_prod}/getBanner`
 }
 let urls = new UrlConstants();
 export default urls;

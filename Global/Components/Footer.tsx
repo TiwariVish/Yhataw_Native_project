@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Image, TouchableOpacity, Text, Animated } from "react-native";
+import { View, StyleSheet, Image, TouchableOpacity, Text } from "react-native";
 import BottomSheetModal from "../PopAndModels/BottomSheetModal";
 import { getPerosnalDetails } from "../../Components/Screens/MyProfileService";
 import store from "../../utils/store";
@@ -29,14 +29,17 @@ function Footer({ navigate }) {
       navigate("UserProfile");
     }
     if (iconName === "pluscircle") {
-      setIsVisible(true);  // Show modal when plus circle icon is pressed
+      setIsVisible(true); // Show modal when plus circle icon is pressed
     }
   };
 
   return (
     <>
       <View style={styles.footerContainer}>
-        <TouchableOpacity style={styles.iconContainer} onPress={() => handleIconPress("home")}>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => handleIconPress("home")}
+        >
           <Image
             source={require("../../assets/home_icon.png")}
             style={styles.icon}
@@ -57,7 +60,10 @@ function Footer({ navigate }) {
           <View style={styles.curveBackground} />
         </View>
 
-        <TouchableOpacity style={styles.iconContainer} onPress={() => handleIconPress("user")}>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => handleIconPress("user")}
+        >
           <Image
             source={
               userData?.profile_image
@@ -96,23 +102,23 @@ const styles = StyleSheet.create({
   icon: {
     width: 32,
     height: 32,
-    borderRadius:20
+    borderRadius: 20,
   },
   centerIconContainer: {
     position: "absolute",
-    top: -40,
+    top: -25,
     left: "50%",
-    alignItems: "center",
+    // transform: [{ translateX: 0 }], // Adjust the icon to be centered
+    // alignItems: "center",
   },
   centerIconWrapper: {
-    display:"flex",
-    width: 70,
-    height: 85,
-    borderRadius: 35,
-    alignItems:'center',
-    justifyContent:'center',
-    zIndex: 10,
-    // elevation: 3,
+    // display: "flex",
+    // width: 70,
+    // height: 85,
+    // borderRadius: 35,
+    // alignItems: "center",
+    // justifyContent: "center",
+    zIndex: 1000,
   },
   curveBackground: {
     position: "absolute",
@@ -132,10 +138,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
     textDecorationLine: "none",
-
   },
 });
 
 export default Footer;
-
-

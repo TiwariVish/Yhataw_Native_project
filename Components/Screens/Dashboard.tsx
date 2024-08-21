@@ -6,6 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Animated,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
@@ -13,6 +16,7 @@ import CustomCard from "../../Global/Components/CustomCard";
 import Footer from "../../Global/Components/Footer";
 import { LoginScreenNavigationProp } from "../type"; // Import the types
 import {
+  addBanner,
   getDataAllLead,
   getDataAttendance,
   getDataMyAttendance,
@@ -71,7 +75,7 @@ const staticData = {
       calendarBackgroundColor: "#009900",
       leadDataKey: "lead_total_visit_done_count",
       myleadKey: "",
-      visit_done_count : "lead_total_visit_done_count"
+      visit_done_count: "lead_total_visit_done_count",
     },
     {
       id: 6,
@@ -80,7 +84,7 @@ const staticData = {
       calendarBackgroundColor: "#009900",
       leadDataKey: "lead_my_not_answered_count",
       myleadKey: "",
-      visit_done_count : "lead_total_visit_done_count"
+      visit_done_count: "lead_total_visit_done_count",
     },
     {
       id: 7,
@@ -89,7 +93,7 @@ const staticData = {
       calendarBackgroundColor: "#009900",
       leadDataKey: "lead_my_not_intrested_count",
       myleadKey: "",
-      visit_done_count : "lead_total_visit_done_count"
+      visit_done_count: "lead_total_visit_done_count",
     },
     {
       id: 8,
@@ -98,7 +102,7 @@ const staticData = {
       calendarBackgroundColor: "#009900",
       leadDataKey: "lead_total_call_back_count",
       myleadKey: "",
-      visit_done_count : "lead_total_visit_done_count"
+      visit_done_count: "lead_total_visit_done_count",
     },
   ],
   attendance: [
@@ -162,6 +166,8 @@ const Dashboard: React.FC<CustomProps> = () => {
     "MY-Dashboard",
     "ADMIN",
   ]);
+
+  const [isBanner, setIsBanner] = useState([]);
   const userId = store.getState().auth;
   const { authenticated, role, privileges } = useSelector(
     (state: RootState) => state.auth
@@ -248,11 +254,14 @@ const Dashboard: React.FC<CustomProps> = () => {
   const fetchUserData = async () => {
     try {
       const response = await getPerosnalDetails(store.getState().auth?.userId);
+      const res = await addBanner();
+      setIsBanner(res?.data);
       setUserData(response.data);
     } catch (error: any) {
       console.error("Error fetching user details:", error);
     }
   };
+  console.log(isBanner, "isBannerisBannerisBanner");
 
   const navigateToSection = (id: number) => {
     dispatch(setLeadId(id));
@@ -264,12 +273,34 @@ const Dashboard: React.FC<CustomProps> = () => {
     navigation.navigate("MyProfile");
   };
 
+  const [isFooterVisible, setFooterVisible] = useState(true);
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    {
+      useNativeDriver: false,
+      listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const offsetY = event.nativeEvent.contentOffset.y;
+        if (offsetY > 100) {
+          setFooterVisible(false);
+        } else {
+          setFooterVisible(true);
+        }
+      },
+    }
+  );
+
+  const check = () => {
+    navigation.navigate("ErrorPage");
+  };
+
   return (
     <>
       {loading ? (
         <DashboardSkeleton />
       ) : (
-          <ScrollView>
+        <ScrollView onScroll={handleScroll} scrollEventThrottle={16}>
           {/* Header section */}
           <View style={styles.header}>
             <View style={styles.imageContainer}>
@@ -292,265 +323,257 @@ const Dashboard: React.FC<CustomProps> = () => {
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {staticData.leads.map((item) => (
-              <View key={item.id} style={styles.card}>
-                <Text>{item.content}</Text>
+            {isBanner.map((item) => (
+              <View key={item.id}>
+                <Image source={{ uri: item.image }} style={styles.card} />
               </View>
             ))}
           </ScrollView>
 
           {/* Leads section */}
-          <View>
-            <ScrollView>
-              {permission?.ADMIN || permission.CRM ? (
-                <>
-                  <View style={styles.row}>
-                    <View style={styles.textContainerAll}>
-                      <Text style={styles.name}>All Leads</Text>
-                      <Text style={styles.role}>
-                        {dashboardData.allLead.lead_total_count}
-                      </Text>
-                    </View>
-                    <View style={styles.iconFord}>
-                      <AntDesign
-                        name="right"
-                        size={24}
-                        color="black"
-                        onPress={() => navigateToSection(1)}
+          {permission?.ADMIN || permission.CRM ? (
+            <>
+              <View style={styles.row}>
+                <View style={styles.textContainerAll}>
+                  <Text style={styles.name}>All Leads</Text>
+                  <Text style={styles.role}>
+                    {dashboardData.allLead.lead_total_count}
+                  </Text>
+                </View>
+                <View style={styles.iconFord}>
+                  <AntDesign
+                    name="right"
+                    size={24}
+                    color="black"
+                    onPress={() => navigateToSection(1)}
+                  />
+                </View>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.horizontalScroll}
+              >
+                {staticData.leads.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => {
+                      navigateToSection(Number(item.id));
+                    }}
+                  >
+                    <View style={styles.cardContainer}>
+                      <CustomCard
+                        cardContent={<Text>{item.content}</Text>}
+                        cardColor={item.cardColor}
+                        calendarBackgroundColor={item.calendarBackgroundColor}
+                        calendarText={`${
+                          dashboardData.allLead[item.leadDataKey] || 0
+                        }`}
                       />
                     </View>
-                  </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.horizontalScroll}
-                  >
-                    {staticData.leads.map((item) => (
-                      <TouchableOpacity
-                        key={item.id}
-                        onPress={() => {
-                          navigateToSection(Number(item.id));
-                        }}
-                      >
-                        <View style={styles.cardContainer}>
-                          <CustomCard
-                            cardContent={<Text>{item.content}</Text>}
-                            cardColor={item.cardColor}
-                            calendarBackgroundColor={
-                              item.calendarBackgroundColor
-                            }
-                            calendarText={`${
-                              dashboardData.allLead[item.leadDataKey] || 0
-                            }`}
-                          />
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </>
-              ) : (
-                ""
-              )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </>
+          ) : (
+            ""
+          )}
 
-              {permission["MY-Dashboard"] ? (
-                <>
-                  <View style={styles.row}>
-                    <View style={styles.textContainerAll}>
-                      <Text style={styles.name}>My Leads</Text>
-                      <Text style={styles.role}>
-                        {dashboardDataMyLead.lead_my_total_count}
-                      </Text>
-                    </View>
-                    <View style={styles.iconFord}>
-                      <AntDesign name="right" size={24} color="black" />
-                    </View>
-                  </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.horizontalScroll}
+          {permission["MY-Dashboard"] ? (
+            <>
+              <View style={styles.row}>
+                <View style={styles.textContainerAll}>
+                  <Text style={styles.name}>My Leads</Text>
+                  <Text style={styles.role}>
+                    {dashboardDataMyLead.lead_my_total_count}
+                  </Text>
+                </View>
+                <View style={styles.iconFord}>
+                  <AntDesign name="right" size={24} color="black" />
+                </View>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.horizontalScroll}
+              >
+                {staticData.leads.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => {
+                      navigateToSection(Number(item.id));
+                    }}
                   >
-                    {staticData.leads.map((item) => (
-                      <TouchableOpacity
-                        key={item.id}
-                        onPress={() => {
-                          navigateToSection(Number(item.id));
-                        }}
-                      >
-                        <View style={styles.cardContainer}>
-                          <CustomCard
-                            cardContent={<Text>{item.content}</Text>}
-                            cardColor={item.cardColor}
-                            calendarBackgroundColor={
-                              item.calendarBackgroundColor
-                            }
-                            calendarText={`${
-                              dashboardDataMyLead[item.myleadKey] || 0
-                            }`}
-                          />
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </>
-              ) : (
-                ""
-              )}
+                    <View style={styles.cardContainer}>
+                      <CustomCard
+                        cardContent={<Text>{item.content}</Text>}
+                        cardColor={item.cardColor}
+                        calendarBackgroundColor={item.calendarBackgroundColor}
+                        calendarText={`${
+                          dashboardDataMyLead[item.myleadKey] || 0
+                        }`}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </>
+          ) : (
+            ""
+          )}
 
-              {/* Attendance section */}
-              {permission?.ADMIN || permission.HR ? (
-                <>
-                  <View style={styles.row}>
-                    <View style={styles.textContainerAll}>
-                      <Text style={styles.name}>All Attendance</Text>
-                      <Text style={styles.role}>
-                        {dashboardData.attendance.attendence_total_emp} day
-                      </Text>
-                    </View>
-                    <View style={styles.iconFord}>
-                      {/* <AntDesign name="right" size={24} color="black" /> */}
-                    </View>
+          {/* Attendance section */}
+          {permission?.ADMIN || permission.HR ? (
+            <>
+              <View style={styles.row}>
+                <View style={styles.textContainerAll}>
+                  <Text style={styles.name}>All Attendance</Text>
+                  <Text style={styles.role}>
+                    {dashboardData.attendance.attendence_total_emp} day
+                  </Text>
+                </View>
+                <View style={styles.iconFord}>
+                  {/* <AntDesign name="right" size={24} color="black" /> */}
+                </View>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.horizontalScroll}
+              >
+                {staticData.attendance.map((item) => (
+                  <View key={item.id} style={styles.cardContainer}>
+                    <CustomCard
+                      cardContent={<Text>{item.content}</Text>}
+                      calendarText={`${
+                        dashboardData.attendance[item.attendanceKey] || 0
+                      }`}
+                    />
                   </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.horizontalScroll}
-                  >
-                    {staticData.attendance.map((item) => (
-                      <View key={item.id} style={styles.cardContainer}>
-                        <CustomCard
-                          cardContent={<Text>{item.content}</Text>}
-                          calendarText={`${
-                            dashboardData.attendance[item.attendanceKey] || 0
-                          }`}
-                        />
-                      </View>
-                    ))}
-                  </ScrollView>
-                </>
-              ) : (
-                ""
-              )}
+                ))}
+              </ScrollView>
+            </>
+          ) : (
+            ""
+          )}
 
-              {permission?.ADMIN ||
-              permission.HR ||
-              permission["MY-Dashboard"] ||
-              permission.CRM ? (
-                <>
-                  <View style={styles.row}>
-                    <View style={styles.textContainerAll}>
-                      <Text style={styles.name}>My Attendance</Text>
-                      <Text style={styles.role}>
-                        {dashboardDataAttendance.attendence_my_current_month}{" "}
-                        day
-                      </Text>
-                    </View>
-                    <View style={styles.iconFord}>
-                      {/* <AntDesign name="right" size={24} color="black" /> */}
-                    </View>
+          {permission?.ADMIN ||
+          permission.HR ||
+          permission["MY-Dashboard"] ||
+          permission.CRM ? (
+            <>
+              <View style={styles.row}>
+                <View style={styles.textContainerAll}>
+                  <Text style={styles.name}>My Attendance</Text>
+                  <Text style={styles.role}>
+                    {dashboardDataAttendance.attendence_my_current_month} day
+                  </Text>
+                </View>
+                <View style={styles.iconFord}>
+                  <AntDesign
+                    name="right"
+                    size={24}
+                    color="black"
+                    onPress={() => check()}
+                  />
+                </View>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.horizontalScroll}
+              >
+                {staticData.attendance.map((item) => (
+                  <View key={item.id} style={styles.cardContainer}>
+                    <CustomCard
+                      cardContent={<Text>{item.content}</Text>}
+                      calendarText={`${
+                        dashboardDataAttendance[item.countMy_Attendance] || 0
+                      }`}
+                    />
                   </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.horizontalScroll}
-                  >
-                    {staticData.attendance.map((item) => (
-                      <View key={item.id} style={styles.cardContainer}>
-                        <CustomCard
-                          cardContent={<Text>{item.content}</Text>}
-                          calendarText={`${
-                            dashboardDataAttendance[item.countMy_Attendance] ||
-                            0
-                          }`}
-                        />
-                      </View>
-                    ))}
-                  </ScrollView>
-                </>
-              ) : (
-                ""
-              )}
+                ))}
+              </ScrollView>
+            </>
+          ) : (
+            ""
+          )}
 
-              {/* Projects section */}
-              {permission?.ADMIN || permission.CRM ? (
-                <>
-                  <View style={styles.row}>
-                    <View style={styles.textContainerAll}>
-                      <Text style={styles.name}>All Project</Text>
-                      <Text style={styles.role}>
-                        {dashboardData.project.projects_total} Total
-                      </Text>
-                    </View>
-                    <View style={styles.iconFord}>
-                      {/* <AntDesign name="right" size={24} color="black" /> */}
-                    </View>
+          {/* Projects section */}
+          {permission?.ADMIN || permission.CRM ? (
+            <>
+              <View style={styles.row}>
+                <View style={styles.textContainerAll}>
+                  <Text style={styles.name}>All Project</Text>
+                  <Text style={styles.role}>
+                    {dashboardData.project.projects_total} Total
+                  </Text>
+                </View>
+                <View style={styles.iconFord}>
+                  {/* <AntDesign name="right" size={24} color="black" /> */}
+                </View>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.horizontalScroll}
+              >
+                {staticData.myProjects.map((item) => (
+                  <View key={item.id} style={styles.cardContainer}>
+                    <CustomCard
+                      cardContent={<Text>{item.content}</Text>}
+                      calendarText={`${
+                        dashboardData.project[item.projectKey] || 0
+                      }`}
+                    />
                   </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.horizontalScroll}
-                  >
-                    {staticData.myProjects.map((item) => (
-                      <View key={item.id} style={styles.cardContainer}>
-                        <CustomCard
-                          cardContent={<Text>{item.content}</Text>}
-                          calendarText={`${
-                            dashboardData.project[item.projectKey] || 0
-                          }`}
-                        />
-                      </View>
-                    ))}
-                  </ScrollView>
-                </>
-              ) : (
-                ""
-              )}
-              {permission["MY-Dashboard"] ? (
-                <>
-                  <View style={styles.row}>
-                    <View style={styles.textContainerAll}>
-                      <Text style={styles.name}>My Project</Text>
-                      <Text style={styles.role}>
-                        {dashboardData.project.projects_total} Total
-                      </Text>
-                    </View>
-                    <View style={styles.iconFord}>
-                      <AntDesign name="right" size={24} color="black" />
-                    </View>
+                ))}
+              </ScrollView>
+            </>
+          ) : (
+            ""
+          )}
+          {permission["MY-Dashboard"] ? (
+            <>
+              <View style={styles.row}>
+                <View style={styles.textContainerAll}>
+                  <Text style={styles.name}>My Project</Text>
+                  <Text style={styles.role}>
+                    {dashboardData.project.projects_total} Total
+                  </Text>
+                </View>
+                <View style={styles.iconFord}>
+                  <AntDesign name="right" size={24} color="black" />
+                </View>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.horizontalScroll}
+              >
+                {staticData.myProjects.map((item) => (
+                  <View key={item.id} style={styles.cardContainer}>
+                    <CustomCard
+                      cardContent={<Text>{item.content}</Text>}
+                      calendarText={`${
+                        dashboardData.project[item.projectKey] || 0
+                      }`}
+                    />
                   </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.horizontalScroll}
-                  >
-                    {staticData.myProjects.map((item) => (
-                      <View key={item.id} style={styles.cardContainer}>
-                        <CustomCard
-                          cardContent={<Text>{item.content}</Text>}
-                          calendarText={`${
-                            dashboardData.project[item.projectKey] || 0
-                          }`}
-                        />
-                      </View>
-                    ))}
-                  </ScrollView>
-                </>
-              ) : (
-                ""
-              )}
-            </ScrollView>
-          </View>
-          </ScrollView>
+                ))}
+              </ScrollView>
+            </>
+          ) : (
+            ""
+          )}
+        </ScrollView>
       )}
-        <Footer navigate={handleProfile} />
+      {isFooterVisible && <Footer navigate={handleProfile} />}
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",
