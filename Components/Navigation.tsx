@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../utils/store";
 import LeadInfoScreen from "./Screens/LeadInfoScreen";
 import CustomerFeedback from "./Screens/CustomerFeedback";
+import ErrorPage from "../Global/Components/ErrorPage";
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,8 @@ const Navigation: React.FC = () => {
             <Stack.Screen name="MyProfile" component={MyProfile} />
             <Stack.Screen name="LeadInfoScreen" component={LeadInfoScreen} />
             <Stack.Screen name="CustomerFeedback" component={CustomerFeedback} />
+            <Stack.Screen name="ErrorPage" component={ErrorPage} />
+
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen}   options={{ headerShown: false }}  />
