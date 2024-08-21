@@ -53,9 +53,8 @@ const LeadInfoScreen = () => {
   const [dropdownItems, setDropdownItems] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isMemberModalVisible, setMemberModalVisible] = useState(false);
-  const [isassineMemberModalVisible, setisassineMemberModalVisible] = useState(false);
-
- 
+  const [isassineMemberModalVisible, setisassineMemberModalVisible] =
+    useState(false);
 
   useEffect(() => {
     getLeadStage();
@@ -90,10 +89,9 @@ const LeadInfoScreen = () => {
     setMemberModalVisible(true);
   };
 
-  const onselectMember = () =>{
-    setisassineMemberModalVisible(true)
-
-  }
+  const onselectMember = () => {
+    setisassineMemberModalVisible(true);
+  };
 
   const handleCardPress = (id: number) => {
     setSelectedCards([id]);
@@ -111,8 +109,8 @@ const LeadInfoScreen = () => {
             <Text style={styles.label}>Lead ID</Text>
             <Text style={styles.value}>{leadData.uid}</Text>
 
-            <Text style={styles.label}>Campaign</Text>
-            <Text style={styles.value}>FB-ADS-947</Text>
+            {/* <Text style={styles.label}>Campaign</Text>
+            <Text style={styles.value}>FB-ADS-947</Text> */}
 
             <Text style={styles.label}>Project</Text>
             <Text style={styles.value}>{leadData.project_name}</Text>
@@ -140,7 +138,10 @@ const LeadInfoScreen = () => {
             </TouchableOpacity>
             <>
               <Text style={styles.label}>Assigned To Member</Text>
-              <TouchableOpacity style={styles.dropdown}  onPress={() => onselectMember()}>
+              <TouchableOpacity
+                style={styles.dropdown}
+                onPress={() => onselectMember()}
+              >
                 <Text style={styles.dropdownText}>
                   {selectedTeams ? selectedTeams : "Assigned To Member"}
                 </Text>
@@ -280,9 +281,11 @@ const LeadInfoScreen = () => {
           </View>
         )}
       </View>
-      <AssignedMemberPop  visible={isassineMemberModalVisible}
+      <AssignedMemberPop
+        visible={isassineMemberModalVisible}
         onClose={() => setisassineMemberModalVisible(false)}
-        onStatusSelect={onselectMember} />
+        onStatusSelect={onselectMember}
+      />
       <MemberPopOver
         visible={isMemberModalVisible}
         onClose={() => setMemberModalVisible(false)}

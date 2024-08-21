@@ -119,21 +119,19 @@ function Leads() {
     }
   };
 
-  const handleDialPress = () => {
-    const phoneNumber = '1234567890'; 
+  const handleDialPress = (phoneNumber) => {
+    // const phoneNumber = '1234567890';
     const url = `tel:${phoneNumber}`;
-
     Linking.canOpenURL(url)
       .then((supported) => {
         if (supported) {
           Linking.openURL(url);
         } else {
-          console.log('Phone dialer is not available');
+          console.log("Phone dialer is not available");
         }
       })
-      .catch((err) => console.error('Error opening dialer:', err));
+      .catch((err) => console.error("Error opening dialer:", err));
   };
-
 
   return (
     <>
@@ -173,7 +171,10 @@ function Leads() {
                     <Text style={styles.location}>{item.form_name}</Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.phoneIcon} onPress={handleDialPress}>
+                <TouchableOpacity
+                  style={styles.phoneIcon}
+                  onPress={() => handleDialPress(item.leadPhone)}
+                >
                   <MaterialCommunityIcons
                     name="phone-outline"
                     size={24}

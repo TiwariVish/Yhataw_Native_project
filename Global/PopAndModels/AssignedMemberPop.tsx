@@ -25,22 +25,13 @@ interface AssignedMemberPop {
   onStatusSelect: (status: string) => void;
 }
 
-interface DropdownItem {
-  id: string;
-  team_name: string;
-  checked: boolean;
-}
-
 const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
   visible,
   onClose,
   onStatusSelect,
 }) => {
-  const [memberdropdownItems, setMemberDropdownItems] = useState<
-    DropdownItem[]
-  >([]);
   const [isteamMembers, setIsteamMembers] = useState<any>([]);
-  const [isUserData,setIsUserData] = useState<any>([])
+  const [isUserData, setIsUserData] = useState<any>([]);
   const { leadData } = useSelector((state: RootState) => state.auth);
   const assignToIds = leadData.AssignTo.map((item) => item._id);
 
@@ -56,9 +47,7 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
       damping: 20,
       stiffness: 150,
     });
-    if (assignToIds.length > 0) {
-      getMemberLeadStage(assignToIds);
-    }
+    getMemberLeadStage(assignToIds);
   }, [visible]);
 
   const getMemberLeadStage = async (ids: any) => {
@@ -68,12 +57,12 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
       };
       const res = await getAllTeamMembersData(payload);
       setIsteamMembers(res.data);
-      const userData = res.data.team_members?.flatMap((member: any) => member.users);
-      console.log(userData,'userData');
-      
+      const userData = res.data.flatMap((team) =>
+        team.team_members.flatMap((member) => member.users)
+      );
       setIsUserData(userData);
     } catch (error) {
-      console.error('API Error:', error); 
+      console.error("API Error:", error);
     }
   };
   const animatedStyle = useAnimatedStyle(() => {
@@ -83,11 +72,12 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
     };
   });
 
-  const handleCheckboxChange = (id: string) => {
-    const updatedItems = memberdropdownItems.map((item) =>
-      item.id === id ? { ...item, checked: !item.checked } : item
+  const handleCheckboxChange = (name) => {
+    console.log(name);
+    const updatedItems = isUserData.map((item) =>
+      item.name === name ? { ...item, checked: !item.checked } : item
     );
-    setMemberDropdownItems(updatedItems);
+    setIsUserData(updatedItems);
   };
 
   return (
@@ -101,15 +91,15 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
           <BlurView style={styles.blurView} intensity={200}>
             <Animated.View style={[styles.modal, animatedStyle]}>
               <ScrollView contentContainerStyle={styles.dropdownMenu}>
-                {isUserData?.map((name, index) => (
+                {isUserData?.map((i) => (
                   <TouchableOpacity
-                    key={index}
+                    key={i.id}
                     style={styles.checkboxItem}
-                    onPress={() => handleCheckboxChange(name)}
+                    onPress={() => handleCheckboxChange(i.name)}
                   >
                     <View style={styles.checkboxContainer}>
                       <View style={styles.checkbox} />
-                      <Text style={styles.checkboxText}>{name}</Text>
+                      <Text style={styles.checkboxText}>{i.name}</Text>
                     </View>
                   </TouchableOpacity>
                 ))}

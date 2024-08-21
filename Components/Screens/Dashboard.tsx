@@ -261,8 +261,6 @@ const Dashboard: React.FC<CustomProps> = () => {
       console.error("Error fetching user details:", error);
     }
   };
-  console.log(isBanner, "isBannerisBannerisBanner");
-
   const navigateToSection = (id: number) => {
     dispatch(setLeadId(id));
     navigation.navigate("Leads");
@@ -615,14 +613,14 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   card: {
-    backgroundColor: "gray",
-    borderColor: "gray",
-    borderWidth: 1,
-    padding: 16,
-    margin: 15,
+    // backgroundColor: "gray",
+    // borderColor: "gray",
+    // borderWidth: 0,
+    padding: 10,
+    margin: 10,
     borderRadius: 8,
-    height: 135,
-    width: 350,
+    height: 150,
+    width: 390,
   },
   cardContainer: {
     margin: 10,
