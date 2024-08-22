@@ -24,7 +24,7 @@ const CustomCard: React.FC<CustomProps> = ({
             { backgroundColor: calendarBackgroundColor },
           ]}
         >
-          <AntDesign name="calendar" size={24} color="white" />
+          <AntDesign name="calendar" size={15} color="white" />
         </View>
         <Text style={styles.calendarText}>{calendarText}</Text>
       </View>
@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
   },
   calendarIcon: {
     borderRadius: 50,
-    height: 55,
-    width: 55,
+    height: 45,
+    width: 45,
     justifyContent: "center", // Center content vertically
     alignItems: "center",
   },

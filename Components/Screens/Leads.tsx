@@ -11,7 +11,7 @@ import {
 import LeadStatus from "./LeadStatus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
-import { selectCurrLead, setLeadDatad } from "../../Redux/authSlice";
+import { selectCurrLead, setLeadDatad, setMyLeadData } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
 import { getAllUsers, getAllUsersMyLead } from "./LeadsService";
 import { useNavigation } from "@react-navigation/native";
@@ -97,8 +97,19 @@ function Leads() {
   };
 
   const handleCardDataLeads = (item: any) => {
-    dispatch(setLeadDatad(item));
-    navigation.navigate("LeadInfoScreen");
+    switch (selectedCard) {
+      case 1 : dispatch(setLeadDatad(item));
+      navigation.navigate("LeadInfoScreen");
+      break;
+      case 2 : ''
+      break;
+      case 3 :  dispatch(setMyLeadData(item))
+      navigation.navigate("LeadInfoScreen");
+      break;
+    }
+    // dispatch(setLeadDatad(item));
+    // dispatch(setMyLeadData(item))
+    // navigation.navigate("LeadInfoScreen");
   };
 
   const filteredLeads = getFilteredLeads();
@@ -135,6 +146,7 @@ function Leads() {
 
   return (
     <>
+    <View  style= {styles.mainCont}>
       <ScrollView
         contentContainerStyle={styles.scrollViewContainer}
         onScroll={({ nativeEvent }) => {
@@ -191,11 +203,17 @@ function Leads() {
           )}
         </View>
       </ScrollView>
+      </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  mainCont:{
+    backgroundColor:"white",
+    height:'100%'
+
+  },
   scrollViewContainer: {
     backgroundColor: "white",
     flexGrow: 1,

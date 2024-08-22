@@ -11,7 +11,8 @@ export interface AuthState {
   userId: string;
   privileges: any,
   currLead:any,
-  leadData:any
+  leadData:any,
+  myLeadData:any
 }
 
 const initialState: AuthState = {
@@ -24,7 +25,8 @@ const initialState: AuthState = {
   userId: "",
   privileges: {},
   currLead:1,
-  leadData:1
+  leadData:1,
+  myLeadData:1
 };
 
 export const authSlice = createSlice({
@@ -70,10 +72,13 @@ export const authSlice = createSlice({
     setLeadDatad: (state, action: PayloadAction<any>) => {
       state.leadData = action.payload;
     },
+    setMyLeadData:(state, action: PayloadAction<any>) =>{
+      state.myLeadData = action.payload;
+    }
   },
 });
 
-export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad } = authSlice.actions;
+export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad, setMyLeadData } = authSlice.actions;
 
 export const selectAuthenticated = (state: RootState) =>state.auth.authenticated;
 export const selectAccessToken = (state: RootState) => state.auth.accessToken;

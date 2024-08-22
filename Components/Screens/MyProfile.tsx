@@ -1,36 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
-import CustomButton from '../../Global/Components/CustomButton';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Modal,
+  TouchableWithoutFeedback,
+} from "react-native";
+import CustomButton from "../../Global/Components/CustomButton";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
-import { logOutAction } from '../../Redux/authSlice';
-import { useDispatch } from 'react-redux';
-import { getPerosnalDetails } from './MyProfileService';
-import store from '../../utils/store';
-import { MyProfileSkeleton } from '../../Global/Components/SkeletonStructures';
+import { logOutAction } from "../../Redux/authSlice";
+import { useDispatch } from "react-redux";
+import { getPerosnalDetails } from "./MyProfileService";
+import store from "../../utils/store";
+import { MyProfileSkeleton } from "../../Global/Components/SkeletonStructures";
 
 const Profile = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await getPerosnalDetails(store.getState().auth?.userId);
       setUserData(response.data);
     } catch (error: any) {
       console.error("Error fetching user details:", error);
-      setLoading(false)
+      setLoading(false);
+    } finally {
+      setLoading(false);
     }
-    finally{
-      setLoading(false)
-    }
-    
   };
 
   const handleLogout = () => {
@@ -48,50 +53,63 @@ const Profile = ({ navigation }) => {
 
   return (
     <>
-    {loading ? (<MyProfileSkeleton />) : (<View style={styles.wrapper}>
-        <View style={styles.container}>
-          <View style={styles.profileContainer}>
-            <Image
-              source={userData?.profile_image ? { uri: userData.profile_image } : require("../../assets/user_icon.png")}
-              style={styles.profileImage}
-            />
+      {loading ? (
+        <MyProfileSkeleton />
+      ) : (
+        <View style={styles.wrapper}>
+          <View style={styles.container}>
+            <View style={styles.profileContainer}>
+              <Image
+                source={
+                  userData?.profile_image
+                    ? { uri: userData.profile_image }
+                    : require("../../assets/user_icon.png")
+                }
+                style={styles.profileImage}
+              />
+              {userData && (
+                <>
+                  <Text style={styles.name}>{userData.name}</Text>
+                  <Text style={styles.position}>
+                    {userData.position || "Team Leader"}
+                  </Text>
+                </>
+              )}
+            </View>
             {userData && (
               <>
-                <Text style={styles.name}>{userData.name}</Text>
-                <Text style={styles.position}>{userData.position || "Team Leader"}</Text>
+                {[
+                  {
+                    label: "Employee ID",
+                    value: userData.employee_id || "N/A",
+                  },
+                  { label: "Email", value: userData.email },
+                  { label: "Date of Birth", value: userData.dob },
+                  { label: "City", value: userData.city },
+                  { label: "State", value: userData.state_name },
+                  { label: "Country", value: userData.country_name },
+                ].map((item, index) => (
+                  <View key={index} style={styles.infoContainer}>
+                    <Text style={styles.label}>{item.label}</Text>
+                    <Text style={styles.value}>{item.value}</Text>
+                    <View style={styles.border}></View>
+                  </View>
+                ))}
               </>
             )}
           </View>
-          {userData && (
-            <>
-              {[
-                { label: "Employee ID", value: userData.employee_id || "N/A" },
-                { label: "Email", value: userData.email },
-                { label: "Date of Birth", value: userData.dob },
-                { label: "City", value: userData.city },
-                { label: "State", value: userData.state_name },
-                { label: "Country", value: userData.country_name },
-              ].map((item, index) => (
-                <View key={index} style={styles.infoContainer}>
-                  <Text style={styles.label}>{item.label}</Text>
-                  <Text style={styles.value}>{item.value}</Text>
-                  <View style={styles.border}></View>
-                </View>
-              ))}
-            </>
-          )}
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              label="Logout"
+              buttonType="iconBtn"
+              labelStyle={styles.logoutButtonText}
+              onClick={handleLogout}
+              customStyles={styles.logoutButton}
+            />
+          </View>
         </View>
-        <View style={styles.buttonContainer}>
-          <CustomButton
-            label="Logout"
-            buttonType="iconBtn"
-            labelStyle={styles.logoutButtonText}
-            onClick={handleLogout}
-            customStyles={styles.logoutButton}
-          />
-        </View>
-      </View>)}
-      
+      )}
+
       {/* Modal section */}
       <Modal
         animationType="slide"
@@ -106,7 +124,13 @@ const Profile = ({ navigation }) => {
                 <Image source={require("../../assets/quesMark_icon.png")} />
               </View>
               <View style={styles.textContainer}>
-                <Text style={[globalStyles.h6, globalStyles.fs1, globalStyles.fontfm]}>
+                <Text
+                  style={[
+                    globalStyles.h6,
+                    globalStyles.fs1,
+                    globalStyles.fontfm,
+                  ]}
+                >
                   Are You Sure you want to logout?
                 </Text>
               </View>
@@ -136,25 +160,25 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    justifyContent: "space-between",
+    backgroundColor: "white",
   },
   container: {
     padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   profileContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   border: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -9,
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
   },
   profileImage: {
     width: 100,
@@ -164,27 +188,27 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   position: {
     fontSize: 16,
-    color: 'gray',
+    color: "gray",
   },
   infoContainer: {
-    flexDirection: 'row',
-    width: '100%',
+    flexDirection: "row",
+    width: "100%",
     marginVertical: 10,
   },
   label: {
     fontSize: 16,
-    color: 'gray',
-    width: '50%',
+    color: "gray",
+    width: "50%",
   },
   value: {
     fontSize: 16,
-    color: 'blue',
-    width: '50%',
+    color: "blue",
+    width: "50%",
   },
   buttonContainer: {
     paddingHorizontal: 20,
@@ -192,26 +216,26 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     borderWidth: 2,
-    borderColor: 'red',
+    borderColor: "red",
     borderRadius: 5,
     padding: 10,
   },
   logoutButtonText: {
-    color: 'red',
+    color: "red",
     fontSize: 16,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
     width: 300,
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   imageContainer: {
     marginBottom: 20,
@@ -220,14 +244,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttonContainerModal: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '90%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "90%",
     marginTop: 10,
   },
   buttonAdj: {
     borderWidth: 2,
-    borderColor: 'red',
+    borderColor: "red",
     borderRadius: 5,
     padding: 10,
     height: 45,

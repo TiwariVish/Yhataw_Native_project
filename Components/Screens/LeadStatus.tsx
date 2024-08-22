@@ -14,7 +14,7 @@ import { RootState } from "../../utils/store";
 interface LeadStatusProps {
   selectedCard: number;
   setSelectedCard: (id: number) => void;
-  onSearchChange: (query: string) => void; 
+  onSearchChange: (query: string) => void;
 }
 
 const leadStatus = [
@@ -26,28 +26,51 @@ const leadStatus = [
   { id: 6, content: "Reminders" },
 ];
 
-function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatusProps) {
+function LeadStatus({
+  selectedCard,
+  setSelectedCard,
+  onSearchChange,
+}: LeadStatusProps) {
   const scrollViewRef = useRef<ScrollView>(null);
-  const { leadData } = useSelector((state: RootState) => state.auth);
+  const { privileges } = useSelector((state: RootState) => state.auth);
+  const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
   const handleCardPress = (id: number) => {
     setSelectedCard(id);
   };
 
+  const getPermissionForView = () => {
+    const permissionObj: Record<string, boolean> = {};
+    dashboardView.forEach((view: string) => {
+      const currVal = privileges[view];
+      permissionObj[view] = currVal?.length ? true : false;
+    });
+    return permissionObj;
+  };
+
+  const permission = getPermissionForView();
+
+  const filteredLeadStatus = permission["MY-Dashboard"]
+    ? leadStatus
+    : leadStatus
+        .filter((item) => item.id !== 1)
+        .concat({ id: 3, content: "My Leads" });
   useEffect(() => {
-    const index = leadStatus.findIndex(item => item.id === selectedCard);
+    const index = filteredLeadStatus.findIndex(
+      (item) => item.id === selectedCard
+    );
     if (index === -1) {
       return;
     }
-    const cardWidth = 125; 
-    const margin = 10; 
+    const cardWidth = 125;
+    const margin = 10;
     const offset = (cardWidth + margin) * index;
-    console.log('Scrolling to offset::::::::', offset);
+    console.log("Scrolling to offset::::::::", offset);
     if (scrollViewRef.current) {
       setTimeout(() => {
         scrollViewRef.current?.scrollTo({ x: offset, animated: true });
       }, 100);
     }
-  }, [selectedCard]);
+  }, [selectedCard, filteredLeadStatus]);
 
   return (
     <View style={styles.container}>
@@ -58,7 +81,9 @@ function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatu
         style={styles.horizontalScroll}
         onContentSizeChange={() => {
           if (scrollViewRef.current) {
-            const index = leadStatus.findIndex(item => item.id === selectedCard);
+            const index = filteredLeadStatus.findIndex(
+              (item) => item.id === selectedCard
+            );
             if (index !== -1) {
               const cardWidth = 125;
               const margin = 10;
@@ -68,7 +93,7 @@ function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatu
           }
         }}
       >
-        {leadStatus.map((item) => (
+        {filteredLeadStatus.map((item) => (
           <TouchableOpacity
             key={item.id}
             onPress={() => handleCardPress(item.id)}
@@ -95,7 +120,7 @@ function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatu
         <TextInput
           placeholder="Search..."
           style={styles.textInput}
-          onChangeText={(text) => onSearchChange(text)} 
+          onChangeText={(text) => onSearchChange(text)}
         />
         <Image
           source={require("../../assets/filter_icon.png")}

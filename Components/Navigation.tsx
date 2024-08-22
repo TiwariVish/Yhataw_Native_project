@@ -24,7 +24,7 @@ const Navigation: React.FC = () => {
         {authenticated ? (
           <>
             <Stack.Screen name="Dashboard" component={Dashboard}   options={{ headerShown: false }} />
-            <Stack.Screen name="Leads" component={Leads} />
+            <Stack.Screen name="Leads" component={Leads}/>
             <Stack.Screen name="MyProfile" component={MyProfile} />
             <Stack.Screen name="LeadInfoScreen" component={LeadInfoScreen} />
             <Stack.Screen name="CustomerFeedback" component={CustomerFeedback} />

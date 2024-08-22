@@ -69,16 +69,6 @@ const LeadInfoScreen = () => {
       setDropdownItems(res2.data);
     } catch {}
   };
-  // const getAssineToMember = async (ids: any) => {
-  //   try {
-  //     const payload = {
-  //       team_id: ids,
-  //       lead_id: dynamicGridValue?.id,
-  //     };
-  //     const response1 = await getAllTeamMembersData(payload);
-  //     setLeadOptionMembersas(response1.data);
-  //   } catch {}
-  // };
 
   const handleStatusSelect = (status: string) => {
     setSelectedStatus(status);
@@ -106,19 +96,20 @@ const LeadInfoScreen = () => {
       <>
         {selectedCards.includes(1) && (
           <View style={styles.infoContainer}>
-            <Text style={styles.label}>Lead ID</Text>
-            <Text style={styles.value}>{leadData.uid}</Text>
-
-            {/* <Text style={styles.label}>Campaign</Text>
-            <Text style={styles.value}>FB-ADS-947</Text> */}
-
-            <Text style={styles.label}>Project</Text>
-            <Text style={styles.value}>{leadData.project_name}</Text>
-
-            <Text style={styles.label}>Source</Text>
-            <Text style={styles.value}>{leadData.source}</Text>
-
-            <Text style={styles.label}>Action</Text>
+            <View style={styles.row}>
+              <View style={styles.column}>
+                <Text style={styles.label}>Lead ID</Text>
+                <Text style={styles.value}>{leadData.uid}</Text>
+              </View>
+              <View style={styles.column}>
+                <Text style={styles.label}>Project</Text>
+                <Text style={styles.value}>{leadData.project_name}</Text>
+              </View>
+              <View style={styles.column}>
+                <Text style={[styles.label,styles.leftpush]}>Source</Text>
+                <Text style={[styles.value,,styles.leftpush]}>{leadData.source}</Text>
+              </View>
+            </View>
             <Text style={styles.label}>Assigned To</Text>
             <TouchableOpacity
               style={styles.dropdown}
@@ -218,7 +209,6 @@ const LeadInfoScreen = () => {
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <Text style={styles.name}>{leadData.leadName}</Text>
-              <Text style={styles.date}>19 Mar, 2024</Text>
               <View style={styles.statusBadge}>
                 <Text style={styles.statusText}>{leadData.stage}</Text>
               </View>
@@ -228,10 +218,10 @@ const LeadInfoScreen = () => {
                 source={require("../../assets/blue_call_icon.png")}
                 style={styles.icon}
               />
-              <Image
+              {/* <Image
                 source={require("../../assets/whatsapp_icon.png")}
                 style={styles.icon}
-              />
+              /> */}
             </View>
           </View>
 
@@ -344,7 +334,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: 120,
+    // width: 120,
   },
   icon: {
     marginHorizontal: 10,
@@ -511,6 +501,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "black",
   },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  column: {
+    flex: 1,
+  },
+  leftpush:{
+    marginLeft:55
+  }
 });
 
 export default LeadInfoScreen;
