@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Linking,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
@@ -55,10 +56,23 @@ const LeadInfoScreen = () => {
   const [isMemberModalVisible, setMemberModalVisible] = useState(false);
   const [isassineMemberModalVisible, setisassineMemberModalVisible] =
     useState(false);
+  // const { privileges } = useSelector((state: RootState) => state.auth);
+  // const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
 
   useEffect(() => {
     getLeadStage();
   }, []);
+
+  // const getPermissionForView = () => {
+  //   const permissionObj: Record<string, boolean> = {};
+  //   dashboardView.forEach((view: string) => {
+  //     const currVal = privileges[view];
+  //     permissionObj[view] = currVal?.length ? true : false;
+  //   });
+  //   return permissionObj;
+  // };
+
+  // const permission = getPermissionForView();
 
   const getLeadStage = async () => {
     try {
@@ -91,6 +105,20 @@ const LeadInfoScreen = () => {
     setIsVisible(true);
   };
 
+  const handleDialPress = (phoneNumber) => {
+    // const phoneNumber = '1234567890';
+    const url = `tel:${phoneNumber}`;
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          console.log("Phone dialer is not available");
+        }
+      })
+      .catch((err) => console.error("Error opening dialer:", err));
+  };
+
   const renderContent = () => {
     return (
       <>
@@ -106,65 +134,75 @@ const LeadInfoScreen = () => {
                 <Text style={styles.value}>{leadData.project_name}</Text>
               </View>
               <View style={styles.column}>
-                <Text style={[styles.label,styles.leftpush]}>Source</Text>
-                <Text style={[styles.value,,styles.leftpush]}>{leadData.source}</Text>
+                <Text style={[styles.label, styles.leftpush]}>Source</Text>
+                <Text style={[styles.value, , styles.leftpush]}>
+                  {leadData.source}
+                </Text>
               </View>
             </View>
-            <Text style={styles.label}>Assigned To</Text>
-            <TouchableOpacity
-              style={styles.dropdown}
-              onPress={() => handleMemberStatusSelect()}
-            >
-              <Text style={styles.dropdownText}>
-                {selectedTeams ? selectedTeams : "Select Team"}
-              </Text>
-              <Icon
-                name="chevron-down-outline"
-                size={20}
-                style={[
-                  styles.dropdownIcon,
-                  openDropdown === 1 && styles.dropdownIconOpen,
-                ]}
-              />
-            </TouchableOpacity>
-            <>
-              <Text style={styles.label}>Assigned To Member</Text>
-              <TouchableOpacity
-                style={styles.dropdown}
-                onPress={() => onselectMember()}
-              >
-                <Text style={styles.dropdownText}>
-                  {selectedTeams ? selectedTeams : "Assigned To Member"}
-                </Text>
-                <Icon
-                  name="chevron-down-outline"
-                  size={20}
-                  style={[
-                    styles.dropdownIcon,
-                    openDropdown === 2 && styles.dropdownIconOpen,
-                  ]}
-                />
-              </TouchableOpacity>
-            </>
+           
+              <>
+                <Text style={styles.label}>Assigned To</Text>
+                <TouchableOpacity
+                  style={styles.dropdown}
+                  onPress={() => handleMemberStatusSelect()}
+                >
+                  <Text style={styles.dropdownText}>
+                    {selectedTeams ? selectedTeams : "Select Team"}
+                  </Text>
+                  <Icon
+                    name="chevron-down-outline"
+                    size={20}
+                    style={[
+                      styles.dropdownIcon,
+                      openDropdown === 1 && styles.dropdownIconOpen,
+                    ]}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.label}>Assigned To Member</Text>
+                <TouchableOpacity
+                  style={styles.dropdown}
+                  onPress={() => onselectMember()}
+                >
+                  <Text style={styles.dropdownText}>
+                    {selectedTeams ? selectedTeams : "Assigned To Member"}
+                  </Text>
+                  <Icon
+                    name="chevron-down-outline"
+                    size={20}
+                    style={[
+                      styles.dropdownIcon,
+                      openDropdown === 2 && styles.dropdownIconOpen,
+                    ]}
+                  />
+                </TouchableOpacity>
+              </>
+             
+            
+            
 
-            <Text style={styles.label}>Status</Text>
-            <TouchableOpacity
-              style={styles.dropdown}
-              onPress={() => handleStatusSelect("")}
-            >
-              <Text style={styles.dropdownText}>
-                {" "}
-                {selectedStatus ? selectedStatus : "Select Status"}
-              </Text>
-              <Icon
-                name="chevron-down-outline"
-                size={20}
-                style={[
-                  styles.dropdownIcon,
-                  openDropdown === 3 && styles.dropdownIconOpen,
-                ]}
-              />
-            </TouchableOpacity>
+          
+              <>
+                <Text style={styles.label}>Status</Text>
+                <TouchableOpacity
+                  style={styles.dropdown}
+                  onPress={() => handleStatusSelect("")}
+                >
+                  <Text style={styles.dropdownText}>
+                    {" "}
+                    {selectedStatus ? selectedStatus : "Select Status"}
+                  </Text>
+                  <Icon
+                    name="chevron-down-outline"
+                    size={20}
+                    style={[
+                      styles.dropdownIcon,
+                      openDropdown === 3 && styles.dropdownIconOpen,
+                    ]}
+                  />
+                </TouchableOpacity>
+              </>
+            
           </View>
         )}
 
@@ -213,6 +251,7 @@ const LeadInfoScreen = () => {
                 <Text style={styles.statusText}>{leadData.stage}</Text>
               </View>
             </View>
+            <TouchableOpacity      onPress={() => handleDialPress(leadData.leadPhone)}>
             <View style={styles.iconContainer}>
               <Image
                 source={require("../../assets/blue_call_icon.png")}
@@ -223,6 +262,7 @@ const LeadInfoScreen = () => {
                 style={styles.icon}
               /> */}
             </View>
+            </TouchableOpacity>
           </View>
 
           <ScrollView
@@ -264,6 +304,7 @@ const LeadInfoScreen = () => {
               style={[
                 styles.submitButton,
                 selectedCards.length > 1 && styles.activeSubmitButton,
+                selectedStatus && styles.activeSubmitButton, 
               ]}
             >
               <Text style={styles.submitButtonText}>Submit</Text>
@@ -389,7 +430,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   label: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: "black",
     marginTop: 5,
@@ -397,6 +438,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     color: "black",
+    marginTop:10
   },
   dropdown: {
     flexDirection: "row",
@@ -509,9 +551,9 @@ const styles = StyleSheet.create({
   column: {
     flex: 1,
   },
-  leftpush:{
-    marginLeft:55
-  }
+  leftpush: {
+    marginLeft: 55,
+  },
 });
 
 export default LeadInfoScreen;

@@ -200,11 +200,11 @@ const Dashboard: React.FC<CustomProps> = () => {
     });
     return permissionObj;
   };
-  console.log(
-    getPermissionForView(),
-    "log for privalages in the dashboard :::::",
-    privileges
-  );
+  // console.log(
+  //   getPermissionForView(),
+  //   "log for privalages in the dashboard :::::",
+  //   privileges
+  // );
   const permission = getPermissionForView();
 
   const getValuepermission = async () => {
