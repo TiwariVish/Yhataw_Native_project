@@ -14,6 +14,8 @@ import { RootState } from "../../utils/store";
 import BottomSheetModal from "../../Global/PopAndModels/BottomSheetModal";
 import ReminderBottomSheetModal from "../../Global/PopAndModels/ReminderBottomSheetModal";
 import {
+  changeAt,
+  changeStage,
   getAllStage,
   getAllTeamMembersData,
   getTeamList,
@@ -56,23 +58,23 @@ const LeadInfoScreen = () => {
   const [isMemberModalVisible, setMemberModalVisible] = useState(false);
   const [isassineMemberModalVisible, setisassineMemberModalVisible] =
     useState(false);
-  // const { privileges } = useSelector((state: RootState) => state.auth);
-  // const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
+  const { privileges } = useSelector((state: RootState) => state.auth);
+  const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
 
   useEffect(() => {
     getLeadStage();
   }, []);
 
-  // const getPermissionForView = () => {
-  //   const permissionObj: Record<string, boolean> = {};
-  //   dashboardView.forEach((view: string) => {
-  //     const currVal = privileges[view];
-  //     permissionObj[view] = currVal?.length ? true : false;
-  //   });
-  //   return permissionObj;
-  // };
+  const getPermissionForView = () => {
+    const permissionObj: Record<string, boolean> = {};
+    dashboardView.forEach((view: string) => {
+      const currVal = privileges[view];
+      permissionObj[view] = currVal?.length ? true : false;
+    });
+    return permissionObj;
+  };
 
-  // const permission = getPermissionForView();
+  const permission = getPermissionForView();
 
   const getLeadStage = async () => {
     try {
@@ -104,6 +106,32 @@ const LeadInfoScreen = () => {
   const handleCare_Reminder = () => {
     setIsVisible(true);
   };
+console.log(leadData,'====================================');
+
+  const handleChangeStage = async() =>{
+    try{
+      const body = {
+        ["id"]: leadData?._id,
+        ["stage"]: leadData.stage,
+      };
+      const response = await changeStage(body);
+    //   const body2 = {
+    //     ["id"]: leadData?._id,
+    //     ["AssignTo"]: leadData?.id,
+    //   };
+    //  const  response2 = await changeAt(body2);
+    //  console.log(response2,'====================================');
+  
+
+    }
+
+    catch{
+
+    }
+    
+
+   
+  }
 
   const handleDialPress = (phoneNumber) => {
     // const phoneNumber = '1234567890';
@@ -140,8 +168,7 @@ const LeadInfoScreen = () => {
                 </Text>
               </View>
             </View>
-           
-              <>
+            {permission?.ADMIN || permission.CRM ? (<>
                 <Text style={styles.label}>Assigned To</Text>
                 <TouchableOpacity
                   style={styles.dropdown}
@@ -176,12 +203,7 @@ const LeadInfoScreen = () => {
                     ]}
                   />
                 </TouchableOpacity>
-              </>
-             
-            
-            
-
-          
+              </>):("")}
               <>
                 <Text style={styles.label}>Status</Text>
                 <TouchableOpacity
@@ -306,6 +328,8 @@ const LeadInfoScreen = () => {
                 selectedCards.length > 1 && styles.activeSubmitButton,
                 selectedStatus && styles.activeSubmitButton, 
               ]}
+
+              onPress={()=>handleChangeStage()}
             >
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>

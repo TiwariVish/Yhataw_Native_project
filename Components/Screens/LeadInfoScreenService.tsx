@@ -32,3 +32,23 @@ export async function getAllStage() {
       throw error;
     }
   }
+
+  export async function changeStage(body: any) {
+    try {
+      const callParams = await getCallParams("PUT", body);
+      const response = await makeCall(urls.UPDATESTAGE, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  export async function changeAt(body: any) {
+    try {
+      const callParams = await getCallParams("PUT", body);
+      const response = await makeCall(urls.UPDATEAI, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

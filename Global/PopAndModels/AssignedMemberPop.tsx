@@ -93,7 +93,7 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
               <ScrollView contentContainerStyle={styles.dropdownMenu}>
                 {isUserData?.map((i) => (
                   <TouchableOpacity
-                    key={i.id}
+                     key={i._id || i.id}
                     style={styles.checkboxItem}
                     onPress={() => handleCheckboxChange(i.name)}
                   >
