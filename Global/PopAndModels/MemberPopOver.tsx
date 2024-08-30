@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
-import { getAllStage, getTeamList } from '../../Components/Screens/LeadInfoScreenService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../utils/store';
+import { getTeamList } from '../../Components/Screens/DashboardService';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -19,8 +21,8 @@ interface DropdownItem {
 }
 
 const MemberPopOver: React.FC<MemberPopOverProps> = ({ visible, onClose, onStatusSelect }) => {
-  const [memberdropdownItems, setmMemberDropdownItems] = useState<DropdownItem[]>([]);
-
+  const [memberdropdownItems, setMemberDropdownItems] = useState<DropdownItem[]>([]);
+  const { leadData } = useSelector((state: RootState) => state.auth);
 
   const scale = useSharedValue(visible ? 1 : 0.8);
   const opacity = useSharedValue(visible ? 1 : 0);
@@ -34,18 +36,35 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({ visible, onClose, onStatu
       damping: 20,
       stiffness: 150,
     });
-    getMemberLeadStage()
+    if (visible) {
+      getMemberLeadStage();
+    }
   }, [visible]);
-
 
   const getMemberLeadStage = async () => {
     try {
-      const res = await getTeamList();
-      setmMemberDropdownItems(res.data);
+      const res = await getTeamList(); 
+      setMemberDropdownItems(res.data);
+      handleCheckboxChange(res.data);
     } catch (error) {
       console.error(error);
     }
-};
+  };
+
+  const handleCheckboxChange = (items: DropdownItem[]) => {
+    const updatedItems = items.map(item => {
+      const isChecked = leadData.AssignTo.some(assignItem => assignItem.team_name === item.team_name);
+      return { ...item, checked: isChecked };
+    });
+    setMemberDropdownItems(updatedItems);
+  };
+
+  // const toggleCheckbox = (id: string) => {
+  //   const updatedItems = memberdropdownItems.map(item => 
+  //     item.id === id ? { ...item, checked: !item.checked } : item
+  //   );
+  //   setMemberDropdownItems(updatedItems);
+  // };
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -53,13 +72,6 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({ visible, onClose, onStatu
       opacity: opacity.value,
     };
   });
-
-  const handleCheckboxChange = (id: string) => {
-    const updatedItems = memberdropdownItems.map(item =>
-      item.id === id ? { ...item, checked: !item.checked } : item
-    );
-    setmMemberDropdownItems(updatedItems);
-  };
 
   return (
     <>
@@ -72,7 +84,7 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({ visible, onClose, onStatu
                   <TouchableOpacity
                     key={item.id}
                     style={styles.checkboxItem}
-                    onPress={() => handleCheckboxChange(item.id)}
+                    // onPress={() => toggleCheckbox(item.id)}
                   >
                     <View style={styles.checkboxContainer}>
                       <View
