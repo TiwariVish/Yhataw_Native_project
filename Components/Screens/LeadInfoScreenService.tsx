@@ -52,3 +52,13 @@ export async function getAllStage() {
       throw error;
     }
   }
+
+  export async function assignToMembers(body: any) {
+    try {
+      const callParams = await getCallParams("PUT", body);
+      const response = await makeCall(urls.ASSIGNTOMEMBERS, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

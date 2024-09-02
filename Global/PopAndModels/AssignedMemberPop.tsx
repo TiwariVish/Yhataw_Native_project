@@ -13,7 +13,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
-import { getAllTeamMembersData } from "../../Components/Screens/LeadInfoScreenService";
+import { assignToMembers, getAllTeamMembersData } from "../../Components/Screens/LeadInfoScreenService";
 import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 
@@ -70,15 +70,33 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
     }
   };
 
-  const toggleCheckbox = (id: string) => {
-    console.log(id,'====================================');
+  const toggleCheckbox = async (id: string) => {
+    console.log(id, '====================================');
     const updatedItems = isUserData.map((item) =>
       item._id === id ? { ...item, checked: !item.checked } : item
     );
     setIsUserData(updatedItems);
+    const isChecked = updatedItems.find(item => item._id === id)?.checked;
+  
+    // try {
+    //   const body = {
+    //     ["id"]: id,
+    //     ["leadData_id"] :leadData._id
+  
+    //   };
+    //   const res = await assignToMembers(body); 
+    //   console.log(res, '=====::::::::::::::::============');
+    // } catch (error) {
+    //   console.error("Failed to assign member:", error);
+    //   const resetItems = updatedItems.map((item) =>
+    //     item._id === id ? { ...item, checked: !isChecked } : item
+    //   );
+    //   setIsUserData(resetItems);
+    // }
     const selectedItems = updatedItems.filter((item) => item.checked);
     onStatusSelect(selectedItems);
   };
+  
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
