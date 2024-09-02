@@ -30,7 +30,6 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
   onClose,
   onStatusSelect,
 }) => {
-  const [isteamMembers, setIsteamMembers] = useState<any>([]);
   const [isUserData, setIsUserData] = useState<any>([]);
   const { leadData } = useSelector((state: RootState) => state.auth);
   const assignToIds = leadData.AssignTo.map((item) => item._id);
@@ -47,7 +46,9 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
       damping: 20,
       stiffness: 150,
     });
-    getMemberLeadStage(assignToIds);
+    if (visible) {
+      getMemberLeadStage(assignToIds);
+    }
   }, [visible]);
 
   const getMemberLeadStage = async (ids: any) => {
@@ -56,29 +57,35 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
         team_id: ids,
       };
       const res = await getAllTeamMembersData(payload);
-      setIsteamMembers(res.data);
       const userData = res.data.flatMap((team) =>
         team.team_members.flatMap((member) => member.users)
       );
-      setIsUserData(userData);
+      const updatedItems = userData.map((item) => ({
+        ...item,
+        checked: false,
+      }));
+      setIsUserData(updatedItems);
     } catch (error) {
       console.error("API Error:", error);
     }
   };
+
+  const toggleCheckbox = (id: string) => {
+    console.log(id,'====================================');
+    const updatedItems = isUserData.map((item) =>
+      item._id === id ? { ...item, checked: !item.checked } : item
+    );
+    setIsUserData(updatedItems);
+    const selectedItems = updatedItems.filter((item) => item.checked);
+    onStatusSelect(selectedItems);
+  };
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
       opacity: opacity.value,
     };
   });
-
-  const handleCheckboxChange = (name) => {
-    console.log(name);
-    const updatedItems = isUserData.map((item) =>
-      item.name === name ? { ...item, checked: !item.checked } : item
-    );
-    setIsUserData(updatedItems);
-  };
 
   return (
     <>
@@ -93,12 +100,17 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
               <ScrollView contentContainerStyle={styles.dropdownMenu}>
                 {isUserData?.map((i) => (
                   <TouchableOpacity
-                     key={i._id || i.id}
+                    key={i._id || i.id}
                     style={styles.checkboxItem}
-                    onPress={() => handleCheckboxChange(i.name)}
+                    onPress={() => toggleCheckbox(i._id)}
                   >
                     <View style={styles.checkboxContainer}>
-                      <View style={styles.checkbox} />
+                      <View
+                        style={[
+                          styles.checkbox,
+                          i.checked && styles.checkboxChecked,
+                        ]}
+                      />
                       <Text style={styles.checkboxText}>{i.name}</Text>
                     </View>
                   </TouchableOpacity>
@@ -131,8 +143,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 10,
     padding: 16,
-    width: screenWidth * 0.8, // Adjust width as needed
-    maxHeight: screenHeight * 0.6, // Adjust height as needed
+    width: screenWidth * 0.8,
+    maxHeight: screenHeight * 0.6,
     elevation: 10,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
