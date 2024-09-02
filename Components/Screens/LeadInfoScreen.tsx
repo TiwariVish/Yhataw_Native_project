@@ -106,7 +106,7 @@ const LeadInfoScreen = () => {
   const handleCare_Reminder = () => {
     setIsVisible(true);
   };
-console.log(leadData,'====================================');
+
 
   const handleChangeStage = async() =>{
     try{
@@ -502,10 +502,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   submitButton: {
+    height:48,
     backgroundColor: "#C4C4C4",
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 8,
+    padding: 10,
     alignItems: "center",
+    justifyContent:"center"
   },
   activeSubmitButton: {
     backgroundColor: "blue",

@@ -148,11 +148,11 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#000',
+    borderColor: 'blue',
     marginRight: 10,
   },
   checkboxChecked: {
-    backgroundColor: '#000',
+    backgroundColor: 'blue',
   },
   checkboxText: {
     fontSize: 16,

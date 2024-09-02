@@ -160,8 +160,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     margin: 5,
     borderRadius: 5,
-    height: 50,
-    width: 125,
+    height: 38,
+    width: 100,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -170,13 +170,13 @@ const styles = StyleSheet.create({
   },
   cardText: {
     color: "black",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: 500,
   },
   selectedCardText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight:500,
   },
   searchContainer: {
     flexDirection: "row",
