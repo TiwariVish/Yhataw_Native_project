@@ -1,8 +1,7 @@
 {
   "cli": {
-    "version": ">= 10.1.0"
+    "version": ">= 11.0.3"
   },
-
   "build": {
     "preview": {
       "android": {
@@ -11,7 +10,7 @@
     },
     "preview2": {
       "android": {
-        "gradleCommand": ":app:assembleRelease"
+        "gradleCommand": ":app:assembleRelease --warning-mode all"
       }
     },
     "preview3": {
