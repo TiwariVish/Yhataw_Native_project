@@ -9,6 +9,7 @@ import {
   Animated,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
@@ -168,6 +169,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   ]);
 
   const [isBanner, setIsBanner] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const userId = store.getState().auth;
   const { authenticated, role, privileges } = useSelector(
     (state: RootState) => state.auth
@@ -293,13 +295,32 @@ const Dashboard: React.FC<CustomProps> = () => {
     navigation.navigate("ErrorPage");
   };
 
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      console.log();
+      
+      await getValuepermission();
+      await fetchMyDashboardData();
+      await fetchDashboardCRM();
+      await fetchUserData();
+    } catch (error) {
+      console.error("Error during refresh:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <>
       {loading ? (
         <DashboardSkeleton />
       ) : (
         <View style={styles.contmain}>
-          <ScrollView onScroll={handleScroll} scrollEventThrottle={16}>
+          <ScrollView onScroll={handleScroll} scrollEventThrottle={16}  refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
             {/* Header section */}
             <View style={styles.header}>
               <View style={styles.imageContainer}>
