@@ -24,3 +24,35 @@ export async function saveReminder(body: any) {
       throw error;
     }
   }
+
+  export async function getReminder(id: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(`${urls.GETREMINDER}${id}`, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  export async function saveRemark(body: any) {
+    try {
+      const callParams = await getCallParams("POST", body);
+      const response = await makeCall(urls.UPDATEREMARK, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  
+export async function getRemark(id: any) {
+  try {
+    const callParams = await getCallParams("GET");
+    const response = await makeCall(`${urls.GETREMARK}${id}`, callParams);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}

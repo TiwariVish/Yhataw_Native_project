@@ -181,6 +181,7 @@ function Leads() {
                   <View style={styles.textContainer}>
                     <Text style={styles.name}>{item.leadName}</Text>
                     <Text style={styles.location}>{item.form_name}</Text>
+                    <Text style={styles.location}>{item.projecttype_name}</Text>
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity

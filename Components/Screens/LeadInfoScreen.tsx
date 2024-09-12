@@ -23,35 +23,28 @@ import {
 import StatusPop from "../../Global/PopAndModels/StatusPop";
 import MemberPopOver from "../../Global/PopAndModels/MemberPopOver";
 import AssignedMemberPop from "../../Global/PopAndModels/AssignedMemberPop";
+import { getReminder } from "./DashboardService";
+import RemarkPop from "../../Global/PopAndModels/RemarkPop";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
   { id: 2, content: "Contact" },
   { id: 3, content: "Reminder" },
   { id: 4, content: "Site Visit" },
+  { id: 5, content: "Remark" },
 ];
 
-const reminders = [
-  {
-    date: "2024-03-14 12:42 PM",
-    title: "Call Back",
-    description:
-      "Customer asked to call back tomorrow. He is busy today. However, he said he is interested.",
-  },
-  {
-    date: "2024-03-14 12:42 PM",
-    title: "Make Call",
-    description: "Message",
-  },
-];
+
 
 const LeadInfoScreen = () => {
   const { leadData } = useSelector((state: RootState) => state.auth);
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
   const [isVisible, setIsVisible] = useState(false);
+  const [rminderisVisible, setRminderIsVisible] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [dropdownData, setDropdownData] = useState<any>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [assignedToMember, setAssignedToMember] = useState<string | null>(null);
   const [selectedTeams, setselectedTeams] = useState<string | null>(null);
   const [dropdownItems, setDropdownItems] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -60,6 +53,10 @@ const LeadInfoScreen = () => {
     useState(false);
   const { privileges } = useSelector((state: RootState) => state.auth);
   const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
+  const [allReminder, setAllRemider] = useState<any>([]);
+  const [newRemarks,setNewRemarks] = useState([])
+
+  const [reminderLeads, setRemiderLeads] = useState([]);
 
   useEffect(() => {
     getLeadStage();
@@ -83,10 +80,16 @@ const LeadInfoScreen = () => {
 
       const res2 = await getTeamList();
       setDropdownItems(res2.data);
+
+      const resp = await getReminder("");
+      setAllRemider(resp.data);
     } catch {}
   };
 
+
   const handleStatusSelect = (status: string) => {
+    console.log(status, "statusstatus");
+
     setSelectedStatus(status);
     setModalVisible(true);
   };
@@ -95,7 +98,7 @@ const LeadInfoScreen = () => {
     setMemberModalVisible(true);
   };
 
-  const onselectMember = () => {
+  const onselectMember = (status: string) => {
     setisassineMemberModalVisible(true);
   };
 
@@ -103,35 +106,20 @@ const LeadInfoScreen = () => {
     setSelectedCards([id]);
   };
 
-  const handleCare_Reminder = () => {
-    setIsVisible(true);
-  };
-
-
-  const handleChangeStage = async() =>{
-    try{
+  const handleCare_addRemark = async (newRemark: any) =>{
+    setNewRemarks((prevRemarks) => [...prevRemarks, newRemark]);
+    console.log("Remark Submitted: ", newRemark); 
+  }
+ 
+  const handleChangeStage = async () => {
+    try {
       const body = {
         ["id"]: leadData?._id,
         ["stage"]: leadData.stage,
       };
       const response = await changeStage(body);
-    //   const body2 = {
-    //     ["id"]: leadData?._id,
-    //     ["AssignTo"]: leadData?.id,
-    //   };
-    //  const  response2 = await changeAt(body2);
-    //  console.log(response2,'====================================');
-  
-
-    }
-
-    catch{
-
-    }
-    
-
-   
-  }
+    } catch {}
+  };
 
   const handleDialPress = (phoneNumber) => {
     // const phoneNumber = '1234567890';
@@ -147,6 +135,12 @@ const LeadInfoScreen = () => {
       .catch((err) => console.error("Error opening dialer:", err));
   };
 
+  const handleNewReminder = async(newReminder:any) => {
+    setRemiderLeads((prev) => [...prev, newReminder]);
+  };
+
+  
+
   const renderContent = () => {
     return (
       <>
@@ -159,7 +153,7 @@ const LeadInfoScreen = () => {
               </View>
               <View style={styles.column}>
                 <Text style={styles.label}>Project</Text>
-                <Text style={styles.value}>{leadData.project_name}</Text>
+                <Text style={styles.value}>{leadData.form_name}</Text>
               </View>
               <View style={styles.column}>
                 <Text style={[styles.label, styles.leftpush]}>Source</Text>
@@ -168,7 +162,8 @@ const LeadInfoScreen = () => {
                 </Text>
               </View>
             </View>
-            {permission?.ADMIN || permission.CRM ? (<>
+            {permission?.ADMIN || permission.CRM ? (
+              <>
                 <Text style={styles.label}>Assigned To</Text>
                 <TouchableOpacity
                   style={styles.dropdown}
@@ -189,10 +184,11 @@ const LeadInfoScreen = () => {
                 <Text style={styles.label}>Assigned To Member</Text>
                 <TouchableOpacity
                   style={styles.dropdown}
-                  onPress={() => onselectMember()}
+                  onPress={() => onselectMember("")}
                 >
                   <Text style={styles.dropdownText}>
-                    {selectedTeams ? selectedTeams : "Assigned To Member"}
+                    {" "}
+                    {assignedToMember ? assignedToMember : "Assigned To Member"}
                   </Text>
                   <Icon
                     name="chevron-down-outline"
@@ -203,37 +199,39 @@ const LeadInfoScreen = () => {
                     ]}
                   />
                 </TouchableOpacity>
-              </>):("")}
-              <>
-                <Text style={styles.label}>Status</Text>
-                <TouchableOpacity
-                  style={styles.dropdown}
-                  onPress={() => handleStatusSelect("")}
-                >
-                  <Text style={styles.dropdownText}>
-                    {" "}
-                    {selectedStatus ? selectedStatus : "Select Status"}
-                  </Text>
-                  <Icon
-                    name="chevron-down-outline"
-                    size={20}
-                    style={[
-                      styles.dropdownIcon,
-                      openDropdown === 3 && styles.dropdownIconOpen,
-                    ]}
-                  />
-                </TouchableOpacity>
               </>
-            
+            ) : (
+              ""
+            )}
+            <>
+              <Text style={styles.label}>Status</Text>
+              <TouchableOpacity
+                style={styles.dropdown}
+                onPress={() => handleStatusSelect("")}
+              >
+                <Text style={styles.dropdownText}>
+                  {" "}
+                  {selectedStatus ? selectedStatus : "Select Status"}
+                </Text>
+                <Icon
+                  name="chevron-down-outline"
+                  size={20}
+                  style={[
+                    styles.dropdownIcon,
+                    openDropdown === 3 && styles.dropdownIconOpen,
+                  ]}
+                />
+              </TouchableOpacity>
+            </>
           </View>
         )}
 
         {selectedCards.includes(2) && (
           <View style={styles.contactContainer}>
-            <Text style={styles.value}>Contact Info</Text>
+            <Text style={styles.label}>Contact Info</Text>
             <View>
-              <Text style={styles.label}>{leadData.leadPhone}</Text>
-              <Text style={styles.label}>{leadData.leadEmail}</Text>
+              <Text style={styles.value}>{leadData.leadPhone}</Text>
+              <Text style={styles.value}>{leadData.leadEmail}</Text>
             </View>
           </View>
         )}
@@ -241,22 +239,47 @@ const LeadInfoScreen = () => {
           <View style={styles.containerRem}>
             <View style={styles.headerRem}>
               <Text style={styles.headerText}>Reminders</Text>
-              <TouchableOpacity onPress={() => handleCare_Reminder()}>
+              <TouchableOpacity onPress={() =>  setRminderIsVisible(true)}>
                 <Text style={styles.addNew}>Add New</Text>
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.remindersList}>
-              {reminders.map((reminder, index) => (
+              {reminderLeads.map((reminder, index) => (
                 <View key={index} style={styles.reminderItem}>
-                  <Text style={styles.dateText}>{reminder.date}</Text>
-                  <Text style={styles.titleText}>{reminder.title}</Text>
-                  <Text style={styles.descriptionText}>
+                  <Text style={styles.dateText}>{reminder.data.date}</Text>
+                  <Text style={styles.dateText}>{reminder.data.title}</Text>
+                  {/* <Text style={styles.descriptionText}>
                     {reminder.description}
-                  </Text>
+                  </Text> */}
                 </View>
               ))}
             </ScrollView>
           </View>
+        )}
+
+        {selectedCards.includes(4) && (
+          <View>
+            <Text>NO DATA FOUND</Text>
+          </View>
+        )}
+
+        {selectedCards.includes(5) && (
+           <View style={styles.containerRem}>
+           <View style={styles.headerRem}>
+             <Text style={styles.headerText}>Remark</Text>
+             <TouchableOpacity onPress={() => setIsVisible(true)}>
+               <Text style={styles.addNew}>Add Remark</Text>
+             </TouchableOpacity>
+           </View>
+           <ScrollView style={styles.remindersList}>
+             {newRemarks.map((reminder, index) => (
+               <View key={index} style={styles.reminderItem}>
+                 <Text style={styles.dateText}>{reminder.data.notes}</Text>
+               </View>
+             ))}
+           </ScrollView>
+         </View>
+         
         )}
       </>
     );
@@ -268,22 +291,26 @@ const LeadInfoScreen = () => {
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <Text style={styles.name}>{leadData.leadName}</Text>
               <View style={styles.statusBadge}>
                 <Text style={styles.statusText}>{leadData.stage}</Text>
               </View>
+              <Text style={styles.name}>{leadData.leadName}</Text>
+              <Text>{leadData.project_name}</Text>
+              <Text>{leadData.projecttype_name}</Text>
             </View>
-            <TouchableOpacity      onPress={() => handleDialPress(leadData.leadPhone)}>
-            <View style={styles.iconContainer}>
-              <Image
-                source={require("../../assets/blue_call_icon.png")}
-                style={styles.icon}
-              />
-              {/* <Image
+            <TouchableOpacity
+              onPress={() => handleDialPress(leadData.leadPhone)}
+            >
+              <View style={styles.iconContainer}>
+                <Image
+                  source={require("../../assets/blue_call_icon.png")}
+                  style={styles.icon}
+                />
+                {/* <Image
                 source={require("../../assets/whatsapp_icon.png")}
                 style={styles.icon}
               /> */}
-            </View>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -326,10 +353,9 @@ const LeadInfoScreen = () => {
               style={[
                 styles.submitButton,
                 selectedCards.length > 1 && styles.activeSubmitButton,
-                selectedStatus && styles.activeSubmitButton, 
+                selectedStatus && styles.activeSubmitButton,
               ]}
-
-              onPress={()=>handleChangeStage()}
+              onPress={() => handleChangeStage()}
             >
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
@@ -352,9 +378,14 @@ const LeadInfoScreen = () => {
         onStatusSelect={handleStatusSelect}
       />
       <ReminderBottomSheetModal
-        visible={isVisible}
-        onClose={() => setIsVisible(false)}
+        visible={rminderisVisible}
+        onClose={() => setRminderIsVisible(false)}
+        onSubmit={handleNewReminder}
       />
+
+      <RemarkPop  visible={isVisible}
+        onClose={() => setIsVisible(false)}
+        onSubmit={handleCare_addRemark} />
     </>
   );
 };
@@ -414,8 +445,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     margin: 5,
     borderRadius: 5,
-    height: 50,
-    width: 125,
+    height: 38,
+    width: 100,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -462,7 +493,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     color: "black",
-    marginTop:10
+    marginTop: 10,
   },
   dropdown: {
     flexDirection: "row",
@@ -502,12 +533,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   submitButton: {
-    height:48,
+    height: 48,
     backgroundColor: "#C4C4C4",
     borderRadius: 8,
     padding: 10,
     alignItems: "center",
-    justifyContent:"center"
+    justifyContent: "center",
   },
   activeSubmitButton: {
     backgroundColor: "blue",

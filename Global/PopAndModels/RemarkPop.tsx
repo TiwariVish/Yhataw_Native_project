@@ -17,21 +17,21 @@ import Animated, {
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import store, { RootState } from "../../utils/store";
-import { getAllReminder, getReminder, saveReminder } from "./RemiderServices";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useSelector } from "react-redux";
+import { getRemark, saveRemark } from "./RemiderServices";
 
-interface ReminderBottomSheetModalProps {
+interface RemarkPop {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (newReminder: any) => void; 
+  onSubmit: (newRemark: any) => void; 
 }
 
 const { height: screenHeight } = Dimensions.get("window");
 
-const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
+const RemarkPop: React.FC<RemarkPop> = ({
   visible,
   onClose,
   onSubmit
@@ -43,39 +43,41 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [formattedDate, setFormattedDate] = useState("");
-  const [newReminder , setNewReminder] = useState([])
+  const [newRemark, setNewRemak] = useState([])
 
   const userId = store.getState().auth.userId;
 
   useEffect(() => {
+    if (visible) {
+        setTitle("");  
+        setNote("");  
+        setDate(new Date());  
+      }
     translateY.value = withSpring(visible ? 0 : screenHeight, {
       damping: 15,
       stiffness: 100,
     });
   }, [visible]);
 
-  const submitReminder = async () => {
+  const submitRemark = async () => {
     const body = {
       leadId: leadData._id,
       userId,
       title,
-      note,
-      date: date.toISOString(),
+      notes:note,
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
     };
-  
     try {
-      const newReminder = await saveReminder(body);
-      const response = await getReminder (leadData._id)
-      setNewReminder(response.data)
-      onSubmit(newReminder);
+      const newRemark = await saveRemark(body);
+      const response = await getRemark(leadData._id);
+      setNewRemak(response.data)
+      onSubmit(newRemark);
       onClose();
     } catch (error) {
       console.error("Error saving reminder:", error);
     }
   };
-
- 
-  
 
   const onChange = (date: Date) => {
     setDate(date);
@@ -109,71 +111,17 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
               <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                   <View style={styles.containerdiv}>
-                    <Text style={styles.header}>Add Reminder</Text>
+                    <Text style={styles.header}>Add Remark</Text>
                     <Text style={styles.subHeader}>
-                      Add new reminder for the lead
+                    Note : Notes help you remember important details about your leads
                     </Text>
-
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.inputTitle}>Title</Text>
-                      <View style={styles.inputWithIconContainer}>
-                        <Image
-                          source={require("../../assets/type_cursor_icon.png")}
-                          style={styles.iconInsideInput}
-                        />
-                        <TextInput
-                          style={styles.inputValue}
-                          value={title}
-                          onChangeText={setTitle}
-                        />
-                      </View>
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.inputTitle}>Date and Time</Text>
-                      <View style={styles.inputWithIconContainer}>
-                        <TextInput
-                          style={styles.inputValueWithIcon}
-                          value={formattedDate}
-                          editable={false}
-                        />
-                        <TouchableOpacity onPress={showDatePicker}>
-                          <Image
-                            source={require("../../assets/calendar_icon.png")}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-
-                    {/* Date Picker for Mobile */}
-                    {show && Platform.OS !== "web" && (
-                      <DateTimePicker
-                        value={date}
-                        mode="datetime"
-                        display="default"
-                        onChange={(event, selectedDate) => onChange(selectedDate || date)}
-                        onTouchCancel={() => setShow(false)}
-                      />
-                    )}
-
-                    {/* Date Picker for Web */}
-                    {Platform.OS === "web" && show && (
-                      <DatePicker
-                        selected={date}
-                        onChange={onChange}
-                        showTimeSelect
-                        dateFormat="Pp"
-                        inline
-                      />
-                    )}
-
                     <View style={styles.inputContainer}>
                       <Text style={styles.inputTitle}>Note</Text>
                       <View style={styles.inputWithIconContainer}>
-                        <Image
+                        {/* <Image
                           source={require("../../assets/note_icon.png")}
                           style={styles.iconInsideInput}
-                        />
+                        /> */}
                         <TextInput
                           style={[styles.inputValue, { height: 80 }]}
                           multiline={true}
@@ -185,7 +133,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                   </View>
                   <TouchableOpacity
                     style={styles.submitButton}
-                    onPress={submitReminder}
+                    onPress={submitRemark}
                   >
                     <Text style={styles.submitButtonText}>Submit</Text>
                   </TouchableOpacity>
@@ -303,4 +251,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ReminderBottomSheetModal;
+export default RemarkPop;
