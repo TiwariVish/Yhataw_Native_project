@@ -11,7 +11,11 @@ import {
 import LeadStatus from "./LeadStatus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
-import { selectCurrLead, setLeadDatad, setMyLeadData } from "../../Redux/authSlice";
+import {
+  selectCurrLead,
+  setLeadDatad,
+  setMyLeadData,
+} from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
 import { getAllUsers, getAllUsersMyLead } from "./LeadsService";
 import { useNavigation } from "@react-navigation/native";
@@ -75,10 +79,19 @@ function Leads() {
         leadsToFilter = leadData;
         break;
       case 2:
-        leadsToFilter = [];
+        leadsToFilter = [{ id: 1, name: 'NO DATA FOUNDS' }];
         break;
       case 3:
         leadsToFilter = dataMyLead;
+        break;
+      case 4:
+        leadsToFilter = [{ id: 1, name: 'NO DATA FOUNDS' }];
+        break;
+      case 5:
+        leadsToFilter = [{ id: 1, name: 'NO DATA FOUNDS' }];
+        break;
+      case 6:
+        leadsToFilter = [];
         break;
       default:
         leadsToFilter = [];
@@ -98,14 +111,17 @@ function Leads() {
 
   const handleCardDataLeads = (item: any) => {
     switch (selectedCard) {
-      case 1 : dispatch(setLeadDatad(item));
-      navigation.navigate("LeadInfoScreen");
-      break;
-      case 2 : ''
-      break;
-      case 3 :  dispatch(setMyLeadData(item))
-      navigation.navigate("LeadInfoScreen");
-      break;
+      case 1:
+        dispatch(setLeadDatad(item));
+        navigation.navigate("LeadInfoScreen");
+        break;
+      case 2:
+        "";
+        break;
+      case 3:
+        dispatch(setMyLeadData(item));
+        navigation.navigate("LeadInfoScreen");
+        break;
     }
     // dispatch(setLeadDatad(item));
     // dispatch(setMyLeadData(item))
@@ -146,74 +162,104 @@ function Leads() {
 
   return (
     <>
-    <View  style= {styles.mainCont}>
-      <ScrollView
-        contentContainerStyle={styles.scrollViewContainer}
-        onScroll={({ nativeEvent }) => {
-          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          if (
-            layoutMeasurement.height + contentOffset.y >=
-            contentSize.height - 20
-          ) {
-            handleLoadMore();
-          }
-        }}
-        scrollEventThrottle={16}
-      >
-        <View style={styles.content}>
-          <LeadStatus
-            selectedCard={selectedCard}
-            setSelectedCard={setSelectedCard}
-            onSearchChange={(query) => setSearchQuery(query)}
-          />
-          {loading && !loadingMore ? (
-            <LeadsSkeleton />
-          ) : (
-            filteredLeads?.map((item, index) => (
-              <View key={`${item._id}-${index}`} style={styles.cardContainer}>
-                <TouchableOpacity
-                  style={styles.card}
-                  onPress={() => handleCardDataLeads(item)}
-                >
-                  <View style={styles.statusBadge}>
-                    <Text style={styles.statusText}>{item.stage}</Text>
-                  </View>
-                  <View style={styles.textContainer}>
-                    <Text style={styles.name}>{item.leadName}</Text>
-                    <Text style={styles.location}>{item.form_name}</Text>
-                    <Text style={styles.location}>{item.projecttype_name}</Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.phoneIcon}
-                  onPress={() => handleDialPress(item.leadPhone)}
-                >
-                  <MaterialCommunityIcons
-                    name="phone-outline"
-                    size={24}
-                    color="black"
-                  />
-                </TouchableOpacity>
+      <View style={styles.mainCont}>
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContainer}
+          onScroll={({ nativeEvent }) => {
+            const { layoutMeasurement, contentOffset, contentSize } =
+              nativeEvent;
+            if (
+              layoutMeasurement.height + contentOffset.y >=
+              contentSize.height - 20
+            ) {
+              handleLoadMore();
+            }
+          }}
+          scrollEventThrottle={16}
+        >
+          <View style={styles.content}>
+            <LeadStatus
+              selectedCard={selectedCard}
+              setSelectedCard={setSelectedCard}
+              onSearchChange={(query) => setSearchQuery(query)}
+            />
+            {loading && !loadingMore ? (
+              <LeadsSkeleton />
+            ) : (
+              filteredLeads?.map((item, index) => {
+                if (selectedCard === 2) {
+                  return (
+                    <View key={`${item.id}-${index}`}>
+                      <Text >{item.name}</Text>
+                    </View>
+                  );
+                }
+
+                else if(selectedCard === 4){
+                  return (
+                    <View key={`${item.id}-${index}`}>
+                      <Text >{item.name}</Text>
+                    </View>
+                  );
+                }
+
+                else if(selectedCard === 5){
+                  return (
+                    <View key={`${item.id}-${index}`}>
+                      <Text >{item.name}</Text>
+                    </View>
+                  );
+                }
+                
+                else {
+                  return (
+                    <View key={`${item._id}-${index}`} style={styles.cardContainer}>
+                      <TouchableOpacity
+                        style={styles.card}
+                        onPress={() => handleCardDataLeads(item)}
+                      >
+                        <View style={styles.statusBadge}>
+                          <Text style={styles.statusText}>{item.stage}</Text>
+                        </View>
+                        <View style={styles.textContainer}>
+                          <Text style={styles.name}>{item.leadName}</Text>
+                          <Text style={styles.location}>{item.form_name}</Text>
+                          <Text style={styles.location}>
+                            {item.projecttype_name}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.phoneIcon}
+                        onPress={() => handleDialPress(item.leadPhone)}
+                      >
+                        <MaterialCommunityIcons
+                          name="phone-outline"
+                          size={24}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                }
+              })
+            )}
+            {loadingMore && (
+              <View style={styles.loadingMore}>
+                <ActivityIndicator size="large" color="#0000ff" />
               </View>
-            ))
-          )}
-          {loadingMore && (
-            <View style={styles.loadingMore}>
-              <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-          )}
-        </View>
-      </ScrollView>
+            )}
+          </View>
+        </ScrollView>
       </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  mainCont:{
-    backgroundColor:"white",
-    height:'100%'
-
+  mainCont: {
+    backgroundColor: "white",
+    height: "100%",
   },
   scrollViewContainer: {
     backgroundColor: "white",

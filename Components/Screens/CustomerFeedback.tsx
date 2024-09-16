@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
     padding: 16,
     // borderRadius: 8,
     // margin: 16,
+    backgroundColor:'white'
   },
   value: {
     color: "#3D48E5",

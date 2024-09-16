@@ -138,10 +138,10 @@ function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatu
           style={styles.textInput}
           onChangeText={(text) => onSearchChange(text)} 
         />
-        <Image
+        {/* <Image
           source={require("../../assets/filter_icon.png")}
           style={styles.filterIcon}
-        />
+        /> */}
       </View>
     </View>
   );

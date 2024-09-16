@@ -123,7 +123,7 @@ const RemarkPop: React.FC<RemarkPop> = ({
                           style={styles.iconInsideInput}
                         /> */}
                         <TextInput
-                          style={[styles.inputValue, { height: 80 }]}
+                          style={[styles.inputValue, { height: 80, textAlignVertical: "top" }]}
                           multiline={true}
                           value={note}
                           onChangeText={setNote}
@@ -227,8 +227,8 @@ const styles = StyleSheet.create({
   },
   inputValue: {
     flex: 1,
-    paddingHorizontal: 30,
     height: 35,
+    textAlignVertical: "top",
   },
   submitButton: {
     backgroundColor: "#4A6EF5",

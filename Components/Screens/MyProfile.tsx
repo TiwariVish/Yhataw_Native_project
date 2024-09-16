@@ -203,11 +203,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     color: "gray",
-    width: "50%",
+    width: "60%",
   },
   value: {
     fontSize: 16,
-    color: "blue",
+    color: "gray",
     width: "50%",
   },
   buttonContainer: {
