@@ -13,10 +13,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import { loginAction } from "../../Redux/authSlice";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
+import { useNavigation } from "@react-navigation/native";
+import { LoginScreenNavigationProp } from "../type";
 
 const { width } = Dimensions.get("window");
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +27,7 @@ const LoginScreen = ({ navigation }) => {
   const [backendEmailError, setBackendEmailError] = useState(false);
   const [IsLoading, setIsLoading] = useState(true);
   const [mobilePattern, setMobilePattern] = useState(false);
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const dispatch = useDispatch();
   const { authenticated } = useSelector((state: RootState) => state.auth);
@@ -39,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
     try {
       setIsLoading(true);
       const response = await login(email, password);
-      console.log(response, "::::::::::::email::::::::::::");
+      console.log(response, "::::::::::::email::::::::::::")
       if (response?.message?.settings?.success) {
         setIsEmailValid(true);
         setBackendEmailError(false);
@@ -50,6 +53,8 @@ const LoginScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Login error:", error);
+      alert(error);
+
     } finally {
       setIsLoading(false);
     }

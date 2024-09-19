@@ -1,8 +1,5 @@
-import { useNavigation } from "@react-navigation/native";
 import strings from "../Global/constants/StringConstants";
-import urls from "../Global/constants/UrlConstants";
 import store from "./store";
-import { LoginScreenNavigationProp } from "../Components/type";
 
 
 export function getNoAuthCallParams(methodType: string, body?: any) {
@@ -83,6 +80,7 @@ export async function makeCall(callName: string, callParams: any) {
     let timeout = getTimeoutPromise();
 
     const response: any = await Promise.race([timeout, call]).catch((err) => {
+
       throw err;
     });
     const json = await response.json();
