@@ -31,6 +31,7 @@ import { useDispatch } from "react-redux";
 import { getPerosnalDetails } from "./MyProfileService";
 import { DashboardSkeleton } from "../../Global/Components/SkeletonStructures";
 import { useSelector } from "react-redux";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 const staticData = {
   leads: [
@@ -330,9 +331,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                 />
               </View>
               <View style={styles.textContainer}>
-                <Text style={styles.name}>{userData?.name}</Text>
+                <Text style={[styles.name,globalStyles.fontfm, globalStyles.h4]} allowFontScaling={false}>{userData?.name}</Text>
                 <Text style={styles.role}>
-                  {userData?.position || "Team Leader"}
+                  {userData?.position}
                 </Text>
               </View>
             </View>
@@ -341,7 +342,7 @@ const Dashboard: React.FC<CustomProps> = () => {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={styles.horizontalScroll}
+              style={styles.horizontalScroll1}
             >
               {isBanner.map((item) => (
                 <View key={item.id}>
@@ -355,8 +356,8 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={styles.name}>All Leads</Text>
-                    <Text style={styles.role}>
+                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>All Leads</Text>
+                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
                       {dashboardData.allLead.lead_total_count}
                     </Text>
                   </View>
@@ -403,8 +404,8 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={styles.name}>My Leads</Text>
-                    <Text style={styles.role}>
+                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>My Leads</Text>
+                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
                       {dashboardDataMyLead.lead_my_total_count}
                     </Text>
                   </View>
@@ -452,8 +453,8 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={styles.name}>All Attendance</Text>
-                    <Text style={styles.role}>
+                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>All Attendance</Text>
+                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
                       {dashboardData.attendance.attendence_total_emp} day
                     </Text>
                   </View>
@@ -489,8 +490,8 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={styles.name}>My Attendance</Text>
-                    <Text style={styles.role}>
+                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>My Attendance</Text>
+                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
                       {dashboardDataAttendance.attendence_my_current_month} day
                     </Text>
                   </View>
@@ -529,8 +530,8 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={styles.name}>All Project</Text>
-                    <Text style={styles.role}>
+                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>All Project</Text>
+                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
                       {dashboardData.project.projects_total} Total
                     </Text>
                   </View>
@@ -562,8 +563,8 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={styles.name}>My Project</Text>
-                    <Text style={styles.role}>
+                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>My Project</Text>
+                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
                       {dashboardData.project.projects_total} Total
                     </Text>
                   </View>
@@ -635,14 +636,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontSize: 16,
-    fontWeight: "bold",
     marginLeft: 15,
   },
   role: {
-    fontSize: 14,
-    color: "gray",
-    marginLeft: 15,
+    // fontSize: 14,
+    // color: "gray",
+    marginLeft: 25,
+    paddingTop:5
   },
   card: {
     // backgroundColor: "gray",
@@ -655,9 +655,14 @@ const styles = StyleSheet.create({
     width: 390,
   },
   cardContainer: {
-    margin: 10,
+    margin: 8,
   },
   horizontalScroll: {
+    flexDirection: "row",
+    // margin:5
+    paddingHorizontal: "2%"
+  },
+  horizontalScroll1:{
     flexDirection: "row",
   },
   row: {

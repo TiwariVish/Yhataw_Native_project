@@ -3,6 +3,7 @@ import { View, StyleSheet, Image, TouchableOpacity, Text } from "react-native";
 import BottomSheetModal from "../PopAndModels/BottomSheetModal";
 import { getPerosnalDetails } from "../../Components/Screens/MyProfileService";
 import store from "../../utils/store";
+import { Avatar } from 'react-native-paper';
 
 function Footer({ navigate }) {
   const [selectedIcon, setSelectedIcon] = useState(null);
@@ -64,14 +65,20 @@ function Footer({ navigate }) {
           style={styles.iconContainer}
           onPress={() => handleIconPress("user")}
         >
-          <Image
+          {/* <Image
             source={
               userData?.profile_image
                 ? { uri: userData.profile_image }
                 : require("../../assets/user_icon.png")
             }
             style={styles.icon}
-          />
+          /> */}
+             <Avatar.Icon 
+        size={35} 
+        icon="account" 
+        color="white" // Icon color
+        style={{ backgroundColor: '#3D48E5' }} // Background color
+      />
           <Text style={styles.iconLabel}>Profile</Text>
         </TouchableOpacity>
       </View>
@@ -100,24 +107,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   icon: {
-    width: 32,
-    height: 32,
+    width: 30,
+    height: 30,
     borderRadius: 20,
   },
   centerIconContainer: {
     position: "absolute",
     top: -25,
     left: "50%",
-    // transform: [{ translateX: 0 }], // Adjust the icon to be centered
-    // alignItems: "center",
   },
   centerIconWrapper: {
-    // display: "flex",
-    // width: 70,
-    // height: 85,
-    // borderRadius: 35,
-    // alignItems: "center",
-    // justifyContent: "center",
     zIndex: 1000,
   },
   curveBackground: {

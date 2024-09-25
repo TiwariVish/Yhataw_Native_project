@@ -122,30 +122,34 @@ const LoginScreen = () => {
         <View  style={styles.image}>
         <Image source={require("../../assets/Logo.png")}  />
         </View>
-        <Text style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm]}>
+        <Text style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm ,]}  allowFontScaling={false}>
           Sign in
         </Text>
-        <Text style={[globalStyles.h8, globalStyles.fs4, globalStyles.fontfm]}>
+        <Text style={[globalStyles.h8, globalStyles.fs4, globalStyles.fontfm]}  allowFontScaling={false}>
           to access Pulse CRM
         </Text>
       </View>
       <View style={styles.inputContainer}>
         <View style={styles.inlineInput}>
+        {!mobilePattern && (
           <Image
-            source={require("../../assets/User_box_light.png")}
+            source={require('../../assets/User_box_light.png')}
             style={styles.icon}
           />
+        )}
           <TextInput
-            style={[styles.input, globalStyles.fontfm, globalStyles.h6]}
+            style={[styles.input, globalStyles.fontfm, globalStyles.h6,  mobilePattern ? { paddingLeft: 40 } : {}, ]}
             placeholder="Email or mobile number"
             onChangeText={handleOnChangeInputField}
             value={email}
+            allowFontScaling={false}
+            
           />
           {mobilePattern && (
             <View style={styles.inputAdornment}>
               <Text
-                style={[globalStyles.fontfm, globalStyles.h5, globalStyles.fs4]}
-              >
+                style={[globalStyles.fontfm, globalStyles.h6,]}
+                allowFontScaling={false} >
                 +91
               </Text>
             </View>
@@ -160,6 +164,7 @@ const LoginScreen = () => {
                 globalStyles.h6,
                 globalStyles.fs4,
               ]}
+              allowFontScaling={false}
             >
               This is not a valid email. Please contact the system
               administrator.
@@ -174,6 +179,7 @@ const LoginScreen = () => {
                 globalStyles.h6,
                 globalStyles.fs4,
               ]}
+              allowFontScaling={false}
             >
               The email id is not correct. Please try again
             </Text>
@@ -184,7 +190,7 @@ const LoginScreen = () => {
             <View style={styles.inlineInput}>
               <Image
                 source={require("../../assets/Lock_icon.png")}
-                style={styles.icon}
+                style={[styles.icon,styles.pssIcon]}
               />
               <TextInput
                 style={[styles.input, globalStyles.fontfm, globalStyles.h6]}
@@ -192,6 +198,7 @@ const LoginScreen = () => {
                 onChangeText={handleOnChangePasswordField}
                 value={password}
                 secureTextEntry={!showPassword}
+                allowFontScaling={false}
               />
               <TouchableOpacity
                 onPress={handleTogglePasswordVisibility}
@@ -212,7 +219,7 @@ const LoginScreen = () => {
           onPress={showPasswordInput ? handleLogin : handleProceed}
           style={styles.button}
         >
-          <Text style={[styles.buttonText , globalStyles.fs1 ,globalStyles.h6]}>
+          <Text style={[styles.buttonText , globalStyles.fs1 ,globalStyles.h6]}  allowFontScaling={false}>
             {showPasswordInput ? "Log In" : "Proceed"}
           </Text>
         </TouchableOpacity>
@@ -227,7 +234,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-    padding: 20,
+    paddingHorizontal: "5%",
   },
   header: {
     alignItems: "flex-start",
@@ -236,8 +243,6 @@ const styles = StyleSheet.create({
   },
   image: {
     marginBottom:10
-    // width: 100,
-    // height: 100,
   },
   headerText: {
     fontSize: 24,
@@ -256,14 +261,15 @@ const styles = StyleSheet.create({
     borderBottomColor: "#DFE1E8",
     paddingBottom: 5,
     marginBottom: 10,
+    position: 'relative',
   },
   icon: {
-    marginRight: 10,
+    marginRight: 0,
   },
   input: {
     flex: 1,
-    padding: 15,
-    marginLeft: 10,
+    padding: 10,
+    // marginLeft: 10,
   },
   passwordContainer: {
     marginBottom: 20,
@@ -278,7 +284,6 @@ const styles = StyleSheet.create({
     height:48,
     backgroundColor: "#3D48E5",
     borderRadius: 8,
-    // paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -293,12 +298,17 @@ const styles = StyleSheet.create({
   },
   inputAdornment: {
     position: "absolute",
-    left: 22,
+    // left: 22,
     top: 0,
     bottom: 5,
     justifyContent: "center",
     alignItems: "center",
+    // paddingLeft: 30,
   },
+  pssIcon:{
+    height:30,
+    width:30
+  }
 });
 
 export default LoginScreen;

@@ -46,7 +46,7 @@ function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatu
     if (index === -1) {
       return;
     }
-    const cardWidth = 125; 
+    const cardWidth =5; 
     const margin = 10; 
     const offset = (cardWidth + margin) * index;
     console.log('Scrolling to offset::::::::', offset);
@@ -77,7 +77,7 @@ function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatu
           if (scrollViewRef.current) {
             const index = leadStatus.findIndex(item => item.id === selectedCard);
             if (index !== -1) {
-              const cardWidth = 125;
+              const cardWidth = 5;
               const margin = 10;
               const offset = (cardWidth + margin) * index;
               scrollViewRef.current.scrollTo({ x: offset, animated: true });
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   selectedCard: {
-    backgroundColor: "blue",
+    backgroundColor: "#3D48E5",
   },
   cardText: {
     color: "black",

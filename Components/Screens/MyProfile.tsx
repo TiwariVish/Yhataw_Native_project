@@ -69,9 +69,9 @@ const Profile = ({ navigation }) => {
               />
               {userData && (
                 <>
-                  <Text style={styles.name}>{userData.name}</Text>
+                  <Text style={[styles.name,globalStyles.fontfm, globalStyles.h4]} allowFontScaling={false}>{userData.name}</Text>
                   <Text style={styles.position}>
-                    {userData.position || "Team Leader"}
+                    {userData.position}
                   </Text>
                 </>
               )}
@@ -90,8 +90,8 @@ const Profile = ({ navigation }) => {
                   { label: "Country", value: userData.country_name },
                 ].map((item, index) => (
                   <View key={index} style={styles.infoContainer}>
-                    <Text style={styles.label}>{item.label}</Text>
-                    <Text style={styles.value}>{item.value}</Text>
+                    <Text style={[styles.label,globalStyles.fontfm, globalStyles.h6]} allowFontScaling={false}>{item.label}</Text>
+                    <Text style={[styles.value,globalStyles.fontfm, globalStyles.h6]} allowFontScaling={false}>{item.value}</Text>
                     <View style={styles.border}></View>
                   </View>
                 ))}
@@ -187,8 +187,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   name: {
-    fontSize: 20,
-    fontWeight: "bold",
     marginBottom: 5,
   },
   position: {
@@ -201,14 +199,10 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   label: {
-    fontSize: 16,
-    color: "gray",
-    width: "60%",
+    width: "45%",
   },
   value: {
-    fontSize: 16,
-    color: "gray",
-    width: "50%",
+    width: "55%",
   },
   buttonContainer: {
     paddingHorizontal: 20,

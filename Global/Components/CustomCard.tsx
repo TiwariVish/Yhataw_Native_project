@@ -1,19 +1,19 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
-import { AntDesign } from "@expo/vector-icons"; // Assuming you are using Expo icons
+import { AntDesign } from "@expo/vector-icons"; 
 
 interface CustomProps {
   cardContent: React.ReactNode;
-  cardColor?: string; // Optional prop for card background color
-  calendarBackgroundColor?: string; // Optional prop for calendar icon background color
+  cardColor?: string; 
+  calendarBackgroundColor?: string; 
   calendarText;
 }
 
 const CustomCard: React.FC<CustomProps> = ({
   cardContent,
-  cardColor = "#e6e6e6", // Default card background color
-  calendarBackgroundColor = "#666666", // Default calendar icon background color
-  calendarText, // Dynamic calendar text
+  cardColor = "#e6e6e6", 
+  calendarBackgroundColor = "#666666", 
+  calendarText, 
 }) => {
   return (
     <View style={[styles.card, { backgroundColor: cardColor }]}>
@@ -43,17 +43,17 @@ const styles = StyleSheet.create({
   rowContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", // Space evenly between items
+    justifyContent: "space-between", 
   },
   calendarIcon: {
     borderRadius: 50,
-    height: 45,
-    width: 45,
-    justifyContent: "center", // Center content vertically
+    height: 35,
+    width: 35,
+    justifyContent: "center", 
     alignItems: "center",
   },
   calendarText: {
-    fontSize: 26,
+    fontSize: 24,
     color: "black",
     marginLeft: 5,
   },

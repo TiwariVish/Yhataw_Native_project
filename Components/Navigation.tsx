@@ -5,12 +5,13 @@ import LoginScreen from "./Screens/LoginScreen";
 import Dashboard from "./Screens/Dashboard";
 import Leads from "./Screens/Leads";
 import MyProfile from "./Screens/MyProfile";
-import { RootStackParamList, RootStackParamList1 } from "./type"; // Import the types
+import { RootStackParamList, RootStackParamList1 } from "./type"; 
 import { useSelector } from "react-redux";
 import { RootState } from "../utils/store";
 import LeadInfoScreen from "./Screens/LeadInfoScreen";
 import CustomerFeedback from "./Screens/CustomerFeedback";
 import ErrorPage from "../Global/Components/ErrorPage";
+import { Text } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,11 @@ const Navigation: React.FC = () => {
               name="Leads"
               component={Leads}
               options={{
+                headerTitle: () => (
+                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}>
+                    Leads
+                  </Text>
+                ),
                 headerStyle: {
                   backgroundColor: "white",
                   ...({} as any),
@@ -39,13 +45,66 @@ const Navigation: React.FC = () => {
                 headerShadowVisible: false,
               }}
             />
-            <Stack.Screen name="MyProfile" component={MyProfile} />
-            <Stack.Screen name="LeadInfoScreen" component={LeadInfoScreen} />
+            <Stack.Screen
+              name="MyProfile"
+              component={MyProfile}
+              options={{
+                headerTitle: () => (
+                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}>
+                    My Profile
+                  </Text>
+                ),
+                headerStyle: {
+                  backgroundColor: "white",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="LeadInfoScreen"
+              component={LeadInfoScreen}
+              options={{
+                // title : "Lead Info Screen",
+                headerTitle: () => (
+                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}>
+                    Lead Info Screen
+                  </Text>
+                ),
+                headerStyle: {
+                  backgroundColor: "white",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
+            />
             <Stack.Screen
               name="CustomerFeedback"
               component={CustomerFeedback}
+              options={{
+                headerTitle: () => (
+                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}>
+                   Customer Feedback
+                  </Text>
+                ),
+                headerStyle: {
+                  backgroundColor: "white",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
             />
-            <Stack.Screen name="ErrorPage" component={ErrorPage} />
+            <Stack.Screen
+              name="ErrorPage"
+              component={ErrorPage}
+              options={{
+                headerStyle: {
+                  backgroundColor: "white",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
+            />
           </>
         ) : (
           <Stack.Screen

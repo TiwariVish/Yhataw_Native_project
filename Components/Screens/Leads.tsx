@@ -22,6 +22,7 @@ import { useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import { getDataMylead } from "./DashboardService";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 function Leads() {
   const dispatch = useDispatch();
@@ -213,18 +214,19 @@ function Leads() {
                 
                 else {
                   return (
+                    <>
                     <View key={`${item._id}-${index}`} style={styles.cardContainer}>
                       <TouchableOpacity
                         style={styles.card}
                         onPress={() => handleCardDataLeads(item)}
                       >
                         <View style={styles.statusBadge}>
-                          <Text style={styles.statusText}>{item.stage}</Text>
+                          <Text style={[styles.statusText,globalStyles.h8]} allowFontScaling={false}>{item.stage}</Text>
                         </View>
                         <View style={styles.textContainer}>
-                          <Text style={styles.name}>{item.leadName}</Text>
-                          <Text style={styles.location}>{item.form_name}</Text>
-                          <Text style={styles.location}>
+                          <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>{item.leadName}</Text>
+                          <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{item.form_name}</Text>
+                          <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>
                             {item.projecttype_name}
                           </Text>
                         </View>
@@ -240,6 +242,8 @@ function Leads() {
                         />
                       </TouchableOpacity>
                     </View>
+                       <View style={styles.border}></View>
+                       </>
                   );
                 }
               })
@@ -264,7 +268,6 @@ const styles = StyleSheet.create({
   scrollViewContainer: {
     backgroundColor: "white",
     flexGrow: 1,
-    // paddingVertical: 20,
   },
   content: {
     backgroundColor: "white",
@@ -274,26 +277,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
     paddingHorizontal: 10,
-    // marginHorizontal: 18,
-    marginVertical: 10,
-    paddingVertical: 10,
   },
   card: {
     flex: 1,
   },
   textContainer: {
     paddingHorizontal: 10,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  location: {
-    fontSize: 14,
-    color: "#888",
   },
   phoneIcon: {
     height: 50,
@@ -319,8 +309,12 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: "#FFF",
-    fontSize: 12,
   },
+  border:{
+      borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    marginTop:10
+  }
 });
 
 export default Leads;

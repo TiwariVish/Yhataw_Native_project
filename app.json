@@ -1,7 +1,18 @@
 {
   "expo": {
+    "android": {
+      "permissions": [
+        "INTERNET"
+      ],
+      "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.vishal_tiwari.Yhataw_Native"
+    },
     "name": "Yhataw_Native",
-    "slug": "Yhataw_Native",
+    "slug": "vishal",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,26 +25,17 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {
-      "permissions": ["INTERNET"],
-      "networkSecurityConfig": "@xml/network_security_config",
-      "usesCleartextTraffic": true,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.vishal_tiwari.Yhataw_Native"
-    },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "46374e77-8b12-42c1-af86-6505771a74ba"
+        "projectId": "23441b41-6252-44d1-a52f-6e12b1491ad5"
       }
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "owner": "chigs_0"
   }
 }

@@ -22,6 +22,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useSelector } from "react-redux";
 import { getRemark, saveRemark } from "./RemiderServices";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 interface RemarkPop {
   visible: boolean;
@@ -111,20 +112,24 @@ const RemarkPop: React.FC<RemarkPop> = ({
               <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                   <View style={styles.containerdiv}>
-                    <Text style={styles.header}>Add Remark</Text>
-                    <Text style={styles.subHeader}>
+                    <Text   style={[globalStyles.h4, globalStyles.fs1, styles.header]}
+                      allowFontScaling={false}>Add Remark</Text>
+                    <Text    style={[globalStyles.h8, globalStyles.fs1, styles.header]}
+                      allowFontScaling={false}>
                     Note : Notes help you remember important details about your leads
                     </Text>
                     <View style={styles.inputContainer}>
-                      <Text style={styles.inputTitle}>Note</Text>
+                      <Text     style={[
+                          globalStyles.h7,
+                          globalStyles.fs1,
+                          styles.header,
+                        ]}
+                        allowFontScaling={false}>Remark</Text>
                       <View style={styles.inputWithIconContainer}>
-                        {/* <Image
-                          source={require("../../assets/note_icon.png")}
-                          style={styles.iconInsideInput}
-                        /> */}
                         <TextInput
-                          style={[styles.inputValue, { height: 80, textAlignVertical: "top" }]}
+                          style={[styles.inputValue, globalStyles.h7,{ height: 80,}]}
                           multiline={true}
+                          placeholder="Enter Remark"
                           value={note}
                           onChangeText={setNote}
                         />
@@ -182,21 +187,14 @@ const styles = StyleSheet.create({
   },
   containerdiv: {
     flex: 1,
-    padding: 16,
+    padding: 10,
     backgroundColor: "#fff",
   },
   header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  subHeader: {
-    fontSize: 14,
-    color: "#7d7d7d",
-    marginBottom: 16,
+    marginBottom: 5,
   },
   inputContainer: {
-    marginBottom: 16,
+    paddingTop:15
   },
   inputWithIconContainer: {
     flexDirection: "row",
@@ -204,8 +202,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 5,
-    // backgroundColor: "#f9f9f9",
-    paddingHorizontal: 10,
   },
   inputValueWithIcon: {
     flex: 1,

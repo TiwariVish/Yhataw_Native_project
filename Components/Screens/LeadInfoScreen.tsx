@@ -25,6 +25,9 @@ import MemberPopOver from "../../Global/PopAndModels/MemberPopOver";
 import AssignedMemberPop from "../../Global/PopAndModels/AssignedMemberPop";
 import { getReminder } from "./DashboardService";
 import RemarkPop from "../../Global/PopAndModels/RemarkPop";
+import { useNavigation } from "@react-navigation/native";
+import { LoginScreenNavigationProp } from "../type";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
@@ -38,6 +41,7 @@ const leadInfoStatus = [
 
 const LeadInfoScreen = () => {
   const { leadData } = useSelector((state: RootState) => state.auth);
+  const {myLeadData} =useSelector((state: RootState) => state.auth);
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
   const [isVisible, setIsVisible] = useState(false);
   const [rminderisVisible, setRminderIsVisible] = useState(false);
@@ -55,10 +59,12 @@ const LeadInfoScreen = () => {
   const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
   const [allReminder, setAllRemider] = useState<any>([]);
   const [newRemarks,setNewRemarks] = useState([])
-
   const [reminderLeads, setRemiderLeads] = useState([]);
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
   useEffect(() => {
+    console.log(myLeadData,'myLeadDatamyLeadData');
+    
     getLeadStage();
   }, []);
 
@@ -114,10 +120,11 @@ const LeadInfoScreen = () => {
   const handleChangeStage = async () => {
     try {
       const body = {
-        ["id"]: leadData?._id,
-        ["stage"]: leadData.stage,
+        ["id"]: myLeadData?._id,
+        ["stage"]: myLeadData.stage,
       };
       const response = await changeStage(body);
+      navigation.navigate("Dashboard");
     } catch {}
   };
 
@@ -146,27 +153,47 @@ const LeadInfoScreen = () => {
       <>
         {selectedCards.includes(1) && (
           <View style={styles.infoContainer}>
-            <View style={styles.row}>
+            {permission?.ADMIN || permission.CRM ? (
+              <View style={styles.row}>
               <View style={styles.column}>
-                <Text style={styles.label}>Lead ID</Text>
-                <Text style={styles.value}>{leadData.uid}</Text>
+                <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Lead ID</Text>
+                <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{leadData.uid}</Text>
               </View>
               <View style={styles.column}>
-                <Text style={styles.label}>Project</Text>
-                <Text style={styles.value}>{leadData.form_name}</Text>
+                <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Project</Text>
+                <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{leadData.form_name}</Text>
               </View>
               <View style={styles.column}>
-                <Text style={[styles.label, styles.leftpush]}>Source</Text>
-                <Text style={[styles.value, , styles.leftpush]}>
+                <Text style={[globalStyles.h5,globalStyles.fontfm , styles.leftpush]} allowFontScaling={false}>Source</Text>
+                <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value ,styles.leftpush]} allowFontScaling={false}>
                   {leadData.source}
                 </Text>
               </View>
             </View>
+          ) :(  <View style={styles.row}>
+            <View style={styles.column}>
+              <Text  style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Lead ID</Text>
+              <Text  style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{myLeadData.uid}</Text>
+            </View>
+            <View style={styles.column}>
+              <Text  style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Project</Text>
+              <Text  style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{myLeadData.form_name}</Text>
+            </View>
+            <View style={styles.column}>
+              <Text style={[globalStyles.h5,globalStyles.fontfm , styles.leftpush]} allowFontScaling={false}>Source</Text>
+              <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value ,styles.leftpush]} allowFontScaling={false}>
+                {myLeadData.source}
+              </Text>
+            </View>
+          </View>)}
+            <>
+            
+            </>
             {permission?.ADMIN || permission.CRM ? (
               <>
-                <Text style={styles.label}>Assigned To</Text>
+                <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>Assigned To</Text>
                 <TouchableOpacity
-                  style={styles.dropdown}
+                  style={[styles.dropdown,styles.value]}
                   onPress={() => handleMemberStatusSelect()}
                 >
                   <Text style={styles.dropdownText}>
@@ -181,9 +208,9 @@ const LeadInfoScreen = () => {
                     ]}
                   />
                 </TouchableOpacity>
-                <Text style={styles.label}>Assigned To Member</Text>
+                <Text style={[globalStyles.h7,globalStyles.fontfm,styles.value]} allowFontScaling={false}>Assigned To Member</Text>
                 <TouchableOpacity
-                  style={styles.dropdown}
+                  style={[styles.dropdown,styles.value]}
                   onPress={() => onselectMember("")}
                 >
                   <Text style={styles.dropdownText}>
@@ -204,9 +231,9 @@ const LeadInfoScreen = () => {
               ""
             )}
             <>
-              <Text style={styles.label}>Status</Text>
+              <Text  style={[globalStyles.h7,globalStyles.fontfm,styles.value]} allowFontScaling={false}>Status</Text>
               <TouchableOpacity
-                style={styles.dropdown}
+                style={[styles.dropdown,styles.value]}
                 onPress={() => handleStatusSelect("")}
               >
                 <Text style={styles.dropdownText}>
@@ -228,19 +255,19 @@ const LeadInfoScreen = () => {
 
         {selectedCards.includes(2) && (
           <View style={styles.contactContainer}>
-            <Text style={styles.label}>Contact Info</Text>
+            <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Contact Info</Text>
             <View>
-              <Text style={styles.value}>{leadData.leadPhone}</Text>
-              <Text style={styles.value}>{leadData.leadEmail}</Text>
+              <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{leadData.leadPhone}</Text>
+              <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{leadData.leadEmail}</Text>
             </View>
           </View>
         )}
         {selectedCards.includes(3) && (
           <View style={styles.containerRem}>
             <View style={styles.headerRem}>
-              <Text style={styles.headerText}>Reminders</Text>
+              <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Reminders</Text>
               <TouchableOpacity onPress={() =>  setRminderIsVisible(true)}>
-                <Text style={styles.addNew}>Add New</Text>
+                <Text style={[globalStyles.h7,globalStyles.fontfm,styles.addNew]} allowFontScaling={false}>Add New</Text>
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.remindersList}>
@@ -266,9 +293,9 @@ const LeadInfoScreen = () => {
         {selectedCards.includes(5) && (
            <View style={styles.containerRem}>
            <View style={styles.headerRem}>
-             <Text style={styles.headerText}>Remark</Text>
+             <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Remark</Text>
              <TouchableOpacity onPress={() => setIsVisible(true)}>
-               <Text style={styles.addNew}>Add Remark</Text>
+               <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.addNew]} allowFontScaling={false}>Add Remark</Text>
              </TouchableOpacity>
            </View>
            <ScrollView style={styles.remindersList}>
@@ -289,14 +316,15 @@ const LeadInfoScreen = () => {
     <>
       <View style={styles.container}>
         <ScrollView style={styles.scrollView}>
+          {permission?.ADMIN || permission.CRM ? ( <>
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <View style={styles.statusBadge}>
-                <Text style={styles.statusText}>{leadData.stage}</Text>
+                <Text style={[styles.statusText,globalStyles.h8]} allowFontScaling={false}>{leadData.stage}</Text>
               </View>
-              <Text style={styles.name}>{leadData.leadName}</Text>
-              <Text>{leadData.project_name}</Text>
-              <Text>{leadData.projecttype_name}</Text>
+              <Text style={[globalStyles.h4,globalStyles.fs1]} allowFontScaling={false}>{leadData.leadName}</Text>
+              <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{leadData.project_name}</Text>
+              <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{leadData.projecttype_name}</Text>
             </View>
             <TouchableOpacity
               onPress={() => handleDialPress(leadData.leadPhone)}
@@ -313,6 +341,31 @@ const LeadInfoScreen = () => {
               </View>
             </TouchableOpacity>
           </View>
+          </>) : (<View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <View style={styles.statusBadge}>
+                <Text style={[styles.statusText,globalStyles.h8]} allowFontScaling={false}>{myLeadData.stage}</Text>
+              </View>
+              <Text style={[globalStyles.h2,globalStyles.fs1]} allowFontScaling={false}>{myLeadData.leadName}</Text>
+              <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{myLeadData.project_name}</Text>
+              <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{myLeadData.projecttype_name}</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => handleDialPress(myLeadData.leadPhone)}
+            >
+              <View style={styles.iconContainer}>
+                <Image
+                  source={require("../../assets/blue_call_icon.png")}
+                  style={styles.icon}
+                />
+                {/* <Image
+                source={require("../../assets/whatsapp_icon.png")}
+                style={styles.icon}
+              /> */}
+              </View>
+            </TouchableOpacity>
+          </View>)}
+         
 
           <ScrollView
             horizontal
@@ -357,7 +410,7 @@ const LeadInfoScreen = () => {
               ]}
               onPress={() => handleChangeStage()}
             >
-              <Text style={styles.submitButtonText}>Submit</Text>
+              <Text style={[styles.submitButtonText,globalStyles.h6,globalStyles.fontfm]}>Submit</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -408,10 +461,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
   },
-  name: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
   date: {
     color: "#888",
   },
@@ -425,12 +474,10 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: "#FFF",
-    fontSize: 12,
   },
   iconContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    // width: 120,
   },
   icon: {
     marginHorizontal: 10,
@@ -451,17 +498,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   selectedCard: {
-    backgroundColor: "blue",
+    backgroundColor: "#3D48E5",
   },
   cardText: {
     color: "black",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight:500,
   },
   selectedCardText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight:500,
   },
   infoContainer: {
     marginBottom: 20,
@@ -484,16 +531,8 @@ const styles = StyleSheet.create({
   reminderItem: {
     marginBottom: 15,
   },
-  label: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-    marginTop: 5,
-  },
   value: {
-    fontSize: 16,
-    color: "black",
-    marginTop: 10,
+    marginTop: 5,
   },
   dropdown: {
     flexDirection: "row",
@@ -503,7 +542,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
-    marginTop: 10,
+    // marginTop: 10,
   },
   dropdownText: {
     fontSize: 16,
@@ -545,15 +584,11 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    // fontSize: 16,
+    // fontWeight: "bold",
   },
   addNew: {
     color: "blue",
-    fontWeight: "bold",
-  },
-  headerText: {
-    fontSize: 18,
     fontWeight: "bold",
   },
   dateText: {
@@ -609,7 +644,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   leftpush: {
-    marginLeft: 55,
+    marginLeft: 30,
   },
 });
 

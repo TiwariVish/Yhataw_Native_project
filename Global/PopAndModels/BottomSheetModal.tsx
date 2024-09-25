@@ -63,8 +63,8 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 
   React.useEffect(() => {
     translateY.value = withSpring(visible ? 0 : screenHeight, {
-      damping: 15, // Bouncy effect
-      stiffness: 100, // Controls the stiffness of the spring
+      damping: 15, 
+      stiffness: 100, 
     });
   }, [visible]);
 
@@ -163,7 +163,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     height: 125,
-    elevation: 5,
     marginBottom: 15,
   },
   image: {
