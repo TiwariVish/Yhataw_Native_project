@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 interface LeadStatusProps {
   selectedCard: number;
@@ -101,8 +102,8 @@ function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatu
               <Text
                 style={[
                   styles.cardText,
-                  selectedCard === item.id && styles.selectedCardText,
-                ]}
+                  selectedCard === item.id && styles.selectedCardText, globalStyles.h7,globalStyles.fs3
+                ]}  allowFontScaling={false}
               >
                 {item.content}
               </Text>
@@ -123,8 +124,8 @@ function LeadStatus({ selectedCard, setSelectedCard ,onSearchChange }: LeadStatu
               <Text
                 style={[
                   styles.cardText,
-                  selectedCard === item.id && styles.selectedCardText,
-                ]}
+                  selectedCard === item.id && styles.selectedCardText,  globalStyles.h7,globalStyles.fs3
+                ]}  allowFontScaling={false}
               >
                 {item.content}
               </Text>
@@ -170,13 +171,9 @@ const styles = StyleSheet.create({
   },
   cardText: {
     color: "black",
-    fontSize: 14,
-    fontWeight: 500,
   },
   selectedCardText: {
     color: "white",
-    fontSize: 14,
-    fontWeight:500,
   },
   searchContainer: {
     flexDirection: "row",

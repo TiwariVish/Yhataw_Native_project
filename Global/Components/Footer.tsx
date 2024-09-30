@@ -4,6 +4,7 @@ import BottomSheetModal from "../PopAndModels/BottomSheetModal";
 import { getPerosnalDetails } from "../../Components/Screens/MyProfileService";
 import store from "../../utils/store";
 import { Avatar } from 'react-native-paper';
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 function Footer({ navigate }) {
   const [selectedIcon, setSelectedIcon] = useState(null);
@@ -30,7 +31,7 @@ function Footer({ navigate }) {
       navigate("UserProfile");
     }
     if (iconName === "pluscircle") {
-      setIsVisible(true); // Show modal when plus circle icon is pressed
+      setIsVisible(true); 
     }
   };
 
@@ -45,7 +46,7 @@ function Footer({ navigate }) {
             source={require("../../assets/home_icon.png")}
             style={styles.icon}
           />
-          <Text style={styles.iconLabel}>Home</Text>
+          <Text style={[styles.iconLabel,globalStyles.h8]} allowFontScaling={false}>Home</Text>
         </TouchableOpacity>
 
         <View style={styles.centerIconContainer}>
@@ -76,10 +77,10 @@ function Footer({ navigate }) {
              <Avatar.Icon 
         size={35} 
         icon="account" 
-        color="white" // Icon color
-        style={{ backgroundColor: '#3D48E5' }} // Background color
+        color="white"
+        style={{ backgroundColor: '#3D48E5' }} 
       />
-          <Text style={styles.iconLabel}>Profile</Text>
+          <Text style={[styles.iconLabel , globalStyles.h8]}  allowFontScaling={false}>Profile</Text>
         </TouchableOpacity>
       </View>
       <BottomSheetModal
@@ -133,8 +134,6 @@ const styles = StyleSheet.create({
     height: 60,
   },
   iconLabel: {
-    color: "blue",
-    fontSize: 12,
     marginTop: 5,
     textDecorationLine: "none",
   },

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { AntDesign } from "@expo/vector-icons"; 
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 interface CustomProps {
   cardContent: React.ReactNode;
@@ -26,9 +27,11 @@ const CustomCard: React.FC<CustomProps> = ({
         >
           <AntDesign name="calendar" size={15} color="white" />
         </View>
-        <Text style={styles.calendarText}>{calendarText}</Text>
+        <Text style={[styles.calendarText,globalStyles.h5,globalStyles.fs2,]}  allowFontScaling={false}>{calendarText}</Text>
       </View>
-      <View style={styles.cardContent}>{cardContent}</View>
+      <View style={styles.cardContent}>
+      <Text style={[styles.calendarText,globalStyles.h5,globalStyles.fs2,]}  allowFontScaling={false}> {cardContent}</Text>
+       </View>
     </View>
   );
 };
@@ -53,8 +56,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   calendarText: {
-    fontSize: 24,
-    color: "black",
     marginLeft: 5,
   },
   cardContent: {

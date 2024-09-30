@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./Screens/LoginScreen";
@@ -11,13 +11,33 @@ import { RootState } from "../utils/store";
 import LeadInfoScreen from "./Screens/LeadInfoScreen";
 import CustomerFeedback from "./Screens/CustomerFeedback";
 import ErrorPage from "../Global/Components/ErrorPage";
-import { Text } from 'react-native';
+import { Alert, Text } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 const Stack = createNativeStackNavigator();
 
 const Navigation: React.FC = () => {
   const { authenticated } = useSelector((state: RootState) => state.auth);
   console.log(authenticated, "sdpkfvndefovndfjobndjobdb");
+
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected ?? true);
+      if (!state.isConnected) {
+        Alert.alert("No Internet Connection", "Please check your network connection.");
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  if (!isConnected) {
+    return <ErrorPage />;
+  }
 
   return (
     <NavigationContainer>

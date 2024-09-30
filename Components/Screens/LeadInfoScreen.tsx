@@ -121,7 +121,7 @@ const LeadInfoScreen = () => {
     try {
       const body = {
         ["id"]: myLeadData?._id,
-        ["stage"]: myLeadData.stage,
+        ["stage"]: selectedStatus,
       };
       const response = await changeStage(body);
       navigation.navigate("Dashboard");
@@ -387,8 +387,8 @@ const LeadInfoScreen = () => {
                     style={[
                       styles.cardText,
                       selectedCards.includes(label.id) &&
-                        styles.selectedCardText,
-                    ]}
+                        styles.selectedCardText, globalStyles.h7,globalStyles.fs3
+                    ]} allowFontScaling={false}
                   >
                     {label.content}
                   </Text>
@@ -410,7 +410,7 @@ const LeadInfoScreen = () => {
               ]}
               onPress={() => handleChangeStage()}
             >
-              <Text style={[styles.submitButtonText,globalStyles.h6,globalStyles.fontfm]}>Submit</Text>
+              <Text style={[styles.submitButtonText,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>Submit</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -502,13 +502,9 @@ const styles = StyleSheet.create({
   },
   cardText: {
     color: "black",
-    fontSize: 14,
-    fontWeight:500,
   },
   selectedCardText: {
     color: "white",
-    fontSize: 14,
-    fontWeight:500,
   },
   infoContainer: {
     marginBottom: 20,

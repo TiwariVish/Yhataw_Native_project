@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../utils/store';
 import { getTeamList } from '../../Components/Screens/DashboardService';
+import { globalStyles } from '../../GlobalCss/GlobalStyles';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -59,13 +60,6 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({ visible, onClose, onStatu
     setMemberDropdownItems(updatedItems);
   };
 
-  // const toggleCheckbox = (id: string) => {
-  //   const updatedItems = memberdropdownItems.map(item => 
-  //     item.id === id ? { ...item, checked: !item.checked } : item
-  //   );
-  //   setMemberDropdownItems(updatedItems);
-  // };
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
@@ -93,7 +87,7 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({ visible, onClose, onStatu
                           item.checked && styles.checkboxChecked,
                         ]}
                       />
-                      <Text style={styles.checkboxText}>{item.team_name}</Text>
+                      <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>{item.team_name}</Text>
                     </View>
                   </TouchableOpacity>
                 ))}
@@ -148,16 +142,13 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: 'blue',
+    borderColor: '#000',
     marginRight: 10,
   },
   checkboxChecked: {
-    backgroundColor: 'blue',
+    backgroundColor: '#000',
   },
-  checkboxText: {
-    fontSize: 16,
-    color: 'black',
-  },
+
 });
 
 export default MemberPopOver;

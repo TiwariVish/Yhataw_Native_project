@@ -16,6 +16,7 @@ import { BlurView } from "expo-blur";
 import { assignToMembers, getAllTeamMembersData } from "../../Components/Screens/LeadInfoScreenService";
 import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -134,7 +135,7 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
                           i.checked && styles.checkboxChecked,
                         ]}
                       />
-                      <Text style={styles.checkboxText}>{i.name}</Text>
+                      <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>{i.name}</Text>
                     </View>
                   </TouchableOpacity>
                 ))}
@@ -197,10 +198,7 @@ const styles = StyleSheet.create({
   checkboxChecked: {
     backgroundColor: "#000",
   },
-  checkboxText: {
-    fontSize: 16,
-    color: "black",
-  },
+
 });
 
 export default AssignedMemberPop;

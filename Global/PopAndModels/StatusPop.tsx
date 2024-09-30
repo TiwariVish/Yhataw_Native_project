@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { getAllStage } from '../../Components/Screens/LeadInfoScreenService';
+import { globalStyles } from '../../GlobalCss/GlobalStyles';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -48,8 +49,8 @@ const StatusPop: React.FC<StatusPopProps> = ({ visible, onClose ,onStatusSelect}
     };
 
     const handleDropdownItemPress = (statusName: string) => {
-        onStatusSelect(statusName); // Call the callback function with selected status
-        onClose(); // Close the modal
+        onStatusSelect(statusName);
+        onClose(); 
     };
 
     return (
@@ -64,7 +65,7 @@ const StatusPop: React.FC<StatusPopProps> = ({ visible, onClose ,onStatusSelect}
                       key={item._id}
                       onPress={() => handleDropdownItemPress(item.status_name)}
                     >
-                      <Text style={styles.dropdownItem}>{item.status_name}</Text>
+                      <Text style={[globalStyles.h5,globalStyles.fontfm,styles.dropdownItem]} allowFontScaling={false}>{item.status_name}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -108,9 +109,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   dropdownItem: {
-    fontSize: 16,
     paddingVertical: 10,
-    color: "black",
   },
 });
 

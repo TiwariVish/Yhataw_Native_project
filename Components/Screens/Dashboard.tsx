@@ -292,9 +292,7 @@ const Dashboard: React.FC<CustomProps> = () => {
     }
   );
 
-  const check = () => {
-    navigation.navigate("ErrorPage");
-  };
+ 
 
 
   const onRefresh = async () => {
@@ -500,7 +498,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                       name="right"
                       size={20}
                       color="black"
-                      onPress={() => check()}
+                    
                     />
                   </View>
                 </View>

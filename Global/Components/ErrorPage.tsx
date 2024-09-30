@@ -1,9 +1,16 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 function ErrorPage() {
   const handleRetry = () => {
-    // Add your retry logic here
+   NetInfo.fetch().then(state => {
+    if (state.isConnected) {
+      console.log('Internet is back!::::::::::');
+    } else {
+      console.log('Still no internet:::::::::::::::');
+    }
+  });
   };
 
   return (
