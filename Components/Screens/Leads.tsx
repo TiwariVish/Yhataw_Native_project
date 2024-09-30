@@ -42,23 +42,22 @@ function Leads() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    getAllLeadsData();
+    getAllLeadsData(false,0);
   }, []);
 
-  const payload = {
-    userId: store.getState().auth.userId,
-    lead_id: offialDetailState.team_id?.id,
-    pageNo: paginationModel.page,
-    pageSize: paginationModel.pageSize,
-  };
-
-  const getAllLeadsData = async (isLoadMore = false) => {
+  const getAllLeadsData = async (isLoadMore = false,pageNo:any) => {
     try {
       if (isLoadMore) {
         setLoadingMore(true);
       } else {
         setLoading(true);
       }
+      let payload = {
+        userId: store.getState().auth.userId,
+        lead_id: offialDetailState.team_id?.id,
+        pageNo: pageNo,
+        pageSize: paginationModel.pageSize,
+      };
       const response = await getAllUsers(payload);
       setLeadData((prevLeads) => [...prevLeads, ...response.data]);
       const response2 = await getAllUsersMyLead(payload);
@@ -131,13 +130,15 @@ function Leads() {
 
   const filteredLeads = getFilteredLeads();
 
-  const handleLoadMore = () => {
+
+
+  const handleLoadMore = (pageToGo:any) => {
     if (!loadingMore) {
       setPaginationModel((prevModel) => ({
         ...prevModel,
-        page: prevModel.page + 1,
+        page:pageToGo,
       }));
-      getAllLeadsData(true);
+      getAllLeadsData(true,pageToGo);
     }
   };
 
@@ -173,7 +174,7 @@ function Leads() {
               layoutMeasurement.height + contentOffset.y >=
               contentSize.height - 20
             ) {
-              handleLoadMore();
+              handleLoadMore(paginationModel.page+1);
             }
           }}
           scrollEventThrottle={16}
