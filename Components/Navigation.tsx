@@ -54,7 +54,7 @@ const Navigation: React.FC = () => {
               component={Leads}
               options={{
                 headerTitle: () => (
-                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}>
+                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}  allowFontScaling={false}>
                     Leads
                   </Text>
                 ),
@@ -70,7 +70,7 @@ const Navigation: React.FC = () => {
               component={MyProfile}
               options={{
                 headerTitle: () => (
-                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}>
+                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}  allowFontScaling={false}>
                     My Profile
                   </Text>
                 ),
@@ -87,7 +87,7 @@ const Navigation: React.FC = () => {
               options={{
                 // title : "Lead Info Screen",
                 headerTitle: () => (
-                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}>
+                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}  allowFontScaling={false}>
                     Lead Info Screen
                   </Text>
                 ),
@@ -103,7 +103,7 @@ const Navigation: React.FC = () => {
               component={CustomerFeedback}
               options={{
                 headerTitle: () => (
-                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}>
+                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}  allowFontScaling={false}>
                    Customer Feedback
                   </Text>
                 ),

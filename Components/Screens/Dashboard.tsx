@@ -494,12 +494,12 @@ const Dashboard: React.FC<CustomProps> = () => {
                     </Text>
                   </View>
                   <View style={styles.iconFord}>
-                    <AntDesign
+                    {/* <AntDesign
                       name="right"
                       size={20}
                       color="black"
                     
-                    />
+                    /> */}
                   </View>
                 </View>
                 <ScrollView
@@ -637,15 +637,10 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   role: {
-    // fontSize: 14,
-    // color: "gray",
     marginLeft: 25,
     paddingTop:5
   },
   card: {
-    // backgroundColor: "gray",
-    // borderColor: "gray",
-    // borderWidth: 0,
     padding: 10,
     margin: 10,
     borderRadius: 8,
@@ -657,7 +652,6 @@ const styles = StyleSheet.create({
   },
   horizontalScroll: {
     flexDirection: "row",
-    // margin:5
     paddingHorizontal: "2%"
   },
   horizontalScroll1:{

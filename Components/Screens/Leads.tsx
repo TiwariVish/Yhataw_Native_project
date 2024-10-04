@@ -99,11 +99,14 @@ function Leads() {
     }
 
     if (searchQuery) {
+      const firstChar = searchQuery.charAt(0).toLowerCase(); 
       return leadsToFilter.filter(
         (lead) =>
-          lead.leadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.project_name.toLowerCase().includes(searchQuery.toLowerCase())
+          lead.leadName.toLowerCase().startsWith(firstChar) 
+        // || lead.project_name.toLowerCase().includes(searchQuery.toLowerCase())
+        
       );
+  
     }
 
     return leadsToFilter;

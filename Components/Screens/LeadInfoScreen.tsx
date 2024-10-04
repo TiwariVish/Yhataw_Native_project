@@ -538,7 +538,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
-    // marginTop: 10,
   },
   dropdownText: {
     fontSize: 16,
@@ -580,8 +579,6 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: "white",
-    // fontSize: 16,
-    // fontWeight: "bold",
   },
   addNew: {
     color: "blue",

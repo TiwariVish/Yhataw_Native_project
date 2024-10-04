@@ -129,7 +129,7 @@ const Profile = ({ navigation }) => {
                     globalStyles.h6,
                     globalStyles.fs1,
                     globalStyles.fontfm,
-                  ]}
+                  ]}  allowFontScaling={false}
                 >
                   Are You Sure you want to logout?
                 </Text>

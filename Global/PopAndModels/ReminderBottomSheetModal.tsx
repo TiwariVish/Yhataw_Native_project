@@ -57,14 +57,21 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
   }, [visible]);
 
   const submitReminder = async () => {
+    const formattedDate = date.toLocaleString("en-GB", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
     const body = {
       leadId: leadData._id,
       userId,
       title,
       note,
-      date: date.toISOString(),
-    };
-
+      date: formattedDate,
+    }; 
     try {
       const newReminder = await saveReminder(body);
       const response = await getReminder(leadData._id);
@@ -81,7 +88,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
     };
   });
   const showDatePicker = () => {
-    console.log("====================================");
+    console.log("================");
     setDatePickerVisibility(true);
   };
 
