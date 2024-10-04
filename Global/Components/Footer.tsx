@@ -6,7 +6,7 @@ import store from "../../utils/store";
 import { Avatar } from 'react-native-paper';
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
-function Footer({ navigate }) {
+function Footer({ navigate , onHomePress  }) {
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -26,6 +26,9 @@ function Footer({ navigate }) {
   };
 
   const handleIconPress = (iconName) => {
+    if (iconName === "home") {
+      onHomePress();  
+    }
     setSelectedIcon(iconName);
     if (iconName === "user") {
       navigate("UserProfile");
@@ -97,12 +100,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "white",
-    height: 60,
+    height: "10%",
     paddingHorizontal: 30,
     position: "absolute",
     bottom: 0,
     width: "100%",
-    elevation: 5,
+    // elevation: 5,
   },
   iconContainer: {
     alignItems: "center",

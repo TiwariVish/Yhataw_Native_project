@@ -283,7 +283,7 @@ const Dashboard: React.FC<CustomProps> = () => {
       useNativeDriver: false,
       listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const offsetY = event.nativeEvent.contentOffset.y;
-        if (offsetY > 100) {
+        if (offsetY > 50) {
           setFooterVisible(false);
         } else {
           setFooterVisible(true);
@@ -593,7 +593,7 @@ const Dashboard: React.FC<CustomProps> = () => {
           </ScrollView>
         </View>
       )}
-      {isFooterVisible && <Footer navigate={handleProfile} />}
+      {isFooterVisible && <Footer navigate={handleProfile} onHomePress={onRefresh} />}
     </>
   );
 };
@@ -602,6 +602,11 @@ const styles = StyleSheet.create({
   contmain: {
     backgroundColor: "white",
     height: "100%",
+    paddingTop: 0,   
+    paddingRight: 0,
+    paddingBottom: 100, 
+    paddingLeft: 0,   
+    
   },
   header: {
     flexDirection: "row",

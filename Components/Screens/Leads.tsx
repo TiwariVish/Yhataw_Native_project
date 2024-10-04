@@ -99,12 +99,17 @@ function Leads() {
     }
 
     if (searchQuery) {
-      const firstChar = searchQuery.charAt(0).toLowerCase(); 
-      return leadsToFilter.filter(
-        (lead) =>
-          lead.leadName.toLowerCase().startsWith(firstChar) 
-        // || lead.project_name.toLowerCase().includes(searchQuery.toLowerCase())
+      // const firstChar = searchQuery.charAt(0).toLowerCase(); 
+      // return leadsToFilter.filter(
+      //   (lead) =>
+      //     lead.leadName.toLowerCase().startsWith(firstChar) 
+      //   // || lead.project_name.toLowerCase().includes(searchQuery.toLowerCase())
         
+      // );
+      const firstThreeChars = searchQuery.substring(0, 3).toLowerCase(); 
+      return leadsToFilter.filter(
+          (lead) =>
+              lead.leadName.toLowerCase().startsWith(firstThreeChars)
       );
   
     }

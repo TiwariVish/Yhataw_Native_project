@@ -59,7 +59,7 @@ const CustomButton = (props: CustomProps) => {
           <ActivityIndicator size="small" color="#000000" />
         </View>
       ) : (
-        <Text style={[styles.label, props.labelStyle]}>{props.label}</Text>
+        <Text style={[styles.label, props.labelStyle]}  allowFontScaling={false}>{props.label}</Text>
       )}
       {props.endIcon && <IconButton icon={props.endIcon} />}
     </TouchableOpacity>
