@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Linking,
+  RefreshControl,
 } from "react-native";
 import LeadStatus from "./LeadStatus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -33,6 +34,7 @@ function Leads() {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [dataMyLead, setDataMyLead] = useState<any>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const [offialDetailState, setOffialDetailState] = useState<any>({});
   const [paginationModel, setPaginationModel] = useState({
     pageSize: 25,
@@ -44,6 +46,21 @@ function Leads() {
   useEffect(() => {
     getAllLeadsData(false,0);
   }, []);
+
+  const onRefresh  = async() =>{
+    setRefreshing(true);
+    try{
+      setLeadData([]); 
+      setDataMyLead([]); 
+      await getAllLeadsData(false, 0);
+    }
+    catch (error) {
+      console.error("Error during refresh:", error);
+    } finally {
+      setRefreshing(false);
+    }
+
+  }
 
   const getAllLeadsData = async (isLoadMore = false,pageNo:any) => {
     try {
@@ -185,7 +202,10 @@ function Leads() {
               handleLoadMore(paginationModel.page+1);
             }
           }}
-          scrollEventThrottle={16}
+          scrollEventThrottle={16} 
+
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> }
         >
           <View style={styles.content}>
             <LeadStatus

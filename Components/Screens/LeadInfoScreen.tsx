@@ -124,7 +124,8 @@ const LeadInfoScreen = () => {
         ["stage"]: selectedStatus,
       };
       const response = await changeStage(body);
-      navigation.navigate("Dashboard");
+      alert("Your status has been changed successfully.");
+      navigation.navigate("Leads");
     } catch {}
   };
 
