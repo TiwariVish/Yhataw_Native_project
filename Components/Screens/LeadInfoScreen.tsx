@@ -11,13 +11,11 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
-import BottomSheetModal from "../../Global/PopAndModels/BottomSheetModal";
 import ReminderBottomSheetModal from "../../Global/PopAndModels/ReminderBottomSheetModal";
 import {
-  changeAt,
+  assignToMembers,
   changeStage,
   getAllStage,
-  getAllTeamMembersData,
   getTeamList,
 } from "./LeadInfoScreenService";
 import StatusPop from "../../Global/PopAndModels/StatusPop";
@@ -28,6 +26,8 @@ import RemarkPop from "../../Global/PopAndModels/RemarkPop";
 import { useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
+import FlipButtonBar from "../../Global/Components/FlipButtonBar";
+import { Feather } from "@expo/vector-icons";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
@@ -37,18 +37,21 @@ const leadInfoStatus = [
   { id: 5, content: "Remark" },
 ];
 
-
+interface Member {
+  id: string;
+  name: string;
+}
 
 const LeadInfoScreen = () => {
   const { leadData } = useSelector((state: RootState) => state.auth);
-  const {myLeadData} =useSelector((state: RootState) => state.auth);
+  const { myLeadData } = useSelector((state: RootState) => state.auth);
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
   const [isVisible, setIsVisible] = useState(false);
   const [rminderisVisible, setRminderIsVisible] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [dropdownData, setDropdownData] = useState<any>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [assignedToMember, setAssignedToMember] = useState<string | null>(null);
+  const [assignedToMembers, setAssignedToMembers] = useState<Member[]>([]);
   const [selectedTeams, setselectedTeams] = useState<string | null>(null);
   const [dropdownItems, setDropdownItems] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -58,13 +61,11 @@ const LeadInfoScreen = () => {
   const { privileges } = useSelector((state: RootState) => state.auth);
   const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
   const [allReminder, setAllRemider] = useState<any>([]);
-  const [newRemarks,setNewRemarks] = useState([])
+  const [newRemarks, setNewRemarks] = useState([]);
   const [reminderLeads, setRemiderLeads] = useState([]);
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
   useEffect(() => {
-    console.log(myLeadData,'myLeadDatamyLeadData');
-    
     getLeadStage();
   }, []);
 
@@ -92,10 +93,7 @@ const LeadInfoScreen = () => {
     } catch {}
   };
 
-
   const handleStatusSelect = (status: string) => {
-    console.log(status, "statusstatus");
-
     setSelectedStatus(status);
     setModalVisible(true);
   };
@@ -104,7 +102,19 @@ const LeadInfoScreen = () => {
     setMemberModalVisible(true);
   };
 
-  const onselectMember = (status: string) => {
+  const onselectMember = (member: any) => {
+    const newMembers: Member[] =
+      Array.isArray(member) && member.length > 0
+        ? member.map((m) => ({ id: m._id, name: m.name }))
+        : [];
+    setAssignedToMembers((prevMembers) => {
+      const uniqueMembers = newMembers.filter(
+        (newMember) =>
+          !prevMembers.some((prevMember) => prevMember.id === newMember.id)
+      );
+      return [...prevMembers, ...uniqueMembers];
+    });
+
     setisassineMemberModalVisible(true);
   };
 
@@ -112,21 +122,35 @@ const LeadInfoScreen = () => {
     setSelectedCards([id]);
   };
 
-  const handleCare_addRemark = async (newRemark: any) =>{
+  const handleCare_addRemark = async (newRemark: any) => {
     setNewRemarks((prevRemarks) => [...prevRemarks, newRemark]);
-    console.log("Remark Submitted: ", newRemark); 
-  }
- 
+    console.log("Remark Submitted: ", newRemark);
+  };
   const handleChangeStage = async () => {
     try {
-      const body = {
-        ["id"]: myLeadData?._id,
-        ["stage"]: selectedStatus,
-      };
-      const response = await changeStage(body);
-      alert("Your status has been changed successfully.");
+      if (selectedStatus) {
+        const bodyForStageChange = {
+          id: myLeadData?._id,
+          stage: selectedStatus,
+        };
+        const response = await changeStage(bodyForStageChange);
+        alert("Your status has been changed successfully.");
+      }
+      if (assignedToMembers && assignedToMembers.length > 0) {
+        const assignedToUserIds = assignedToMembers
+          .map((member) => member.id)
+          .map((id) => `'${id}'`)
+          .join(",");
+        const bodyForAssignMembers = {
+          ["id"]: leadData._id,
+          ["AssignToUser"]: assignedToUserIds,
+        };
+        const res = await assignToMembers(bodyForAssignMembers);
+      }
       navigation.navigate("Leads");
-    } catch {}
+    } catch (error) {
+      console.error("Failed to process change or assign member:", error);
+    }
   };
 
   const handleDialPress = (phoneNumber) => {
@@ -143,12 +167,9 @@ const LeadInfoScreen = () => {
       .catch((err) => console.error("Error opening dialer:", err));
   };
 
-  const handleNewReminder = async(newReminder:any) => {
+  const handleNewReminder = async (newReminder: any) => {
     setRemiderLeads((prev) => [...prev, newReminder]);
   };
-
-  
-
   const renderContent = () => {
     return (
       <>
@@ -156,45 +177,124 @@ const LeadInfoScreen = () => {
           <View style={styles.infoContainer}>
             {permission?.ADMIN || permission.CRM ? (
               <View style={styles.row}>
-              <View style={styles.column}>
-                <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Lead ID</Text>
-                <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{leadData.uid}</Text>
+                <View style={styles.column}>
+                  <Text
+                    style={[globalStyles.h5, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    Lead ID
+                  </Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                    allowFontScaling={false}
+                  >
+                    {leadData.uid}
+                  </Text>
+                </View>
+                <View style={styles.column}>
+                  <Text
+                    style={[globalStyles.h5, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    Project
+                  </Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                    allowFontScaling={false}
+                  >
+                    {leadData.form_name}
+                  </Text>
+                </View>
+                <View style={styles.column}>
+                  <Text
+                    style={[
+                      globalStyles.h5,
+                      globalStyles.fontfm,
+                      styles.leftpush,
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    Source
+                  </Text>
+                  <Text
+                    style={[
+                      globalStyles.h7,
+                      globalStyles.fontfm,
+                      styles.value,
+                      styles.leftpush,
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    {leadData.source}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.column}>
-                <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Project</Text>
-                <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{leadData.form_name}</Text>
+            ) : (
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <Text
+                    style={[globalStyles.h5, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    Lead ID
+                  </Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                    allowFontScaling={false}
+                  >
+                    {myLeadData.uid}
+                  </Text>
+                </View>
+                <View style={styles.column}>
+                  <Text
+                    style={[globalStyles.h5, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    Project
+                  </Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                    allowFontScaling={false}
+                  >
+                    {myLeadData.form_name}
+                  </Text>
+                </View>
+                <View style={styles.column}>
+                  <Text
+                    style={[
+                      globalStyles.h5,
+                      globalStyles.fontfm,
+                      styles.leftpush,
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    Source
+                  </Text>
+                  <Text
+                    style={[
+                      globalStyles.h7,
+                      globalStyles.fontfm,
+                      styles.value,
+                      styles.leftpush,
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    {myLeadData.source}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.column}>
-                <Text style={[globalStyles.h5,globalStyles.fontfm , styles.leftpush]} allowFontScaling={false}>Source</Text>
-                <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value ,styles.leftpush]} allowFontScaling={false}>
-                  {leadData.source}
-                </Text>
-              </View>
-            </View>
-          ) :(  <View style={styles.row}>
-            <View style={styles.column}>
-              <Text  style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Lead ID</Text>
-              <Text  style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{myLeadData.uid}</Text>
-            </View>
-            <View style={styles.column}>
-              <Text  style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Project</Text>
-              <Text  style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{myLeadData.form_name}</Text>
-            </View>
-            <View style={styles.column}>
-              <Text style={[globalStyles.h5,globalStyles.fontfm , styles.leftpush]} allowFontScaling={false}>Source</Text>
-              <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value ,styles.leftpush]} allowFontScaling={false}>
-                {myLeadData.source}
-              </Text>
-            </View>
-          </View>)}
-            <>
-            
-            </>
+            )}
+
             {permission?.ADMIN || permission.CRM ? (
               <>
-                <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>Assigned To</Text>
+                <Text
+                  style={[globalStyles.h7, globalStyles.fontfm]}
+                  allowFontScaling={false}
+                >
+                  Assigned To
+                </Text>
                 <TouchableOpacity
-                  style={[styles.dropdown,styles.value]}
+                  style={[styles.dropdown, styles.value]}
                   onPress={() => handleMemberStatusSelect()}
                 >
                   <Text style={styles.dropdownText}>
@@ -209,14 +309,22 @@ const LeadInfoScreen = () => {
                     ]}
                   />
                 </TouchableOpacity>
-                <Text style={[globalStyles.h7,globalStyles.fontfm,styles.value]} allowFontScaling={false}>Assigned To Member</Text>
+                <Text
+                  style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                  allowFontScaling={false}
+                >
+                  Assigned To Member
+                </Text>
                 <TouchableOpacity
-                  style={[styles.dropdown,styles.value]}
+                  style={[styles.dropdown, styles.value]}
                   onPress={() => onselectMember("")}
                 >
                   <Text style={styles.dropdownText}>
-                    {" "}
-                    {assignedToMember ? assignedToMember : "Assigned To Member"}
+                    {assignedToMembers.length > 0
+                      ? assignedToMembers
+                          .map((member) => member.name)
+                          .join(", ")
+                      : "Assigned To Member"}
                   </Text>
                   <Icon
                     name="chevron-down-outline"
@@ -232,9 +340,14 @@ const LeadInfoScreen = () => {
               ""
             )}
             <>
-              <Text  style={[globalStyles.h7,globalStyles.fontfm,styles.value]} allowFontScaling={false}>Status</Text>
+              <Text
+                style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                allowFontScaling={false}
+              >
+                Status
+              </Text>
               <TouchableOpacity
-                style={[styles.dropdown,styles.value]}
+                style={[styles.dropdown, styles.value]}
                 onPress={() => handleStatusSelect("")}
               >
                 <Text style={styles.dropdownText}>
@@ -256,19 +369,44 @@ const LeadInfoScreen = () => {
 
         {selectedCards.includes(2) && (
           <View style={styles.contactContainer}>
-            <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Contact Info</Text>
+            <Text
+              style={[globalStyles.h5, globalStyles.fontfm]}
+              allowFontScaling={false}
+            >
+              Contact Info
+            </Text>
             <View>
-              <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{leadData.leadPhone}</Text>
-              <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.value]} allowFontScaling={false}>{leadData.leadEmail}</Text>
+              <Text
+                style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                allowFontScaling={false}
+              >
+                {leadData.leadPhone}
+              </Text>
+              <Text
+                style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                allowFontScaling={false}
+              >
+                {leadData.leadEmail}
+              </Text>
             </View>
           </View>
         )}
         {selectedCards.includes(3) && (
           <View style={styles.containerRem}>
             <View style={styles.headerRem}>
-              <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Reminders</Text>
-              <TouchableOpacity onPress={() =>  setRminderIsVisible(true)}>
-                <Text style={[globalStyles.h7,globalStyles.fontfm,styles.addNew]} allowFontScaling={false}>Add New</Text>
+              <Text
+                style={[globalStyles.h5, globalStyles.fontfm]}
+                allowFontScaling={false}
+              >
+                Reminders
+              </Text>
+              <TouchableOpacity onPress={() => setRminderIsVisible(true)}>
+                <Text
+                  style={[globalStyles.h7, globalStyles.fontfm, styles.addNew]}
+                  allowFontScaling={false}
+                >
+                  Add New
+                </Text>
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.remindersList}>
@@ -290,24 +428,32 @@ const LeadInfoScreen = () => {
             <Text>NO DATA FOUND</Text>
           </View>
         )}
-
         {selectedCards.includes(5) && (
-           <View style={styles.containerRem}>
-           <View style={styles.headerRem}>
-             <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>Remark</Text>
-             <TouchableOpacity onPress={() => setIsVisible(true)}>
-               <Text style={[globalStyles.h7,globalStyles.fontfm ,styles.addNew]} allowFontScaling={false}>Add Remark</Text>
-             </TouchableOpacity>
-           </View>
-           <ScrollView style={styles.remindersList}>
-             {newRemarks.map((reminder, index) => (
-               <View key={index} style={styles.reminderItem}>
-                 <Text style={styles.dateText}>{reminder.data.notes}</Text>
-               </View>
-             ))}
-           </ScrollView>
-         </View>
-         
+          <View style={styles.containerRem}>
+            <View style={styles.headerRem}>
+              <Text
+                style={[globalStyles.h5, globalStyles.fontfm]}
+                allowFontScaling={false}
+              >
+                Remark
+              </Text>
+              <TouchableOpacity onPress={() => setIsVisible(true)}>
+                <Text
+                  style={[globalStyles.h7, globalStyles.fontfm, styles.addNew]}
+                  allowFontScaling={false}
+                >
+                  Add Remark
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.remindersList}>
+              {newRemarks.map((reminder, index) => (
+                <View key={index} style={styles.reminderItem}>
+                  <Text style={styles.dateText}>{reminder.data.notes}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
         )}
       </>
     );
@@ -317,58 +463,94 @@ const LeadInfoScreen = () => {
     <>
       <View style={styles.container}>
         <ScrollView style={styles.scrollView}>
-          {permission?.ADMIN || permission.CRM ? ( <>
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              <View style={styles.statusBadge}>
-                <Text style={[styles.statusText,globalStyles.h8]} allowFontScaling={false}>{leadData.stage}</Text>
+          {permission?.ADMIN || permission.CRM ? (
+            <>
+              <View style={styles.header}>
+                <View style={styles.headerLeft}>
+                  <View style={styles.statusBadge}>
+                    <Text
+                      style={[styles.statusText, globalStyles.h8]}
+                      allowFontScaling={false}
+                    >
+                      {leadData.stage}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[globalStyles.h4, globalStyles.fs1]}
+                    allowFontScaling={false}
+                  >
+                    {leadData.leadName}
+                  </Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    {leadData.project_name}
+                  </Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    {leadData.projecttype_name}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => handleDialPress(leadData.leadPhone)}
+                >
+                  <View style={styles.callIconCircle}>
+                    <Feather name="phone-call" size={24} color="#00C853" />
+                  </View>
+                </TouchableOpacity>
               </View>
-              <Text style={[globalStyles.h4,globalStyles.fs1]} allowFontScaling={false}>{leadData.leadName}</Text>
-              <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{leadData.project_name}</Text>
-              <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{leadData.projecttype_name}</Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => handleDialPress(leadData.leadPhone)}
-            >
-              <View style={styles.iconContainer}>
-                <Image
-                  source={require("../../assets/blue_call_icon.png")}
-                  style={styles.icon}
-                />
-                {/* <Image
+            </>
+          ) : (
+            <View style={styles.header}>
+              <View style={styles.headerLeft}>
+                <View style={styles.statusBadge}>
+                  <Text
+                    style={[styles.statusText, globalStyles.h8]}
+                    allowFontScaling={false}
+                  >
+                    {myLeadData.stage}
+                  </Text>
+                </View>
+                <Text
+                  style={[globalStyles.h2, globalStyles.fs1]}
+                  allowFontScaling={false}
+                >
+                  {myLeadData.leadName}
+                </Text>
+                <Text
+                  style={[globalStyles.h7, globalStyles.fontfm]}
+                  allowFontScaling={false}
+                >
+                  {myLeadData.project_name}
+                </Text>
+                <Text
+                  style={[globalStyles.h7, globalStyles.fontfm]}
+                  allowFontScaling={false}
+                >
+                  {myLeadData.projecttype_name}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => handleDialPress(myLeadData.leadPhone)}
+              >
+                <View style={styles.iconContainer}>
+                  <Image
+                    source={require("../../assets/blue_call_icon.png")}
+                    style={styles.icon}
+                  />
+                  {/* <Image
                 source={require("../../assets/whatsapp_icon.png")}
                 style={styles.icon}
               /> */}
-              </View>
-            </TouchableOpacity>
-          </View>
-          </>) : (<View style={styles.header}>
-            <View style={styles.headerLeft}>
-              <View style={styles.statusBadge}>
-                <Text style={[styles.statusText,globalStyles.h8]} allowFontScaling={false}>{myLeadData.stage}</Text>
-              </View>
-              <Text style={[globalStyles.h2,globalStyles.fs1]} allowFontScaling={false}>{myLeadData.leadName}</Text>
-              <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{myLeadData.project_name}</Text>
-              <Text style={[globalStyles.h7,globalStyles.fontfm]} allowFontScaling={false}>{myLeadData.projecttype_name}</Text>
+                </View>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => handleDialPress(myLeadData.leadPhone)}
-            >
-              <View style={styles.iconContainer}>
-                <Image
-                  source={require("../../assets/blue_call_icon.png")}
-                  style={styles.icon}
-                />
-                {/* <Image
-                source={require("../../assets/whatsapp_icon.png")}
-                style={styles.icon}
-              /> */}
-              </View>
-            </TouchableOpacity>
-          </View>)}
-         
+          )}
 
-          <ScrollView
+          {/* <ScrollView
             horizontal
             style={styles.buttonContainer}
             showsHorizontalScrollIndicator={false}
@@ -396,7 +578,25 @@ const LeadInfoScreen = () => {
                 </View>
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </ScrollView> */}
+
+          <FlipButtonBar
+            segments={leadInfoStatus.map((item) => item.content)}
+            style={{}}
+            selectedSegment={
+              selectedCards.length > 0
+                ? leadInfoStatus[selectedCards[0] - 1]?.content
+                : ""
+            }
+            onSegmentChange={(selectedContent) => {
+              const selectedCard = leadInfoStatus.find(
+                (item) => item.content === selectedContent
+              );
+              if (selectedCard) {
+                handleCardPress(selectedCard.id);
+              }
+            }}
+          />
 
           {renderContent()}
         </ScrollView>
@@ -408,10 +608,20 @@ const LeadInfoScreen = () => {
                 styles.submitButton,
                 selectedCards.length > 1 && styles.activeSubmitButton,
                 selectedStatus && styles.activeSubmitButton,
+                assignedToMembers && styles.activeSubmitButton,
               ]}
               onPress={() => handleChangeStage()}
             >
-              <Text style={[styles.submitButtonText,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>Submit</Text>
+              <Text
+                style={[
+                  styles.submitButtonText,
+                  globalStyles.h6,
+                  globalStyles.fontfm,
+                ]}
+                allowFontScaling={false}
+              >
+                Submit
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -437,9 +647,11 @@ const LeadInfoScreen = () => {
         onSubmit={handleNewReminder}
       />
 
-      <RemarkPop  visible={isVisible}
+      <RemarkPop
+        visible={isVisible}
         onClose={() => setIsVisible(false)}
-        onSubmit={handleCare_addRemark} />
+        onSubmit={handleCare_addRemark}
+      />
     </>
   );
 };
@@ -447,7 +659,7 @@ const LeadInfoScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: "#F4F9FD",
   },
   scrollView: {
     padding: 20,
@@ -639,6 +851,22 @@ const styles = StyleSheet.create({
   },
   leftpush: {
     marginLeft: 30,
+  },
+  flipButtonBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    borderWidth: 2,
+    color: "red",
+  },
+  callIconCircle: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: "#00C853",
   },
 });
 
