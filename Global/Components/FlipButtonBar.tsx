@@ -6,13 +6,14 @@ import { globalStyles } from '../../GlobalCss/GlobalStyles';
 interface FlipButtonBarProps {
   segments: string[];
   showSearch?: boolean;
-  onSegmentChange?: (segment: any) => void;
+  onSegmentChange?: (segment: string) => void;
   onSearchChange?: (text: string) => void;
-  selectedSegment?: any; 
-  style:{}
+  selectedSegment?: string; 
+  style?: {};
+  scrollViewRef?: React.RefObject<ScrollView>;
 }
 
-const FlipButtonBar: React.FC<FlipButtonBarProps> = ({ segments, showSearch = false, onSegmentChange, onSearchChange, selectedSegment,style }) => {
+const FlipButtonBar: React.FC<FlipButtonBarProps> = ({ segments, showSearch = false, onSegmentChange, onSearchChange, selectedSegment, style, scrollViewRef }) => {
   const [searchText, setSearchText] = useState('');
 
   const handleSegmentClick = (segment: string) => {
@@ -31,9 +32,10 @@ const FlipButtonBar: React.FC<FlipButtonBarProps> = ({ segments, showSearch = fa
   const isScrollable = segments.length > 3;
 
   return (
-    <View style={[styles.container,style]}>
+    <View style={[styles.container, style]}>
       <View style={styles.segmentedControl}>
         <ScrollView
+          ref={scrollViewRef} // Pass the ref to ScrollView
           horizontal={isScrollable}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}
@@ -41,13 +43,10 @@ const FlipButtonBar: React.FC<FlipButtonBarProps> = ({ segments, showSearch = fa
           {segments.map((segment) => (
             <TouchableOpacity
               key={segment}
-              style={[
-                styles.segmentButton,
-                selectedSegment === segment && styles.activeSegment,
-              ]}
+              style={[styles.segmentButton, selectedSegment === segment && styles.activeSegment]}
               onPress={() => handleSegmentClick(segment)}
             >
-              <Text style={[styles.segmentText, selectedSegment === segment && styles.activeText,globalStyles.h7,globalStyles.fs3]}  allowFontScaling={false}>
+              <Text style={[styles.segmentText, selectedSegment === segment && styles.activeText, globalStyles.h7, globalStyles.fs3]} allowFontScaling={false}>
                 {segment}
               </Text>
             </TouchableOpacity>
