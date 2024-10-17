@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -126,35 +126,52 @@ const LeadInfoScreen = () => {
     setNewRemarks((prevRemarks) => [...prevRemarks, newRemark]);
     console.log("Remark Submitted: ", newRemark);
   };
+
   const handleChangeStage = async () => {
     try {
+      let statusChanged = false;
+      let membersChanged = false;
+      const waitCallApi = [];
+
       if (selectedStatus) {
         const bodyForStageChange = {
           id: myLeadData?._id,
           stage: selectedStatus,
         };
-        const response = await changeStage(bodyForStageChange);
-        alert("Your status has been changed successfully.");
+        waitCallApi.push(changeStage(bodyForStageChange));
+        statusChanged = true;
       }
+
       if (assignedToMembers && assignedToMembers.length > 0) {
         const assignedToUserIds = assignedToMembers
           .map((member) => member.id)
           .map((id) => `'${id}'`)
           .join(",");
         const bodyForAssignMembers = {
-          ["id"]: leadData._id,
-          ["AssignToUser"]: assignedToUserIds,
+          id: leadData._id,
+          AssignToUser: assignedToUserIds,
         };
-        const res = await assignToMembers(bodyForAssignMembers);
+        waitCallApi.push(assignToMembers(bodyForAssignMembers));
+        membersChanged = true;
       }
+
+      await Promise.all(waitCallApi);
+  
+      if (statusChanged && membersChanged) {
+        alert("Your status and member assignment have been changed successfully.");
+      } else if (statusChanged) {
+        alert("Your status has been changed successfully.");
+      } else if (membersChanged) {
+        alert("Your member has been changed successfully.");
+      }
+      
       navigation.navigate("Leads");
     } catch (error) {
       console.error("Failed to process change or assign member:", error);
     }
   };
 
-  const handleDialPress = (phoneNumber) => {
-    // const phoneNumber = '1234567890';
+  const handleDialPress = useCallback((phoneNumber) => {
     const url = `tel:${phoneNumber}`;
     Linking.canOpenURL(url)
       .then((supported) => {
@@ -165,7 +182,7 @@ const LeadInfoScreen = () => {
         }
       })
       .catch((err) => console.error("Error opening dialer:", err));
-  };
+  }, []);
 
   const handleNewReminder = async (newReminder: any) => {
     setRemiderLeads((prev) => [...prev, newReminder]);
@@ -412,11 +429,8 @@ const LeadInfoScreen = () => {
             <ScrollView style={styles.remindersList}>
               {reminderLeads.map((reminder, index) => (
                 <View key={index} style={styles.reminderItem}>
-                  <Text style={styles.dateText}>{reminder.data.date}</Text>
-                  <Text style={styles.dateText}>{reminder.data.title}</Text>
-                  {/* <Text style={styles.descriptionText}>
-                    {reminder.description}
-                  </Text> */}
+                  <Text style={[globalStyles.h7, globalStyles.fontfm,]}   allowFontScaling={false}>{reminder.data.date}</Text>
+                  <Text style={[globalStyles.h7, globalStyles.fontfm,]}   allowFontScaling={false}>{reminder.data.title}</Text>
                 </View>
               ))}
             </ScrollView>
@@ -449,7 +463,7 @@ const LeadInfoScreen = () => {
             <ScrollView style={styles.remindersList}>
               {newRemarks.map((reminder, index) => (
                 <View key={index} style={styles.reminderItem}>
-                  <Text style={styles.dateText}>{reminder.data.notes}</Text>
+                  <Text style={[globalStyles.h7, globalStyles.fontfm,]}   allowFontScaling={false}>{reminder.data.notes}</Text>
                 </View>
               ))}
             </ScrollView>
@@ -536,49 +550,12 @@ const LeadInfoScreen = () => {
               <TouchableOpacity
                 onPress={() => handleDialPress(myLeadData.leadPhone)}
               >
-                <View style={styles.iconContainer}>
-                  <Image
-                    source={require("../../assets/blue_call_icon.png")}
-                    style={styles.icon}
-                  />
-                  {/* <Image
-                source={require("../../assets/whatsapp_icon.png")}
-                style={styles.icon}
-              /> */}
+                <View style={styles.callIconCircle}>
+                  <Feather name="phone-call" size={24} color="#00C853" />
                 </View>
               </TouchableOpacity>
             </View>
           )}
-
-          {/* <ScrollView
-            horizontal
-            style={styles.buttonContainer}
-            showsHorizontalScrollIndicator={false}
-          >
-            {leadInfoStatus.map((label) => (
-              <TouchableOpacity
-                key={label.id}
-                onPress={() => handleCardPress(label.id)}
-              >
-                <View
-                  style={[
-                    styles.card,
-                    selectedCards.includes(label.id) && styles.selectedCard,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.cardText,
-                      selectedCards.includes(label.id) &&
-                        styles.selectedCardText, globalStyles.h7,globalStyles.fs3
-                    ]} allowFontScaling={false}
-                  >
-                    {label.content}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView> */}
 
           <FlipButtonBar
             segments={leadInfoStatus.map((item) => item.content)}
@@ -606,11 +583,17 @@ const LeadInfoScreen = () => {
             <TouchableOpacity
               style={[
                 styles.submitButton,
-                selectedCards.length > 1 && styles.activeSubmitButton,
-                selectedStatus && styles.activeSubmitButton,
-                assignedToMembers && styles.activeSubmitButton,
+                (selectedStatus ||
+                  (assignedToMembers && assignedToMembers.length > 0)) &&
+                  styles.activeSubmitButton,
               ]}
               onPress={() => handleChangeStage()}
+              disabled={
+                !(
+                  selectedStatus ||
+                  (assignedToMembers && assignedToMembers.length > 0)
+                )
+              }
             >
               <Text
                 style={[
@@ -688,37 +671,15 @@ const styles = StyleSheet.create({
   statusText: {
     color: "#FFF",
   },
-  iconContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
   icon: {
     marginHorizontal: 10,
   },
-  buttonContainer: {
-    flexDirection: "row",
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: "white",
-    borderColor: "gray",
-    borderWidth: 1,
-    margin: 5,
-    borderRadius: 5,
-    height: 38,
-    width: 100,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
   selectedCard: {
     backgroundColor: "#3D48E5",
   },
-  cardText: {
-    color: "black",
-  },
-  selectedCardText: {
-    color: "white",
-  },
+ 
+
   infoContainer: {
     marginBottom: 20,
   },
@@ -763,19 +724,6 @@ const styles = StyleSheet.create({
   dropdownIconOpen: {
     transform: [{ rotate: "180deg" }],
   },
-  dropdownMenu: {
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    marginTop: 5,
-    padding: 10,
-    backgroundColor: "#FFF",
-  },
-  dropdownItem: {
-    fontSize: 16,
-    paddingVertical: 10,
-    color: "black",
-  },
   submitButtonContainer: {
     padding: 20,
   },
@@ -788,58 +736,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   activeSubmitButton: {
-    backgroundColor: "blue",
+    backgroundColor: "#3D48E5",
   },
   submitButtonText: {
     color: "white",
   },
   addNew: {
-    color: "blue",
+    color: "#3D48E5",
     fontWeight: "bold",
-  },
-  dateText: {
-    fontSize: 14,
-    color: "#888",
-  },
-  titleText: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: "#555",
-  },
-  checkboxDropdownMenu: {
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    marginTop: 5,
-    padding: 10,
-    backgroundColor: "#FFF",
-  },
-  checkboxItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginRight: 10,
-  },
-  checkboxChecked: {
-    backgroundColor: "blue",
-  },
-  checkboxText: {
-    fontSize: 16,
-    color: "black",
   },
   row: {
     flexDirection: "row",
@@ -851,13 +755,6 @@ const styles = StyleSheet.create({
   },
   leftpush: {
     marginLeft: 30,
-  },
-  flipButtonBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    borderWidth: 2,
-    color: "red",
   },
   callIconCircle: {
     justifyContent: "center",
