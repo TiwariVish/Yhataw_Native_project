@@ -34,7 +34,7 @@ const LeadStatus: React.FC<LeadStatusProps> = ({
   const scrollToSelectedCard = (selectedCardId: number) => {
     const index = leadStatus.findIndex((item) => item.id === selectedCardId);
     if (index !== -1 && scrollViewRef.current) {
-      const buttonWidth = 100; 
+      const buttonWidth = 50; 
       const offset = index * buttonWidth; 
       console.log(offset, "offset"); 
       scrollViewRef.current.scrollTo({ x: offset, animated: true });

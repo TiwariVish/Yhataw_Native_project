@@ -97,3 +97,29 @@ export async function getDataAllLead(roleId?: any) {
     }
     
   }
+
+  export async function getTeamWiseMember(userId: String) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(
+        urls.GETTEAMWISEMEMBER + userId,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  export async function getTeamUserWise(userId: String) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(
+        urls.GETTEAMUSERWISE + userId,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

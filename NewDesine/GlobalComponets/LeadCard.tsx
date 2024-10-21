@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { globalStyles } from '../../GlobalCss/GlobalStyles';
 
 interface CustomCardProps {
   name: string;
@@ -21,17 +22,22 @@ const LeadCard: React.FC<CustomCardProps> = ({
   imageUrl, 
   projectName 
 }) => {
+  const firstLetter = name.charAt(0).toUpperCase();
   return (
     <View style={styles.cardContainer}>
       <View style={styles.cardContent}>
         <View style={styles.leftColumn}>
-          {imageUrl && (
+        {imageUrl ? (
             <View style={styles.circleOutline}>
               <Image
-                source={imageUrl}
+                source={{ uri: imageUrl }} 
                 style={styles.image}
                 resizeMode="cover"
               />
+            </View>
+          ) : (
+            <View style={styles.circleOutline}>
+              <Text  style={[globalStyles.h2, globalStyles.fs3]} allowFontScaling={false}>{firstLetter}</Text>
             </View>
           )}
         </View>

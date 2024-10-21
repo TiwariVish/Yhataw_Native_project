@@ -222,6 +222,11 @@ class UrlConstants extends StringConstants {
   GETALLMANAGERBYTEAMWISE = `${this.url_prod}/getAllManagerByTeamWise/`;
   GETALLMANAGERBYROLE = `${this.url_prod}/getReportingManagerByRoleWise`;
 
+  GETTEAMWISEMEMBER = `${this.url_prod}/getTeamWiseMember/`;
+  GETTEAMUSERWISE =  `${this.url_prod}/getTeamUserWise/`;
+
+
+
   //add Loan
   ADDLOAN = `${this.url_prod}/addUserLoan`;
   UPDATELOAN = `${this.url_prod}/updateUserLoan`;

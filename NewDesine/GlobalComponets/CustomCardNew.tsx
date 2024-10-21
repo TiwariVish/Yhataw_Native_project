@@ -1,17 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
 import { globalStyles } from '../../GlobalCss/GlobalStyles';
 
 interface CustomCardProps {
   title: string;
-  count:string;
-  iconName: string;
+  count: string;
+  iconName?: string;
   iconBackgroundColor?: string;
   imageUrl?: any; 
   style?: object; 
   post?: string; 
+  id 
   postCounter?: string;
+  onCardPress?: (arg:any) => void; 
 }
 
 const CustomCardNew: React.FC<CustomCardProps> = ({ 
@@ -22,33 +24,58 @@ const CustomCardNew: React.FC<CustomCardProps> = ({
   imageUrl, 
   style, 
   post, 
-  postCounter 
+  postCounter,
+  id ,
+  onCardPress 
 }) => {
+  const showInitial = !imageUrl && !iconName; 
+
+  // Handler for card press
+  const handleCardPress = () => {
+      if (onCardPress) {
+      onCardPress({ title, count, id}); 
+    }
+  };
+
   return (
-    <View style={[styles.card, style]}>
-      {imageUrl && ( 
-        <View style={styles.circleOutLine}>
-          <Image 
-            source={imageUrl} 
-            style={styles.image} 
-            resizeMode="contain" 
-          /> 
-        </View>
-      )}
-      {iconName && ( <View style={[styles.iconContainer, { backgroundColor: iconBackgroundColor }]}>
-        <AntDesign  name="calendar" size={25} color="white" />
-      </View>)}
-     
-      <Text style={[styles.title,globalStyles.h5,globalStyles.fs2]} allowFontScaling={false}>{title}</Text>
-      {post && <Text style={styles.post} allowFontScaling={false}>{post}</Text>} 
-      {count &&   <Text style={styles.count} allowFontScaling={false}>{count}</Text>}
-    
-      {postCounter && (
-        <View style={styles.countContainer}>
-          <Text allowFontScaling={false}>{postCounter}</Text>
-        </View>
-      )}
-    </View>
+    <TouchableOpacity onPress={handleCardPress} activeOpacity={0.7}>
+      <View style={[styles.card, style]}>
+        {/* Conditional rendering of the image or first letter */}
+        {imageUrl ? (
+          <View style={styles.circleOutLine}>
+            <Image 
+             source={{ uri: imageUrl }}
+              style={styles.image} 
+              resizeMode="contain" 
+            /> 
+          </View>
+        ) : showInitial ? (
+          <View style={styles.circleOutLine}>
+            <Text style={[globalStyles.h2, globalStyles.fs3]} allowFontScaling={false}>
+              {title ? title.charAt(0).toUpperCase() : ''}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Conditional rendering of the calendar icon */}
+        {iconName && (
+          <View style={[styles.iconContainer, { backgroundColor: iconBackgroundColor }]}>
+          <AntDesign  name="calendar" size={25} color="white" />
+          </View>
+        )}
+
+        {/* Title and other content */}
+        <Text style={[styles.title, globalStyles.h5, globalStyles.fs2]} allowFontScaling={false}>{title}</Text>
+        {post && <Text style={styles.post} allowFontScaling={false}>{post}</Text>} 
+        {count && <Text style={styles.count} allowFontScaling={false}>{count}</Text>}
+      
+        {postCounter && (
+          <View style={styles.countContainer}>
+            <Text allowFontScaling={false}>{postCounter}</Text>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
   );
 };
 
@@ -66,7 +93,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     justifyContent: 'flex-start', 
     elevation: 5,
-    
   },
   iconContainer: {
     width: 60,
@@ -77,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: 10, 
   },
   title: {
-    marginTop:10,
+    marginTop: 10,
   },
   post: {
     marginTop: 5,   
@@ -97,7 +123,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center', 
-    marginTop:10
+    marginTop: 10,
   },
   circleOutLine: {
     width: 70, 
@@ -117,7 +143,8 @@ const styles = StyleSheet.create({
     position: 'absolute', 
     top: '7.5%', 
     left: '7.5%', 
-  }
+  },
+  
 });
 
 export default CustomCardNew;

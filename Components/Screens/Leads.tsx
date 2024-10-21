@@ -141,7 +141,6 @@ function Leads() {
       case 2:
         "";
         break;
-
       case 3:
         dispatch(setMyLeadData(item));
         break;
@@ -203,7 +202,6 @@ function Leads() {
                 return (
                   <View style={styles.newAliment} key={index}>
                     <LeadCard
-                      imageUrl={require("../../assets/photo.png")}
                       name={item.leadName}
                       location={item.form_name}
                       status={item.stage}
