@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -20,21 +20,20 @@ import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-interface AssignedMemberPop {
+interface AssignedMemberPopProps {
   visible: boolean;
   onClose: () => void;
-  onStatusSelect: (status: string) => void;
+  onStatusSelect: (selectedItems: any[]) => void; 
 }
 
-const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
+const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
   visible,
   onClose,
   onStatusSelect,
 }) => {
-  const [isUserData, setIsUserData] = useState<any>([]);
+  const [userData, setUserData] = useState<any[]>([]); 
   const { leadData } = useSelector((state: RootState) => state.auth);
   const assignToIds = leadData.AssignTo.map((item) => item._id);
-
   const scale = useSharedValue(visible ? 1 : 0.8);
   const opacity = useSharedValue(visible ? 1 : 0);
 
@@ -48,103 +47,81 @@ const AssignedMemberPop: React.FC<AssignedMemberPop> = ({
       stiffness: 150,
     });
     if (visible) {
-      getMemberLeadStage(assignToIds);
+      fetchMemberLeadStage(assignToIds);
     }
   }, [visible]);
 
-  const getMemberLeadStage = async (ids: any) => {
+  const fetchMemberLeadStage = async (ids: string[]) => {
     try {
-      const payload = {
-        team_id: ids,
-      };
+      const payload = { team_id: ids };
       const res = await getAllTeamMembersData(payload);
-      const userData = res.data.flatMap((team) =>
+      const members = res.data.flatMap((team) =>
         team.team_members.flatMap((member) => member.users)
       );
-      const updatedItems = userData.map((item) => ({
-        ...item,
-        checked: false,
-      }));
-      setIsUserData(updatedItems);
+      const updatedMembers = members.map((item) => ({ ...item, checked: false }));
+      setUserData(updatedMembers);
     } catch (error) {
       console.error("API Error:", error);
     }
   };
 
-  const toggleCheckbox = async (id: string) => {
-
-    const updatedItems = isUserData.map((item) =>
-      item._id === id ? { ...item, checked: !item.checked } : item
-    );
-    setIsUserData(updatedItems);
-    const isChecked = updatedItems.find(item => item._id === id)?.checked;
-    try {
-      const body = {
-        ["id"]: id,
-        ["leadData_id"] :leadData._id
-  
-      };
-      const res = await assignToMembers(body); 
-     
-    } catch (error) {
-      console.error("Failed to assign member:", error);
-      const resetItems = updatedItems.map((item) =>
-        item._id === id ? { ...item, checked: !isChecked } : item
+  const toggleCheckbox = useCallback((id: string) => {
+    setUserData((prevData) => {
+      const updatedItems = prevData.map((item) =>
+        item._id === id ? { ...item, checked: !item.checked } : item
       );
-      setIsUserData(resetItems);
-    }
-     
-    const selectedItems = updatedItems.filter((item) => item.checked);
-    onClose();
-    onStatusSelect(selectedItems);
-     const anyChecked = updatedItems.some(item => item.checked);
-     if (anyChecked) {
-    onClose(); 
-  }
-  };
-  
+      const selectedItems = updatedItems.filter((item) => item.checked);
+      if (selectedItems.length > 0) {
+        onStatusSelect(selectedItems);
+      }
+      return updatedItems;
+    });
+  }, [onStatusSelect]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-      opacity: opacity.value,
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  const renderCheckboxItem = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      style={styles.checkboxItem}
+      onPress={() => toggleCheckbox(item._id)}
+    >
+      <View style={styles.checkboxContainer}>
+        <View
+          style={[
+            styles.checkbox,
+            item.checked && styles.checkboxChecked,
+          ]}
+        />
+        <Text style={[globalStyles.h5, globalStyles.fontfm]} allowFontScaling={false}>
+          {item.name}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
-    <>
-      {visible && (
-        <TouchableOpacity
-          style={styles.overlay}
-          onPress={onClose}
-          activeOpacity={1}
-        >
-          <BlurView style={styles.blurView} intensity={200}>
-            <Animated.View style={[styles.modal, animatedStyle]}>
-              <ScrollView contentContainerStyle={styles.dropdownMenu}>
-                {isUserData?.map((i) => (
-                  <TouchableOpacity
-                    key={i._id || i.id}
-                    style={styles.checkboxItem}
-                    onPress={() => toggleCheckbox(i._id)}
-                  >
-                    <View style={styles.checkboxContainer}>
-                      <View
-                        style={[
-                          styles.checkbox,
-                          i.checked && styles.checkboxChecked,
-                        ]}
-                      />
-                      <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>{i.name}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </Animated.View>
-          </BlurView>
-        </TouchableOpacity>
-      )}
-    </>
+    visible && (
+      <TouchableOpacity
+        style={styles.overlay}
+        onPress={onClose}
+        activeOpacity={1}
+      >
+        <BlurView style={styles.blurView} intensity={200}>
+          <Animated.View style={[styles.modal, animatedStyle]}>
+            <FlatList
+              data={userData}
+              keyExtractor={(item) => item._id || item.id}
+              renderItem={renderCheckboxItem}
+              contentContainerStyle={styles.dropdownMenu}
+              showsVerticalScrollIndicator={false}
+            />
+          </Animated.View>
+        </BlurView>
+      </TouchableOpacity>
+    )
   );
 };
 
@@ -198,7 +175,6 @@ const styles = StyleSheet.create({
   checkboxChecked: {
     backgroundColor: "#000",
   },
-
 });
 
 export default AssignedMemberPop;
