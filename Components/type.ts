@@ -8,6 +8,7 @@ export type RootStackParamList = {
   LeadInfoScreen:undefined
   CustomerFeedback:undefined
   ErrorPage:undefined
+  ForgotPassword :undefined
 };
 
 // types.ts
@@ -19,6 +20,7 @@ export type RootStackParamList1 = {
   LeadInfoScreen:undefined
   CustomerFeedback:undefined
   ErrorPage:undefined
+  ForgotPassword :undefined
 };
 
 export type LoginScreenNavigationProp = StackNavigationProp<

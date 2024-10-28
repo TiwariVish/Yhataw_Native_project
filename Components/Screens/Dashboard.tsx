@@ -12,34 +12,68 @@ import {
   RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { AntDesign } from "@expo/vector-icons";
-import CustomCard from "../../Global/Components/CustomCard";
-import Footer from "../../Global/Components/Footer";
-import { LoginScreenNavigationProp } from "../type"; // Import the types
+import { Feather } from "@expo/vector-icons";
+import { LoginScreenNavigationProp } from "../type";
 import {
-  addBanner,
   getDataAllLead,
   getDataAttendance,
   getDataMyAttendance,
   getDataMylead,
   getDataProject,
+  getTeamUserWise,
+  getTeamWiseMember,
 } from "./DashboardService";
 import { locationType } from "../../Models/Interface";
 import store, { RootState } from "../../utils/store";
-import { setLeadId } from "../../Redux/authSlice";
+import { selectRole, setLeadId } from "../../Redux/authSlice";
 import { useDispatch } from "react-redux";
 import { getPerosnalDetails } from "./MyProfileService";
 import { DashboardSkeleton } from "../../Global/Components/SkeletonStructures";
 import { useSelector } from "react-redux";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
+import CustomCardNew from "../../NewDesine/GlobalComponets/CustomCardNew";
+import FotterDseine from "../../NewDesine/GlobalComponets/FotterDseine";
+import CustomBigCard from "../../NewDesine/GlobalComponets/CustomBigCard";
+
+const projectData = [
+  {
+    id: "PN0001265",
+    title: "Medical App (iOS native)",
+    createdDate: "Sep 12, 2020",
+    priority: "Medium",
+    projectData: {
+      tasks: 40,
+      activeTasks: 13,
+      assignees: [
+        { id: 1, name: "any", imageUrl: require("../../assets/user_icon.png") },
+        { id: 2, name: "any", imageUrl: require("../../assets/user_icon.png") },
+      ],
+    },
+  },
+  {
+    id: "PN0001435",
+    title: "Medical App (iOS native)",
+    createdDate: "Sep 12, 2020",
+    priority: "High",
+    projectData: {
+      tasks: 40,
+      activeTasks: 13,
+      assignees: [
+        { id: 1, imageUrl: require("../../assets/user_icon.png") },
+        { id: 2, imageUrl: require("../../assets/user_icon.png") },
+        { id: 3, imageUrl: require("../../assets/user_icon.png") },
+      ],
+    },
+  },
+];
 
 const staticData = {
   leads: [
     {
       id: 2,
-      content: "New",
+      content: "Just Now",
       cardColor: "#D4FFEA",
-      calendarBackgroundColor: "#009900",
+      calendarBackgroundColor: "#FA4200",
       leadDataKey: "lead_total_new_count",
       myleadKey: "lead_my_new_count",
       lead_my_pipeline_count: "",
@@ -48,7 +82,7 @@ const staticData = {
       id: 4,
       content: "Site Visit",
       cardColor: "#99e6ff",
-      calendarBackgroundColor: "#1a1aff",
+      calendarBackgroundColor: "#00C0FA",
       leadDataKey: "",
       myleadKey: "",
       lead_my_pipeline_count: "",
@@ -113,29 +147,70 @@ const staticData = {
       content: "Present",
       attendanceKey: "attendence_present_today",
       countMy_Attendance: "attendence_my_current_month_present",
+      calendarBackgroundColor: "#009900",
     },
     {
       id: 2,
       content: "Absent",
       attendanceKey: "attendence_absent_today",
       countMy_Attendance: "attendence_my_current_month_absent",
+      calendarBackgroundColor: "#FA4200",
     },
     {
       id: 3,
       content: "Late",
       attendanceKey: "attendence_late_today",
       countMy_Attendance: "attendence_my_current_month_late",
+      calendarBackgroundColor: "#00C0FA",
     },
     {
       id: 4,
       content: "Leave",
       attendanceKey: "attendence_leave_today",
       countMy_Attendance: "attendence_my_current_month_leave",
+      calendarBackgroundColor: "#FA4200",
     },
   ],
   myProjects: [
-    { id: 1, content: "Commercial", projectKey: "projects_commercial" },
-    { id: 2, content: "Residential", projectKey: "projects_residencial" },
+    // { id: 1, content: "Commercial", projectKey: "projects_commercial" },
+    // { id: 2, content: "Residential", projectKey: "projects_residencial" },
+    {
+      id: "PN0001265",
+      title: "Medical App (iOS native)",
+      createdDate: "Sep 12, 2020",
+      priority: "Medium",
+      projectData: {
+        tasks: 40,
+        activeTasks: 13,
+        assignees: [
+          {
+            id: 1,
+            name: "any",
+            imageUrl: require("../../assets/user_icon.png"),
+          },
+          {
+            id: 2,
+            name: "any",
+            imageUrl: require("../../assets/user_icon.png"),
+          },
+        ],
+      },
+    },
+    {
+      id: "PN0001435",
+      title: "Medical App (iOS native)",
+      createdDate: "Sep 12, 2020",
+      priority: "High",
+      projectData: {
+        tasks: 40,
+        activeTasks: 13,
+        assignees: [
+          { id: 1, imageUrl: require("../../assets/user_icon.png") },
+          { id: 2, imageUrl: require("../../assets/user_icon.png") },
+          { id: 3, imageUrl: require("../../assets/user_icon.png") },
+        ],
+      },
+    },
   ],
 };
 
@@ -169,7 +244,10 @@ const Dashboard: React.FC<CustomProps> = () => {
     "ADMIN",
   ]);
 
-  const [isBanner, setIsBanner] = useState([]);
+  const [teamData, setTeamData] = useState([]);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [teamWiseMember, setTeamWiseMember] = useState([]);
+  const roleFromRedux = useSelector(selectRole);
   const [refreshing, setRefreshing] = useState(false);
   const userId = store.getState().auth;
   const { authenticated, role, privileges } = useSelector(
@@ -177,22 +255,31 @@ const Dashboard: React.FC<CustomProps> = () => {
   );
 
   useEffect(() => {
-    // if (permission?.ADMIN || permission.CRM) {
-      getValuepermission();
-    // }
-    // if (
-    //   permission?.ADMIN ||
-    //   permission.HR ||
-    //   permission["MY-Dashboard"] ||
-    //   permission.CRM
-    // ) {
-      fetchMy_Attendance();
-    // }
-    // if (permission["MY-Dashboard"]) {
-      fetchMyDashboardData();
-    // }
-    fetchDashboardCRM();
-    fetchUserData();
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const permission = getPermissionForView();
+        const apiCallBasedOnPermissionForView = [];
+        if (permission.ADMIN || permission.CRM) {
+          apiCallBasedOnPermissionForView.push(getValuepermission());
+          apiCallBasedOnPermissionForView.push(fetchMy_Attendance());
+        }
+        if (permission.HR || permission["MY-Dashboard"]) {
+          apiCallBasedOnPermissionForView.push(fetchMy_Attendance());
+          apiCallBasedOnPermissionForView.push(fetchMyDashboardData());
+        }
+        apiCallBasedOnPermissionForView.push(fetchDashboardCRM());
+        apiCallBasedOnPermissionForView.push(fetchUserData());
+
+        await Promise.all(apiCallBasedOnPermissionForView);
+      } catch (error) {
+        console.error("Error in useEffect:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [userId]);
 
   const getPermissionForView = () => {
@@ -223,6 +310,9 @@ const Dashboard: React.FC<CustomProps> = () => {
         project: project?.data[0] || [],
         attendance: attendance?.data[0] || [],
       });
+
+      const res2 = await getTeamUserWise(store.getState().auth?.userId);
+      setTeamData(res2.data);
     } catch (error) {
       console.error("Error fetching data", error);
       setLoading(false);
@@ -241,29 +331,44 @@ const Dashboard: React.FC<CustomProps> = () => {
   };
 
   const fetchMyDashboardData = async () => {
-    const response = await getDataMylead();
-    setDashboardDataMyLead(response?.data[0] || []);
-    const response2 = await getDataProject();
-    setDashboardDataProject(response2?.data[0] || []);
+    try {
+      const [myLeads, projects] = await Promise.all([
+        getDataMylead(),
+        getDataProject(),
+      ]);
+      setDashboardDataMyLead(myLeads?.data[0] || []);
+      setDashboardDataProject(projects?.data[0] || []);
+    } catch (error) {
+      console.error("Error fetching my dashboard data", error);
+    }
   };
 
   const fetchDashboardCRM = async () => {
     try {
       const response = await getDataAllLead();
       setDashboardDataAllLead(response?.data[0] || []);
-    } catch {}
+    } catch (error) {
+      console.error("Error fetching dashboard CRM data", error);
+    }
   };
 
   const fetchUserData = async () => {
     try {
       const response = await getPerosnalDetails(store.getState().auth?.userId);
-      const res = await addBanner();
-      setIsBanner(res?.data);
       setUserData(response.data);
     } catch (error: any) {
       console.error("Error fetching user details:", error);
     }
   };
+
+  const handleCardClick = async (team) => {
+    setSelectedTeam(team);
+    try {
+      const response = await getTeamWiseMember(team.id);
+      setTeamWiseMember(response.data);
+    } catch {}
+  };
+
   const navigateToSection = (id: number) => {
     dispatch(setLeadId(id));
     navigation.navigate("Leads");
@@ -283,7 +388,7 @@ const Dashboard: React.FC<CustomProps> = () => {
       useNativeDriver: false,
       listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const offsetY = event.nativeEvent.contentOffset.y;
-        if (offsetY > 50) {
+        if (offsetY > 250) {
           setFooterVisible(false);
         } else {
           setFooterVisible(true);
@@ -298,12 +403,11 @@ const Dashboard: React.FC<CustomProps> = () => {
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      console.log();
-      
       await getValuepermission();
       await fetchMyDashboardData();
       await fetchDashboardCRM();
       await fetchUserData();
+      await handleCardClick("");
     } catch (error) {
       console.error("Error during refresh:", error);
     } finally {
@@ -311,15 +415,22 @@ const Dashboard: React.FC<CustomProps> = () => {
     }
   };
 
+  const testing = () => {
+    // navigation.navigate("DashboardNew");
+  };
   return (
     <>
       {loading ? (
         <DashboardSkeleton />
       ) : (
         <View style={styles.contmain}>
-          <ScrollView onScroll={handleScroll} scrollEventThrottle={16}  refreshControl={
+          <ScrollView
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }>
+            }
+          >
             {/* Header section */}
             <View style={styles.header}>
               <View style={styles.imageContainer}>
@@ -329,15 +440,24 @@ const Dashboard: React.FC<CustomProps> = () => {
                 />
               </View>
               <View style={styles.textContainer}>
-                <Text style={[styles.name,globalStyles.fontfm, globalStyles.h4]} allowFontScaling={false}>{userData?.name}</Text>
-                <Text style={styles.role}>
-                  {userData?.position}
+                <Text
+                  style={[styles.name, globalStyles.fontfm, globalStyles.h4]}
+                  allowFontScaling={false}
+                >
+                  {userData?.name}
+                </Text>
+                <Text
+                  style={[globalStyles.h7, globalStyles.fontfm, styles.role]}
+                  allowFontScaling={false}
+                >
+                  {roleFromRedux}
                 </Text>
               </View>
             </View>
 
             {/* Horizontal cards section */}
-            <ScrollView
+
+            {/* <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               style={styles.horizontalScroll1}
@@ -347,26 +467,63 @@ const Dashboard: React.FC<CustomProps> = () => {
                   <Image source={{ uri: item.image }} style={styles.card} />
                 </View>
               ))}
-            </ScrollView>
+            </ScrollView> */}
 
             {/* Leads section */}
             {permission?.ADMIN || permission.CRM ? (
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>All Leads</Text>
-                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
+                    <Text
+                      style={[
+                        styles.name,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      All Leads
+                    </Text>
+                    <Text
+                      style={[
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        styles.role,
+                      ]}
+                      allowFontScaling={false}
+                    >
                       {dashboardData.allLead.lead_total_count}
                     </Text>
                   </View>
-                  <View style={styles.iconFord}>
+                  {/* <View style={styles.iconFord}>
                     <AntDesign
                       name="right"
                       size={20}
                       color="black"
                       onPress={() => navigateToSection(1)}
                     />
-                  </View>
+                  </View> */}
+                  <TouchableOpacity
+                    style={styles.viewAllContainer}
+                    onPress={() => navigateToSection(1)}
+                  >
+                    <Text
+                      style={[
+                        styles.viewAll,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      View all
+                    </Text>
+                    <Feather
+                      name="chevron-right"
+                      size={24}
+                      color="#007bff"
+                      style={styles.icon}
+                    />
+                  </TouchableOpacity>
                 </View>
                 <ScrollView
                   horizontal
@@ -381,14 +538,24 @@ const Dashboard: React.FC<CustomProps> = () => {
                       }}
                     >
                       <View style={styles.cardContainer}>
-                        <CustomCard
+                        <CustomCardNew
+                          id={item.id}
+                          title={item.content}
+                          count={`${
+                            dashboardData.allLead[item.leadDataKey] || 0
+                          }`}
+                          iconName="calendar"
+                          iconBackgroundColor={item.calendarBackgroundColor}
+                          onCardPress={() => navigateToSection(Number(item.id))}
+                        />
+                        {/* <CustomCard
                           cardContent={<Text>{item.content}</Text>}
                           cardColor={item.cardColor}
                           calendarBackgroundColor={item.calendarBackgroundColor}
                           calendarText={`${
                             dashboardData.allLead[item.leadDataKey] || 0
                           }`}
-                        />
+                        /> */}
                       </View>
                     </TouchableOpacity>
                   ))}
@@ -402,19 +569,59 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>My Leads</Text>
-                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
+                    <Text
+                      style={[
+                        styles.name,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      My Leads
+                    </Text>
+                    <Text
+                      style={[
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        styles.role,
+                      ]}
+                      allowFontScaling={false}
+                    >
                       {dashboardDataMyLead.lead_my_total_count}
                     </Text>
                   </View>
-                  <View style={styles.iconFord}>
+                  {/* <View style={styles.iconFord}>
                     <AntDesign
                       name="right"
                       size={20}
                       color="black"
                       onPress={() => navigateToSection(3)}
                     />
-                  </View>
+                  </View> */}
+
+                  {dashboardDataMyLead.lead_my_total_count > 0 && (
+                    <TouchableOpacity
+                      style={styles.viewAllContainer}
+                      onPress={() => navigateToSection(3)}
+                    >
+                      <Text
+                        style={[
+                          styles.viewAll,
+                          globalStyles.h6,
+                          globalStyles.fontfm,
+                        ]}
+                        allowFontScaling={false}
+                      >
+                        View all
+                      </Text>
+                      <Feather
+                        name="chevron-right"
+                        size={24}
+                        color="#007bff"
+                        style={styles.icon}
+                      />
+                    </TouchableOpacity>
+                  )}
                 </View>
                 <ScrollView
                   horizontal
@@ -429,13 +636,22 @@ const Dashboard: React.FC<CustomProps> = () => {
                       }}
                     >
                       <View style={styles.cardContainer}>
-                        <CustomCard
+                        {/* <CustomCard
                           cardContent={<Text>{item.content}</Text>}
                           cardColor={item.cardColor}
                           calendarBackgroundColor={item.calendarBackgroundColor}
                           calendarText={`${
                             dashboardDataMyLead[item.myleadKey] || 0
                           }`}
+                        /> */}
+
+                        <CustomCardNew
+                          id={item.id}
+                          title={item.content}
+                          count={`${dashboardDataMyLead[item.myleadKey] || 0}`}
+                          iconName="calendar"
+                          iconBackgroundColor={item.calendarBackgroundColor}
+                          onCardPress={() => navigateToSection(Number(item.id))}
                         />
                       </View>
                     </TouchableOpacity>
@@ -446,18 +662,192 @@ const Dashboard: React.FC<CustomProps> = () => {
               ""
             )}
 
+            {permission?.ADMIN || permission.CRM ? (
+              <>
+                <View style={styles.row}>
+                  <View style={styles.textContainerAll}>
+                    <Text
+                      style={[
+                        styles.name,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      All Team
+                    </Text>
+                    <Text
+                      style={[
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        styles.role,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      {teamData.length}
+                    </Text>
+                  </View>
+                  {/* <TouchableOpacity style={styles.viewAllContainer}>
+                    <Text
+                      style={[
+                        styles.viewAll,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      View all
+                    </Text>
+                    <Feather
+                      name="chevron-right"
+                      size={24}
+                      color="#007bff"
+                      style={styles.icon}
+                    />
+                  </TouchableOpacity> */}
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.horizontalScroll}
+                >
+                  {teamData.map((item) => (
+                    <TouchableOpacity key={item.id}>
+                      <View style={styles.cardContainer}>
+                        <CustomCardNew
+                          id={item._id}
+                          title={item.team_name}
+                          count=""
+                          onCardPress={handleCardClick}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                {selectedTeam && (
+                  <>
+                    <View style={styles.row}>
+                      <View style={styles.textContainerAll}>
+                        <Text
+                          style={[
+                            styles.name,
+                            globalStyles.h6,
+                            globalStyles.fontfm,
+                          ]}
+                          allowFontScaling={false}
+                        >
+                          Team Members
+                        </Text>
+                        <Text
+                          style={[
+                            globalStyles.h7,
+                            globalStyles.fontfm,
+                            styles.role,
+                          ]}
+                          allowFontScaling={false}
+                        >
+                          {teamWiseMember.length}
+                        </Text>
+                      </View>
+                      {/* <TouchableOpacity style={styles.viewAllContainer}>
+                        <Text
+                          style={[
+                            styles.viewAll,
+                            globalStyles.h6,
+                            globalStyles.fontfm,
+                          ]}
+                          allowFontScaling={false}
+                        >
+                          View all
+                        </Text>
+                        <Feather
+                          name="chevron-right"
+                          size={24}
+                          color="#007bff"
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity> */}
+                    </View>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.horizontalScroll}
+                    >
+                      {teamWiseMember.map((item) => {
+                        const usersArray = Array.isArray(item.users)
+                          ? item.users
+                          : [item.users];
+                        return usersArray.map((user) => {
+                          const userOfficesArray = Array.isArray(
+                            item.user_offices
+                          )
+                            ? item.user_offices
+                            : [item.user_offices];
+
+                          const userOffice = userOfficesArray.find(
+                            (office) => office.userId === user._id
+                          );
+
+                          return (
+                            <View key={user._id} style={styles.cardContainer}>
+                              <CustomCardNew
+                                id={user._id}
+                                title={user.name}
+                                post={
+                                  userOffice ? userOffice.designation : "N/A"
+                                }
+                                postCounter={
+                                  userOffice ? userOffice.emp_type : "N/A"
+                                }
+                                count=""
+                                imageUrl={user.profile_image}
+                              />
+                            </View>
+                          );
+                        });
+                      })}
+                    </ScrollView>
+                  </>
+                )}
+              </>
+            ) : (
+              ""
+            )}
+
             {/* Attendance section */}
             {permission?.ADMIN || permission.HR ? (
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>All Attendance</Text>
-                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
+                    <Text
+                      style={[
+                        styles.name,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      All Attendance
+                    </Text>
+                    <Text
+                      style={[
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        styles.role,
+                      ]}
+                      allowFontScaling={false}
+                    >
                       {dashboardData.attendance.attendence_total_emp} day
                     </Text>
                   </View>
                   <View style={styles.iconFord}>
-                    {/* <AntDesign name="right" size={24} color="black" /> */}
+                    {/* <AntDesign
+                      name="right"
+                      size={24}
+                      color="black"
+                      onPress={() => testing()}
+                    /> */}
                   </View>
                 </View>
                 <ScrollView
@@ -467,11 +857,21 @@ const Dashboard: React.FC<CustomProps> = () => {
                 >
                   {staticData.attendance.map((item) => (
                     <View key={item.id} style={styles.cardContainer}>
-                      <CustomCard
+                      {/* <CustomCard
                         cardContent={<Text>{item.content}</Text>}
                         calendarText={`${
                           dashboardData.attendance[item.attendanceKey] || 0
                         }`}
+                      /> */}
+
+                      <CustomCardNew
+                        id={item.id}
+                        title={item.content}
+                        count={`${
+                          dashboardData.attendance[item.attendanceKey] || 0
+                        }`}
+                        iconName="calendar"
+                        iconBackgroundColor={item.calendarBackgroundColor}
                       />
                     </View>
                   ))}
@@ -488,8 +888,24 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>My Attendance</Text>
-                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
+                    <Text
+                      style={[
+                        styles.name,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      My Attendance
+                    </Text>
+                    <Text
+                      style={[
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        styles.role,
+                      ]}
+                      allowFontScaling={false}
+                    >
                       {dashboardDataAttendance.attendence_my_current_month} day
                     </Text>
                   </View>
@@ -509,11 +925,21 @@ const Dashboard: React.FC<CustomProps> = () => {
                 >
                   {staticData.attendance.map((item) => (
                     <View key={item.id} style={styles.cardContainer}>
-                      <CustomCard
+                      {/* <CustomCard
                         cardContent={<Text>{item.content}</Text>}
                         calendarText={`${
                           dashboardDataAttendance[item.countMy_Attendance] || 0
                         }`}
+                      /> */}
+
+                      <CustomCardNew
+                        id={item.id}
+                        title={item.content}
+                        count={`${
+                          dashboardDataAttendance[item.countMy_Attendance] || 0
+                        }`}
+                        iconName="calendar"
+                        iconBackgroundColor={item.calendarBackgroundColor}
                       />
                     </View>
                   ))}
@@ -528,8 +954,24 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>All Project</Text>
-                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
+                    <Text
+                      style={[
+                        styles.name,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      All Project
+                    </Text>
+                    <Text
+                      style={[
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        styles.role,
+                      ]}
+                      allowFontScaling={false}
+                    >
                       {dashboardData.project.projects_total} Total
                     </Text>
                   </View>
@@ -542,7 +984,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                   showsHorizontalScrollIndicator={false}
                   style={styles.horizontalScroll}
                 >
-                  {staticData.myProjects.map((item) => (
+                  {/* {staticData.myProjects.map((item) => (
                     <View key={item.id} style={styles.cardContainer}>
                       <CustomCard
                         cardContent={<Text>{item.content}</Text>}
@@ -551,7 +993,23 @@ const Dashboard: React.FC<CustomProps> = () => {
                         }`}
                       />
                     </View>
-                  ))}
+                  ))} */}
+
+                  <View style={styles.leadsContainer}>
+                    {staticData.myProjects.map((project) => (
+                      <CustomBigCard
+                        key={project.id}
+                        id={project.id}
+                        title={project.title}
+                        createdDate={project.createdDate}
+                        projectData={project.projectData}
+                        style={styles.cardSpacing}
+                        onPress={() =>
+                          console.log(`Card Pressed: ${project.id}`)
+                        }
+                      />
+                    ))}
+                  </View>
                 </ScrollView>
               </>
             ) : (
@@ -561,8 +1019,24 @@ const Dashboard: React.FC<CustomProps> = () => {
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
-                    <Text style={[styles.name,globalStyles.h6,globalStyles.fontfm]} allowFontScaling={false}>My Project</Text>
-                    <Text style={[globalStyles.h7,globalStyles.fontfm,styles.role]} allowFontScaling={false}>
+                    <Text
+                      style={[
+                        styles.name,
+                        globalStyles.h6,
+                        globalStyles.fontfm,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      My Project
+                    </Text>
+                    <Text
+                      style={[
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        styles.role,
+                      ]}
+                      allowFontScaling={false}
+                    >
                       {dashboardData.project.projects_total} Total
                     </Text>
                   </View>
@@ -575,7 +1049,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                   showsHorizontalScrollIndicator={false}
                   style={styles.horizontalScroll}
                 >
-                  {staticData.myProjects.map((item) => (
+                  {/* {staticData.myProjects.map((item) => (
                     <View key={item.id} style={styles.cardContainer}>
                       <CustomCard
                         cardContent={<Text>{item.content}</Text>}
@@ -584,7 +1058,22 @@ const Dashboard: React.FC<CustomProps> = () => {
                         }`}
                       />
                     </View>
-                  ))}
+                  ))} */}
+                  <View style={styles.leadsContainer}>
+                    {projectData.map((project) => (
+                      <CustomBigCard
+                        key={project.id}
+                        id={project.id}
+                        title={project.title}
+                        createdDate={project.createdDate}
+                        projectData={project.projectData}
+                        style={styles.cardSpacing}
+                        onPress={() =>
+                          console.log(`Card Pressed: ${project.id}`)
+                        }
+                      />
+                    ))}
+                  </View>
                 </ScrollView>
               </>
             ) : (
@@ -593,20 +1082,18 @@ const Dashboard: React.FC<CustomProps> = () => {
           </ScrollView>
         </View>
       )}
-      {isFooterVisible && <Footer navigate={handleProfile} onHomePress={onRefresh} />}
+      {isFooterVisible && (
+        // <Footer navigate={handleProfile} onHomePress={onRefresh} />
+        <FotterDseine navigate={handleProfile} onHomePress={onRefresh} />
+      )}
     </>
   );
 };
 
 const styles = StyleSheet.create({
   contmain: {
-    backgroundColor: "white",
-    height: "100%",
-    paddingTop: 0,   
-    paddingRight: 0,
-    paddingBottom: 100, 
-    paddingLeft: 0,   
-    
+    backgroundColor: "#F4F9FD",
+    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -639,11 +1126,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    marginLeft: 15,
+    marginLeft: 22,
   },
   role: {
     marginLeft: 25,
-    paddingTop:5
+    paddingTop: 5,
   },
   card: {
     padding: 10,
@@ -657,9 +1144,9 @@ const styles = StyleSheet.create({
   },
   horizontalScroll: {
     flexDirection: "row",
-    paddingHorizontal: "2%"
+    paddingHorizontal: "2%",
   },
-  horizontalScroll1:{
+  horizontalScroll1: {
     flexDirection: "row",
   },
   row: {
@@ -670,6 +1157,25 @@ const styles = StyleSheet.create({
   },
   iconFord: {
     marginRight: 20,
+  },
+  viewAllContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  viewAll: {
+    color: "#007bff",
+    marginRight: 5,
+  },
+  icon: {
+    marginLeft: 5,
+  },
+  leadsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  cardSpacing: {
+    marginHorizontal: 8,
   },
 });
 

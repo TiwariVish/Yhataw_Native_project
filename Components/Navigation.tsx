@@ -5,14 +5,15 @@ import LoginScreen from "./Screens/LoginScreen";
 import Dashboard from "./Screens/Dashboard";
 import Leads from "./Screens/Leads";
 import MyProfile from "./Screens/MyProfile";
-import { RootStackParamList, RootStackParamList1 } from "./type"; 
+import { RootStackParamList, RootStackParamList1 } from "./type";
 import { useSelector } from "react-redux";
 import { RootState } from "../utils/store";
 import LeadInfoScreen from "./Screens/LeadInfoScreen";
 import CustomerFeedback from "./Screens/CustomerFeedback";
 import ErrorPage from "../Global/Components/ErrorPage";
-import { Alert, Text } from 'react-native';
-import NetInfo from '@react-native-community/netinfo';
+import { Alert, Text } from "react-native";
+import NetInfo from "@react-native-community/netinfo";
+import ForgotPassword from "./Screens/ForgotPassword";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,10 +24,13 @@ const Navigation: React.FC = () => {
   const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
       setIsConnected(state.isConnected ?? true);
       if (!state.isConnected) {
-        Alert.alert("No Internet Connection", "Please check your network connection.");
+        Alert.alert(
+          "No Internet Connection",
+          "Please check your network connection."
+        );
       }
     });
 
@@ -54,12 +58,19 @@ const Navigation: React.FC = () => {
               component={Leads}
               options={{
                 headerTitle: () => (
-                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}  allowFontScaling={false}>
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
                     Leads
                   </Text>
                 ),
                 headerStyle: {
-                  backgroundColor: "white",
+                  backgroundColor: "#F4F9FD",
                   ...({} as any),
                 },
                 headerShadowVisible: false,
@@ -70,7 +81,14 @@ const Navigation: React.FC = () => {
               component={MyProfile}
               options={{
                 headerTitle: () => (
-                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}  allowFontScaling={false}>
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
                     My Profile
                   </Text>
                 ),
@@ -87,7 +105,14 @@ const Navigation: React.FC = () => {
               options={{
                 // title : "Lead Info Screen",
                 headerTitle: () => (
-                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}  allowFontScaling={false}>
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
                     Lead Info Screen
                   </Text>
                 ),
@@ -103,8 +128,15 @@ const Navigation: React.FC = () => {
               component={CustomerFeedback}
               options={{
                 headerTitle: () => (
-                  <Text style={{ marginLeft:-20, fontSize: 20, fontWeight: "bold" }}  allowFontScaling={false}>
-                   Customer Feedback
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
+                    Customer Feedback
                   </Text>
                 ),
                 headerStyle: {
@@ -127,11 +159,19 @@ const Navigation: React.FC = () => {
             />
           </>
         ) : (
+          <>
           <Stack.Screen
             name="Login"
             component={LoginScreen}
             options={{ headerShown: false }}
           />
+
+          <Stack.Screen
+          name="ForgotPassword"
+          component={ForgotPassword}
+          options={{ headerShown: false }}
+        />
+        </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

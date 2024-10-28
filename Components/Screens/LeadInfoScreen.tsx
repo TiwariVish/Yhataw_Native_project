@@ -27,7 +27,7 @@ import { useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import FlipButtonBar from "../../Global/Components/FlipButtonBar";
-import { Feather } from "@expo/vector-icons";
+import { Feather, FontAwesome } from "@expo/vector-icons";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
@@ -52,7 +52,7 @@ const LeadInfoScreen = () => {
   const [dropdownData, setDropdownData] = useState<any>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [assignedToMembers, setAssignedToMembers] = useState<Member[]>([]);
-  const [selectedTeams, setselectedTeams] = useState<string | null>(null);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [dropdownItems, setDropdownItems] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isMemberModalVisible, setMemberModalVisible] = useState(false);
@@ -82,15 +82,15 @@ const LeadInfoScreen = () => {
 
   const getLeadStage = async () => {
     try {
-      const res = await getAllStage();
-      setDropdownData(res.data);
-
-      const res2 = await getTeamList();
-      setDropdownItems(res2.data);
-
-      const resp = await getReminder("");
-      setAllRemider(resp.data);
-    } catch {}
+      const [stageResponse, teamResponse, reminderResponse] = await Promise.all(
+        [getAllStage(), getTeamList(), getReminder("")]
+      );
+      setDropdownData(stageResponse.data);
+      setDropdownItems(teamResponse.data);
+      setAllRemider(reminderResponse.data);
+    } catch (error) {
+      console.error("Error fetching lead stage:", error);
+    }
   };
 
   const handleStatusSelect = (status: string) => {
@@ -98,24 +98,28 @@ const LeadInfoScreen = () => {
     setModalVisible(true);
   };
 
-  const handleMemberStatusSelect = () => {
+  const handleSelectedTeamsChange = (teams: string[]) => {
+    setSelectedTeams(teams);
     setMemberModalVisible(true);
   };
 
-  const onselectMember = (member: any) => {
-    const newMembers: Member[] =
+
+  const onSelectMember = (member: any) => {
+    const selectedMembers: Member[] = 
       Array.isArray(member) && member.length > 0
         ? member.map((m) => ({ id: m._id, name: m.name }))
         : [];
     setAssignedToMembers((prevMembers) => {
-      const uniqueMembers = newMembers.filter(
-        (newMember) =>
-          !prevMembers.some((prevMember) => prevMember.id === newMember.id)
-      );
-      return [...prevMembers, ...uniqueMembers];
+      const selectedIds = selectedMembers.map(m => m.id);
+      const uniqueMembers = [
+        ...prevMembers,
+        ...selectedMembers.filter(newMember => 
+          !prevMembers.some(prevMember => prevMember.id === newMember.id)
+        )
+      ];
+  
+      return uniqueMembers;
     });
-
-    setisassineMemberModalVisible(true);
   };
 
   const handleCardPress = (id: number) => {
@@ -133,7 +137,7 @@ const LeadInfoScreen = () => {
       let membersChanged = false;
       const waitCallApi = [];
 
-      if (selectedStatus) {
+      if (myLeadData?._id && selectedStatus) {
         const bodyForStageChange = {
           id: myLeadData?._id,
           stage: selectedStatus,
@@ -142,7 +146,7 @@ const LeadInfoScreen = () => {
         statusChanged = true;
       }
 
-      if (assignedToMembers && assignedToMembers.length > 0) {
+      if (leadData?._id && assignedToMembers && assignedToMembers.length > 0) {
         const assignedToUserIds = assignedToMembers
           .map((member) => member.id)
           .map((id) => `'${id}'`)
@@ -188,118 +192,60 @@ const LeadInfoScreen = () => {
     setRemiderLeads((prev) => [...prev, newReminder]);
   };
   const renderContent = () => {
+    const renderLeadInfo = (data) => (
+      <>
+        <View>
+          <Text
+            style={[globalStyles.h5, globalStyles.fontfm]}
+            allowFontScaling={false}
+          >
+            Lead ID
+          </Text>
+          <Text
+            style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+            allowFontScaling={false}
+          >
+            {data.uid}
+          </Text>
+        </View>
+        <View>
+          <Text
+            style={[globalStyles.h5, globalStyles.fontfm]}
+            allowFontScaling={false}
+          >
+            Project
+          </Text>
+          <Text
+            style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+            allowFontScaling={false}
+          >
+            {data.form_name}
+          </Text>
+        </View>
+        <View>
+          <Text
+            style={[globalStyles.h5, globalStyles.fontfm]}
+            allowFontScaling={false}
+          >
+            Source
+          </Text>
+          <Text
+            style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+            allowFontScaling={false}
+          >
+            {data.source}
+          </Text>
+        </View>
+      </>
+    );
     return (
       <>
         {selectedCards.includes(1) && (
           <View style={styles.infoContainer}>
             {permission?.ADMIN || permission.CRM ? (
-              <View style={styles.row}>
-                <View style={styles.column}>
-                  <Text
-                    style={[globalStyles.h5, globalStyles.fontfm]}
-                    allowFontScaling={false}
-                  >
-                    Lead ID
-                  </Text>
-                  <Text
-                    style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
-                    allowFontScaling={false}
-                  >
-                    {leadData.uid}
-                  </Text>
-                </View>
-                <View style={styles.column}>
-                  <Text
-                    style={[globalStyles.h5, globalStyles.fontfm]}
-                    allowFontScaling={false}
-                  >
-                    Project
-                  </Text>
-                  <Text
-                    style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
-                    allowFontScaling={false}
-                  >
-                    {leadData.form_name}
-                  </Text>
-                </View>
-                <View style={styles.column}>
-                  <Text
-                    style={[
-                      globalStyles.h5,
-                      globalStyles.fontfm,
-                      styles.leftpush,
-                    ]}
-                    allowFontScaling={false}
-                  >
-                    Source
-                  </Text>
-                  <Text
-                    style={[
-                      globalStyles.h7,
-                      globalStyles.fontfm,
-                      styles.value,
-                      styles.leftpush,
-                    ]}
-                    allowFontScaling={false}
-                  >
-                    {leadData.source}
-                  </Text>
-                </View>
-              </View>
+              <View style={styles.row}>{renderLeadInfo(leadData)}</View>
             ) : (
-              <View style={styles.row}>
-                <View style={styles.column}>
-                  <Text
-                    style={[globalStyles.h5, globalStyles.fontfm]}
-                    allowFontScaling={false}
-                  >
-                    Lead ID
-                  </Text>
-                  <Text
-                    style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
-                    allowFontScaling={false}
-                  >
-                    {myLeadData.uid}
-                  </Text>
-                </View>
-                <View style={styles.column}>
-                  <Text
-                    style={[globalStyles.h5, globalStyles.fontfm]}
-                    allowFontScaling={false}
-                  >
-                    Project
-                  </Text>
-                  <Text
-                    style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
-                    allowFontScaling={false}
-                  >
-                    {myLeadData.form_name}
-                  </Text>
-                </View>
-                <View style={styles.column}>
-                  <Text
-                    style={[
-                      globalStyles.h5,
-                      globalStyles.fontfm,
-                      styles.leftpush,
-                    ]}
-                    allowFontScaling={false}
-                  >
-                    Source
-                  </Text>
-                  <Text
-                    style={[
-                      globalStyles.h7,
-                      globalStyles.fontfm,
-                      styles.value,
-                      styles.leftpush,
-                    ]}
-                    allowFontScaling={false}
-                  >
-                    {myLeadData.source}
-                  </Text>
-                </View>
-              </View>
+              <View style={styles.row}>{renderLeadInfo(myLeadData)}</View>
             )}
 
             {permission?.ADMIN || permission.CRM ? (
@@ -312,10 +258,10 @@ const LeadInfoScreen = () => {
                 </Text>
                 <TouchableOpacity
                   style={[styles.dropdown, styles.value]}
-                  onPress={() => handleMemberStatusSelect()}
+                  onPress={() => setMemberModalVisible(true)}
                 >
                   <Text style={styles.dropdownText}>
-                    {selectedTeams ? selectedTeams : "Select Team"}
+                  {selectedTeams.length > 0 ? selectedTeams.join(', ') : "Select Team"}
                   </Text>
                   <Icon
                     name="chevron-down-outline"
@@ -327,14 +273,14 @@ const LeadInfoScreen = () => {
                   />
                 </TouchableOpacity>
                 <Text
-                  style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+                  style={[globalStyles.h7, globalStyles.fontfm]}
                   allowFontScaling={false}
                 >
                   Assigned To Member
                 </Text>
                 <TouchableOpacity
                   style={[styles.dropdown, styles.value]}
-                  onPress={() => onselectMember("")}
+                  onPress={() =>  setisassineMemberModalVisible(true)}
                 >
                   <Text style={styles.dropdownText}>
                     {assignedToMembers.length > 0
@@ -353,34 +299,30 @@ const LeadInfoScreen = () => {
                   />
                 </TouchableOpacity>
               </>
-            ) : (
-              ""
-            )}
-            <>
-              <Text
-                style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
-                allowFontScaling={false}
-              >
-                Status
+            ) : null}
+
+            <Text
+              style={[globalStyles.h7, globalStyles.fontfm]}
+              allowFontScaling={false}
+            >
+              Status
+            </Text>
+            <TouchableOpacity
+              style={[styles.dropdown, styles.value]}
+              onPress={() => handleStatusSelect("")}
+            >
+              <Text style={styles.dropdownText}>
+                {selectedStatus || "Select Status"}
               </Text>
-              <TouchableOpacity
-                style={[styles.dropdown, styles.value]}
-                onPress={() => handleStatusSelect("")}
-              >
-                <Text style={styles.dropdownText}>
-                  {" "}
-                  {selectedStatus ? selectedStatus : "Select Status"}
-                </Text>
-                <Icon
-                  name="chevron-down-outline"
-                  size={20}
-                  style={[
-                    styles.dropdownIcon,
-                    openDropdown === 3 && styles.dropdownIconOpen,
-                  ]}
-                />
-              </TouchableOpacity>
-            </>
+              <Icon
+                name="chevron-down-outline"
+                size={20}
+                style={[
+                  styles.dropdownIcon,
+                  openDropdown === 3 && styles.dropdownIconOpen,
+                ]}
+              />
+            </TouchableOpacity>
           </View>
         )}
 
@@ -392,19 +334,39 @@ const LeadInfoScreen = () => {
             >
               Contact Info
             </Text>
-            <View>
-              <Text
-                style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
-                allowFontScaling={false}
-              >
-                {leadData.leadPhone}
-              </Text>
-              <Text
-                style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
-                allowFontScaling={false}
-              >
-                {leadData.leadEmail}
-              </Text>
+            <View style={styles.contactInfo}>
+              <View style={styles.infoRow}>
+                <FontAwesome name="phone" size={16} color="#0078FF" />
+                <Text
+                  style={[
+                    globalStyles.h7,
+                    globalStyles.fontfm,
+                    styles.valueContent,
+                  ]}
+                  allowFontScaling={false}
+                >
+                  {(selectedCards.includes(2) && permission.ADMIN) ||
+                  permission.CRM
+                    ? leadData.leadPhone
+                    : myLeadData.leadPhone}
+                </Text>
+              </View>
+              <View style={styles.infoRow}>
+                <FontAwesome name="envelope" size={16} color="#0078FF" />
+                <Text
+                  style={[
+                    globalStyles.h7,
+                    globalStyles.fontfm,
+                    styles.valueContent,
+                  ]}
+                  allowFontScaling={false}
+                >
+                  {(selectedCards.includes(2) && permission.ADMIN) ||
+                  permission.CRM
+                    ? leadData.leadEmail
+                    : myLeadData.leadEmail}
+                </Text>
+              </View>
             </View>
           </View>
         )}
@@ -429,8 +391,18 @@ const LeadInfoScreen = () => {
             <ScrollView style={styles.remindersList}>
               {reminderLeads.map((reminder, index) => (
                 <View key={index} style={styles.reminderItem}>
-                  <Text style={[globalStyles.h7, globalStyles.fontfm,]}   allowFontScaling={false}>{reminder.data.date}</Text>
-                  <Text style={[globalStyles.h7, globalStyles.fontfm,]}   allowFontScaling={false}>{reminder.data.title}</Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    {reminder.data.date}
+                  </Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    {reminder.data.title}
+                  </Text>
                 </View>
               ))}
             </ScrollView>
@@ -463,7 +435,12 @@ const LeadInfoScreen = () => {
             <ScrollView style={styles.remindersList}>
               {newRemarks.map((reminder, index) => (
                 <View key={index} style={styles.reminderItem}>
-                  <Text style={[globalStyles.h7, globalStyles.fontfm,]}   allowFontScaling={false}>{reminder.data.notes}</Text>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    {reminder.data.notes}
+                  </Text>
                 </View>
               ))}
             </ScrollView>
@@ -612,12 +589,13 @@ const LeadInfoScreen = () => {
       <AssignedMemberPop
         visible={isassineMemberModalVisible}
         onClose={() => setisassineMemberModalVisible(false)}
-        onStatusSelect={onselectMember}
+        onStatusSelect={onSelectMember}
+        selectedMembers = {assignedToMembers}
       />
       <MemberPopOver
         visible={isMemberModalVisible}
         onClose={() => setMemberModalVisible(false)}
-        onStatusSelect={handleMemberStatusSelect}
+        onStatusSelect={handleSelectedTeamsChange}
       />
       <StatusPop
         visible={isModalVisible}
@@ -674,19 +652,66 @@ const styles = StyleSheet.create({
   icon: {
     marginHorizontal: 10,
   },
-
   selectedCard: {
     backgroundColor: "#3D48E5",
   },
- 
-
   infoContainer: {
     marginBottom: 20,
+    backgroundColor: "#FFF",
+    padding: 15,
+    borderRadius: 15,
+    shadowColor: "transparent",
+    elevation: 3,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  dropdown: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#F7F7F7",
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 5,
+  },
+  dropdownText: {
+    color: "#333",
+  },
+  dropdownIcon: {
+    marginLeft: 10,
+    color: "#0078FF",
+  },
+  dropdownIconOpen: {
+    transform: [{ rotate: "180deg" }],
+  },
+  value: {
+    marginTop: 5,
   },
   contactContainer: {
-    marginBottom: 20,
+    backgroundColor: "#FFF",
+    padding: 10,
+    borderRadius: 15,
+    shadowColor: "transparent",
+  },
+  contactInfo: {
+    marginTop: 10,
+  },
+  valueContent: {
+    marginLeft: 10,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 5,
   },
   containerRem: {
+    backgroundColor: "#FFF",
+    padding: 10,
+    borderRadius: 15,
+    shadowColor: "transparent",
     marginBottom: 20,
   },
   headerRem: {
@@ -700,29 +725,6 @@ const styles = StyleSheet.create({
   },
   reminderItem: {
     marginBottom: 15,
-  },
-  value: {
-    marginTop: 5,
-  },
-  dropdown: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderColor: "gray",
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-  },
-  dropdownText: {
-    fontSize: 16,
-    color: "black",
-  },
-  dropdownIcon: {
-    marginLeft: 10,
-    transform: [{ rotate: "0deg" }],
-  },
-  dropdownIconOpen: {
-    transform: [{ rotate: "180deg" }],
   },
   submitButtonContainer: {
     padding: 20,
@@ -745,14 +747,7 @@ const styles = StyleSheet.create({
     color: "#3D48E5",
     fontWeight: "bold",
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  column: {
-    flex: 1,
-  },
+
   leftpush: {
     marginLeft: 30,
   },
