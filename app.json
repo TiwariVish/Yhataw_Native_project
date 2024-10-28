@@ -6,7 +6,7 @@
       ],
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/crm_icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.vishal_tiwari.Yhataw_Native"
@@ -15,10 +15,10 @@
     "slug": "vishal",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/crm_icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/pulse_Logo_big.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

@@ -24,12 +24,14 @@ interface AssignedMemberPopProps {
   visible: boolean;
   onClose: () => void;
   onStatusSelect: (selectedItems: any[]) => void; 
+  selectedMembers: any[];
 }
 
 const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
   visible,
   onClose,
   onStatusSelect,
+  selectedMembers
 }) => {
   const [userData, setUserData] = useState<any[]>([]); 
   const { leadData } = useSelector((state: RootState) => state.auth);
@@ -48,6 +50,8 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
     });
     if (visible) {
       fetchMemberLeadStage(assignToIds);
+    } else {
+      resetSelection();
     }
   }, [visible]);
 
@@ -58,25 +62,41 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
       const members = res.data.flatMap((team) =>
         team.team_members.flatMap((member) => member.users)
       );
-      const updatedMembers = members.map((item) => ({ ...item, checked: false }));
+
+      const updatedMembers = members.map((item) => ({
+        ...item,
+        checked: selectedMembers.some((selected) => selected.id === item._id),
+      }));
       setUserData(updatedMembers);
     } catch (error) {
       console.error("API Error:", error);
     }
   };
 
-  const toggleCheckbox = useCallback((id: string) => {
-    setUserData((prevData) => {
-      const updatedItems = prevData.map((item) =>
-        item._id === id ? { ...item, checked: !item.checked } : item
-      );
-      const selectedItems = updatedItems.filter((item) => item.checked);
-      if (selectedItems.length > 0) {
+  const resetSelection = () => {
+    setUserData((prevData) =>
+      prevData.map((item) => ({
+        ...item,
+        checked: selectedMembers.some((selected) => selected.id === item._id),
+      }))
+    );
+  };
+
+  const toggleCheckbox = useCallback(
+    (id: string) => {
+      setUserData((prevData) => {
+        const updatedItems = prevData.map((item) =>
+          item._id === id ? { ...item, checked: !item.checked } : item
+        );
+        
+        const selectedItems = updatedItems.filter((item) => item.checked);
         onStatusSelect(selectedItems);
-      }
-      return updatedItems;
-    });
-  }, [onStatusSelect]);
+        
+        return updatedItems;
+      });
+    },
+    [onStatusSelect]
+  );
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

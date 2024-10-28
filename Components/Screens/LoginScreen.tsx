@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -25,177 +25,169 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [backendEmailError, setBackendEmailError] = useState(false);
-  const [IsLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [mobilePattern, setMobilePattern] = useState(false);
-  const navigation = useNavigation<LoginScreenNavigationProp>();
 
+  const navigation = useNavigation<LoginScreenNavigationProp>();
   const dispatch = useDispatch();
   const { authenticated } = useSelector((state: RootState) => state.auth);
 
-  const handleProceed = async () => {
-    const isValid = validateEmail(email);
-    const isMobileValid = /^[0-9]{10}$/.test(email);
-    if (!isEmailValid && !isMobileValid) {
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateMobile = (email: string) => /^[0-9]{10}$/.test(email);
+
+  const handleProceed = useCallback(async () => {
+    const isValid = validateEmail(email) || validateMobile(email);
+    if (!isValid) {
       setIsEmailValid(false);
       return;
     }
     try {
       setIsLoading(true);
       const response = await login(email, password);
-      console.log(response, "::::::::::::email::::::::::::")
       if (response?.message?.settings?.success) {
         setIsEmailValid(true);
         setBackendEmailError(false);
         setShowPasswordInput(true);
       } else {
         setBackendEmailError(true);
-        console.log("Login failed. Please check your credentials.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert(error);
-
     } finally {
       setIsLoading(false);
     }
-  };
-  const handleOnChangeInputField = (text: string) => {
-    setEmail(text);
-    const isNumeric = /^[0-9]+$/.test(text);
-    setMobilePattern(isNumeric);
-    setIsEmailValid(true);
-    setBackendEmailError(false);
-    if (text === "") {
-      setIsEmailValid(true);
-      setBackendEmailError(false);
-    }
-  };
+  }, [email, password]);
 
-  const handleOnChangePasswordField = (text: string) => {
-    setPassword(text);
-  };
-
-  const handleLogin = async () => {
+  const handleLogin = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await login(email, password);
-      console.log(response, "::::::::::::::password--------------------");
       if (response?.message?.settings?.success) {
-        const { accessToken, fullName, role, _id } =
-          response?.message?.data?.user;
+        const {
+          accessToken,
+          fullName,
+          role,
+          _id,
+          email: userEmail,
+          role_privileges,
+        } = response?.message?.data?.user;
         dispatch(
           loginAction({
             authenticated: true,
-            accessToken: accessToken,
+            accessToken,
             userName: fullName,
-            email: response.message.data.user.email,
+            email: userEmail,
             role,
             userId: _id,
-            privileges: response.message.data.user?.role_privileges || {},
+            privileges: role_privileges || {},
           })
         );
         if (authenticated) {
           navigation.navigate("Dashboard");
         }
-      } else {
-        console.log("Login failed. Please check your credentials.");
       }
     } catch (error) {
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
+  }, [email, password, dispatch, authenticated, navigation]);
+
+  const handleOnChangeInputField = (text: string) => {
+    setEmail(text);
+    setMobilePattern(/^[0-9]+$/.test(text));
+    setIsEmailValid(true);
+    setBackendEmailError(false);
   };
 
-  const handleTogglePasswordVisibility = () => {
+  const handleTogglePasswordVisibility = useCallback(() => {
     setShowPassword(!showPassword);
-  };
+  }, [showPassword]);
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const getForgotPassword = useCallback(() => {
+    navigation.navigate("ForgotPassword");
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View  style={styles.image}>
-        <Image source={require("../../assets/Logo.png")}  />
-        </View>
-        <Text style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm ,]}  allowFontScaling={false}>
+        <Image source={require("../../assets/Logo.png")} style={styles.image} />
+        <Text
+          style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm]}
+          allowFontScaling={false}
+        >
           Sign in
         </Text>
-        <Text style={[globalStyles.h8, globalStyles.fs4, globalStyles.fontfm]}  allowFontScaling={false}>
+        <Text
+          style={[globalStyles.h8, globalStyles.fs4, globalStyles.fontfm]}
+          allowFontScaling={false}
+        >
           to access Pulse CRM
         </Text>
       </View>
+
       <View style={styles.inputContainer}>
         <View style={styles.inlineInput}>
-        {!mobilePattern && (
-          <Image
-            source={require('../../assets/User_box_light.png')}
-            style={styles.icon}
-          />
-        )}
+          {!mobilePattern && (
+            <Image
+              source={require("../../assets/User_box_light.png")}
+              style={styles.icon}
+            />
+          )}
           <TextInput
-            style={[styles.input, globalStyles.fontfm, globalStyles.h6,  mobilePattern ? { paddingLeft: 40 } : {}, ]}
+            style={[
+              styles.input,
+              globalStyles.fontfm,
+              globalStyles.h6,
+              mobilePattern ? { paddingLeft: 40 } : {},
+            ]}
             placeholder="Email or mobile number"
             onChangeText={handleOnChangeInputField}
             value={email}
             allowFontScaling={false}
-            
           />
           {mobilePattern && (
             <View style={styles.inputAdornment}>
               <Text
-                style={[globalStyles.fontfm, globalStyles.h6,]}
-                allowFontScaling={false} >
+                style={[globalStyles.fontfm, globalStyles.h6]}
+                allowFontScaling={false}
+              >
                 +91
               </Text>
             </View>
           )}
         </View>
-        <View>
-          {backendEmailError  && (
-            <Text
-              style={[
-                styles.errorText,
-                globalStyles.fontfm,
-                globalStyles.h6,
-                globalStyles.fs4,
-              ]}
-              allowFontScaling={false}
-            >
-              This is not a valid email. Please contact the system
-              administrator.
-            </Text>
-          )}
 
-          { !isEmailValid && !backendEmailError && (
-            <Text
-              style={[
-                styles.errorText,
-                globalStyles.fontfm,
-                globalStyles.h6,
-                globalStyles.fs4,
-              ]}
-              allowFontScaling={false}
-            >
-              The email id is not correct. Please try again
-            </Text>
-          )}
-        </View>
+        {!isEmailValid && !backendEmailError && (
+          <Text
+            style={[styles.errorText, globalStyles.fontfm, globalStyles.h6]}
+            allowFontScaling={false}
+          >
+            The email id is not correct. Please try again.
+          </Text>
+        )}
+
+        {backendEmailError && (
+          <Text
+            style={[styles.errorText, globalStyles.fontfm, globalStyles.h6]}
+            allowFontScaling={false}
+          >
+            This is not a valid email. Please contact the system administrator.
+          </Text>
+        )}
+
         {showPasswordInput && (
           <View style={styles.passwordContainer}>
             <View style={styles.inlineInput}>
               <Image
                 source={require("../../assets/Lock_icon.png")}
-                style={[styles.icon,styles.pssIcon]}
+                style={styles.icon}
               />
               <TextInput
                 style={[styles.input, globalStyles.fontfm, globalStyles.h6]}
                 placeholder="Password"
-                onChangeText={handleOnChangePasswordField}
+                onChangeText={setPassword}
                 value={password}
                 secureTextEntry={!showPassword}
                 allowFontScaling={false}
@@ -215,11 +207,33 @@ const LoginScreen = () => {
             </View>
           </View>
         )}
+
+        {showPasswordInput && (
+          <TouchableOpacity
+            style={styles.forgotPassword}
+            onPress={getForgotPassword}
+          >
+            <Text
+              style={[
+                styles.forgotPasswordText,
+                globalStyles.fs4,
+                globalStyles.h6,
+              ]}
+              allowFontScaling={false}
+            >
+              Forgot Password?
+            </Text>
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           onPress={showPasswordInput ? handleLogin : handleProceed}
           style={styles.button}
         >
-          <Text style={[styles.buttonText , globalStyles.fs1 ,globalStyles.h6]}  allowFontScaling={false}>
+          <Text
+            style={[styles.buttonText, globalStyles.fs1, globalStyles.h6]}
+            allowFontScaling={false}
+          >
             {showPasswordInput ? "Log In" : "Proceed"}
           </Text>
         </TouchableOpacity>
@@ -242,14 +256,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   image: {
-    marginBottom:10
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  subHeaderText: {
-    fontSize: 16,
+    marginBottom: 10,
   },
   inputContainer: {
     width: "100%",
@@ -261,7 +268,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#DFE1E8",
     paddingBottom: 5,
     marginBottom: 10,
-    position: 'relative',
+    position: "relative",
   },
   icon: {
     marginRight: 0,
@@ -269,7 +276,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     padding: 10,
-    // marginLeft: 10,
   },
   passwordContainer: {
     marginBottom: 20,
@@ -281,7 +287,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   button: {
-    height:48,
+    height: 48,
     backgroundColor: "#3D48E5",
     borderRadius: 8,
     paddingHorizontal: 20,
@@ -298,17 +304,20 @@ const styles = StyleSheet.create({
   },
   inputAdornment: {
     position: "absolute",
-    // left: 22,
     top: 0,
     bottom: 5,
     justifyContent: "center",
     alignItems: "center",
-    // paddingLeft: 30,
+    paddingRight: 10,
   },
-  pssIcon:{
-    height:30,
-    width:30
-  }
+  forgotPassword: {
+    alignSelf: "flex-end",
+    marginBottom: 20,
+  },
+  forgotPasswordText: {
+    color: "#3D48E5",
+    fontWeight: "bold",
+  },
 });
 
 export default LoginScreen;

@@ -12,7 +12,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 interface MemberPopOverProps {
   visible: boolean;
   onClose: () => void;
-  onStatusSelect: (status: string) => void;
+  onStatusSelect: (status: string[]) => void;
 }
 
 interface DropdownItem {
@@ -58,6 +58,8 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({ visible, onClose, onStatu
       return { ...item, checked: isChecked };
     });
     setMemberDropdownItems(updatedItems);
+       const selectedTeams = updatedItems.filter(item => item.checked).map(item => item.team_name);
+       onStatusSelect(selectedTeams);
   };
 
   const animatedStyle = useAnimatedStyle(() => {

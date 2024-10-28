@@ -1,35 +1,64 @@
-import React ,{useEffect} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import Navigation from './Components/Navigation';
 import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react'; // Import PersistGate
-import { store, persistor } from './utils/store'; // Correctly import store and persistor
-// import AppLoading from 'expo-app-loading';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './utils/store';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
+import { Video } from 'expo-av'; // Import Video from expo-av
 
 export default function App() {
-  SplashScreen.preventAutoHideAsync(); 
+  SplashScreen.preventAutoHideAsync();
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
   });
+
+  const videoRef = useRef(null);
+
   useEffect(() => {
     // Hide the splash screen when assets are ready
     if (fontsLoaded) {
-      SplashScreen.hideAsync();
+      setTimeout(async () => {
+        setIsVideoPlaying(false); // Hide video after 4 seconds
+        await SplashScreen.hideAsync(); // Hide the splash screen
+      }, 6000); // 4 seconds delay
     }
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null ;
+    return null;
   }
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <View style={styles.container}>
-          <Navigation />
-          <StatusBar style="auto" />
+          {isVideoPlaying ? (
+            <Video
+              ref={videoRef}
+              source={require('./assets/Pulse_Splash2.mp4')} // Path to your video file
+              style={styles.video}
+              resizeMode="cover"
+              shouldPlay
+              isLooping={true} 
+              onPlaybackStatusUpdate={(status) => {
+                if (status.didJustFinish) {
+                  setIsVideoPlaying(true); // Stop video once it's done playing
+                  SplashScreen.hideAsync(); // Hide the splash screen
+                }
+              }}
+            />
+          ) : (
+            // Wrap the Navigation and StatusBar inside a View to avoid Text errors
+            <View style={{ flex: 1 }}>
+              <Navigation />
+              <StatusBar style="auto" />
+            </View>
+          )}
         </View>
       </PersistGate>
     </Provider>
@@ -41,6 +70,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     justifyContent: 'center',
-    fontFamily:'Inter_400Regular'
+    fontFamily: 'Inter_400Regular',
+  },
+  video: {
+    width: '100%',
+    height: '100%', // Video covers the entire screen
   },
 });
