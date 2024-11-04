@@ -113,8 +113,8 @@ function Leads() {
     }
     if (searchQuery) {
       const firstThreeChars = searchQuery.substring(0, 3).toLowerCase();
-      return leadsToFilter.filter((lead) =>
-        lead.leadName.toLowerCase().startsWith(firstThreeChars)
+      return leadsToFilter.filter(
+        (lead) => lead.leadName && lead.leadName.toLowerCase().startsWith(firstThreeChars)
       );
     }
     return leadsToFilter;

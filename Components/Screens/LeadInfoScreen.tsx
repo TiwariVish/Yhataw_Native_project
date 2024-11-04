@@ -488,7 +488,7 @@ const LeadInfoScreen = () => {
                       style={[globalStyles.h8, globalStyles.tc4]}
                       allowFontScaling={false}
                     >
-                      {leadData.stage}
+                      {leadData.stage.charAt(0).toUpperCase() + leadData.stage.slice(1)}
                     </Text>
                   </View>
                   <Text
@@ -535,7 +535,7 @@ const LeadInfoScreen = () => {
                     style={[globalStyles.h8, globalStyles.tc4]}
                     allowFontScaling={false}
                   >
-                    {myLeadData.stage}
+                    {myLeadData.stage.charAt(0).toUpperCase() + myLeadData.stage.slice(1)}
                   </Text>
                 </View>
                 <Text
