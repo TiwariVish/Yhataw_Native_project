@@ -129,7 +129,7 @@ const ProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F9FD',
+    backgroundColor: '#FFFFFF',
   },
   profileContainer: {
     alignItems: 'center',
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#0078FF',
+    borderColor: '#C5C8F7',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden', 

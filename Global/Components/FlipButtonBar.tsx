@@ -65,9 +65,9 @@ const FlipButtonBar: React.FC<FlipButtonBarProps> = ({ segments, showSearch = fa
               onChangeText={handleSearchChange}
             />
           </View>
-          <View style={styles.filterContainer}>
+          {/* <View style={styles.filterContainer}>
             <Feather name="filter" size={20} color="#333" />
-          </View>
+          </View> */}
         </View>
       )}
     </View>
@@ -77,7 +77,7 @@ const FlipButtonBar: React.FC<FlipButtonBarProps> = ({ segments, showSearch = fa
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    backgroundColor: "#F4F9FD",
+    backgroundColor: "#FFFFFF",
   },
   segmentedControl: {
     flexDirection: 'row',
@@ -108,10 +108,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A86FF',
   },
   segmentText: {
-    color: 'black',
+    color: '#0A1629',
   },
   activeText: {
-    color: '#FFF',
+    color: '#FFFFFF',
   },
   searchWrapper: {
     flexDirection: 'row',

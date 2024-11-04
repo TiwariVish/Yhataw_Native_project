@@ -1,3 +1,4 @@
+import { color } from "@mui/system";
 import { StyleSheet } from "react-native";
 export const globalStyles = StyleSheet.create({
   h1: {
@@ -21,7 +22,7 @@ export const globalStyles = StyleSheet.create({
   h7: {
     fontSize: 14,
   },
-  h8:{
+  h8: {
     fontSize: 12,
   },
   fs1: {
@@ -36,7 +37,22 @@ export const globalStyles = StyleSheet.create({
   fs4: {
     fontWeight: 400,
   },
-   fontfm: {
-    fontFamily: 'Inter_400Regular',
+  fontfm: {
+    fontFamily: "Inter_400Regular",
+  },
+  tc: {
+    color: "#031639",
+  },
+  tc1: {
+    color: "#6C6C74",
+  },
+  tc2: {
+    color: "#9E9FAB",
+  },
+  tc3: {
+    color: "#3F8CFF",
+  },
+  tc4: {
+    color:"#FFFFFF"
   },
 });

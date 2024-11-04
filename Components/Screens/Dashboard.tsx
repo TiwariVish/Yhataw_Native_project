@@ -34,6 +34,7 @@ import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import CustomCardNew from "../../NewDesine/GlobalComponets/CustomCardNew";
 import FotterDseine from "../../NewDesine/GlobalComponets/FotterDseine";
 import CustomBigCard from "../../NewDesine/GlobalComponets/CustomBigCard";
+import Footer from "../../Global/Components/Footer";
 
 const projectData = [
   {
@@ -72,8 +73,8 @@ const staticData = {
     {
       id: 2,
       content: "Just Now",
-      cardColor: "#D4FFEA",
-      calendarBackgroundColor: "#FA4200",
+      cardColor: "#E8B86D",
+      calendarBackgroundColor: "#E8B86D",
       leadDataKey: "lead_total_new_count",
       myleadKey: "lead_my_new_count",
       lead_my_pipeline_count: "",
@@ -82,7 +83,7 @@ const staticData = {
       id: 4,
       content: "Site Visit",
       cardColor: "#99e6ff",
-      calendarBackgroundColor: "#00C0FA",
+      calendarBackgroundColor: "#91DDCF",
       leadDataKey: "",
       myleadKey: "",
       lead_my_pipeline_count: "",
@@ -91,7 +92,7 @@ const staticData = {
       id: 5,
       content: "Pipeline",
       cardColor: "#FFF3DF",
-      calendarBackgroundColor: "#ffff00",
+      calendarBackgroundColor: "#F19ED2",
       leadDataKey: "lead_total_pipeline_count",
       myleadKey: "lead_my_pipeline_count",
     },
@@ -99,7 +100,7 @@ const staticData = {
       id: 3,
       content: "Visit Cancelled",
       cardColor: "#D4FFEA",
-      calendarBackgroundColor: "#009900",
+      calendarBackgroundColor: "#EF9C66",
       leadDataKey: "",
       myleadKey: "",
       lead_my_pipeline_count: "lead_my_pipeline_count",
@@ -108,7 +109,7 @@ const staticData = {
       id: 1,
       content: "Visit Done",
       cardColor: "#D4FFEA",
-      calendarBackgroundColor: "#009900",
+      calendarBackgroundColor: "#AFD198",
       leadDataKey: "lead_total_visit_done_count",
       myleadKey: "",
       visit_done_count: "lead_total_visit_done_count",
@@ -117,7 +118,7 @@ const staticData = {
       id: 6,
       content: "Not Answered",
       cardColor: "#FFEFEC",
-      calendarBackgroundColor: "#cf6363",
+      calendarBackgroundColor: "#F6B0B0",
       leadDataKey: "lead_my_not_answered_count",
       myleadKey: "lead_my_not_answered_count",
       visit_done_count: "lead_total_visit_done_count",
@@ -126,7 +127,7 @@ const staticData = {
       id: 7,
       content: "Not Intrested",
       cardColor: "#FFEFEC",
-      calendarBackgroundColor: "#cf6363",
+      calendarBackgroundColor: "#FFCCA7",
       leadDataKey: "lead_my_not_intrested_count",
       myleadKey: "lead_my_not_intrested_count",
       visit_done_count: "lead_total_visit_done_count",
@@ -135,7 +136,7 @@ const staticData = {
       id: 8,
       content: "Call Back",
       cardColor: "#FFF3DF",
-      calendarBackgroundColor: "#ffff00",
+      calendarBackgroundColor: "#C5E0A3",
       leadDataKey: "lead_total_call_back_count",
       myleadKey: "lead_my_call_back_count",
       visit_done_count: "lead_total_visit_done_count",
@@ -147,28 +148,28 @@ const staticData = {
       content: "Present",
       attendanceKey: "attendence_present_today",
       countMy_Attendance: "attendence_my_current_month_present",
-      calendarBackgroundColor: "#009900",
+      calendarBackgroundColor: "#98C7D9",
     },
     {
       id: 2,
       content: "Absent",
       attendanceKey: "attendence_absent_today",
       countMy_Attendance: "attendence_my_current_month_absent",
-      calendarBackgroundColor: "#FA4200",
+      calendarBackgroundColor: "#B5E7AC",
     },
     {
       id: 3,
       content: "Late",
       attendanceKey: "attendence_late_today",
       countMy_Attendance: "attendence_my_current_month_late",
-      calendarBackgroundColor: "#00C0FA",
+      calendarBackgroundColor: "#E3C9FF",
     },
     {
       id: 4,
       content: "Leave",
       attendanceKey: "attendence_leave_today",
       countMy_Attendance: "attendence_my_current_month_leave",
-      calendarBackgroundColor: "#FA4200",
+      calendarBackgroundColor: "#FF9B9B",
     },
   ],
   myProjects: [
@@ -370,6 +371,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   };
 
   const navigateToSection = (id: number) => {
+    if(id > 6) return
     dispatch(setLeadId(id));
     navigation.navigate("Leads");
     setModalVisible(false);
@@ -435,19 +437,19 @@ const Dashboard: React.FC<CustomProps> = () => {
             <View style={styles.header}>
               <View style={styles.imageContainer}>
                 <Image
-                  source={require("../../assets/Logo.png")}
+                  source={require("../../assets/new_pulse_logo.png")}
                   style={styles.image}
                 />
               </View>
               <View style={styles.textContainer}>
                 <Text
-                  style={[styles.name, globalStyles.fontfm, globalStyles.h4]}
+                  style={[globalStyles.fs1, globalStyles.h5,globalStyles.tc]}
                   allowFontScaling={false}
                 >
                   {userData?.name}
                 </Text>
                 <Text
-                  style={[globalStyles.h7, globalStyles.fontfm, styles.role]}
+                  style={[globalStyles.h8, globalStyles.fs3,globalStyles.tc1]}
                   allowFontScaling={false}
                 >
                   {roleFromRedux}
@@ -476,9 +478,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                   <View style={styles.textContainerAll}>
                     <Text
                       style={[
-                        styles.name,
-                        globalStyles.h6,
-                        globalStyles.fontfm,
+                        styles.leadData,
+                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
                       ]}
                       allowFontScaling={false}
                     >
@@ -486,8 +487,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     </Text>
                     <Text
                       style={[
-                        globalStyles.h7,
-                        globalStyles.fontfm,
+                        globalStyles.h8,
+                        globalStyles.fs3,
+                        globalStyles.tc2,
                         styles.role,
                       ]}
                       allowFontScaling={false}
@@ -510,8 +512,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     <Text
                       style={[
                         styles.viewAll,
-                        globalStyles.h6,
+                        globalStyles.h7,
                         globalStyles.fontfm,
+                        globalStyles.tc3
                       ]}
                       allowFontScaling={false}
                     >
@@ -520,7 +523,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                     <Feather
                       name="chevron-right"
                       size={24}
-                      color="#007bff"
+                      color="#3F8CFF"
                       style={styles.icon}
                     />
                   </TouchableOpacity>
@@ -571,20 +574,20 @@ const Dashboard: React.FC<CustomProps> = () => {
                   <View style={styles.textContainerAll}>
                     <Text
                       style={[
-                        styles.name,
-                        globalStyles.h6,
-                        globalStyles.fontfm,
+                        styles.leadData,
+                        globalStyles.fs1, globalStyles.h5,globalStyles.tc2
                       ]}
                       allowFontScaling={false}
                     >
                       My Leads
                     </Text>
                     <Text
-                      style={[
-                        globalStyles.h7,
-                        globalStyles.fontfm,
-                        styles.role,
-                      ]}
+                    style={[
+                      globalStyles.h8,
+                      globalStyles.fs3,
+                      globalStyles.tc2,
+                      styles.role,
+                    ]}
                       allowFontScaling={false}
                     >
                       {dashboardDataMyLead.lead_my_total_count}
@@ -607,8 +610,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                       <Text
                         style={[
                           styles.viewAll,
-                          globalStyles.h6,
+                          globalStyles.h7,
                           globalStyles.fontfm,
+                          globalStyles.tc3
                         ]}
                         allowFontScaling={false}
                       >
@@ -668,9 +672,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                   <View style={styles.textContainerAll}>
                     <Text
                       style={[
-                        styles.name,
-                        globalStyles.h6,
-                        globalStyles.fontfm,
+                        styles.leadData,
+                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
                       ]}
                       allowFontScaling={false}
                     >
@@ -678,8 +681,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     </Text>
                     <Text
                       style={[
-                        globalStyles.h7,
-                        globalStyles.fontfm,
+                        globalStyles.h8,
+                        globalStyles.fs3,
+                        globalStyles.tc2,
                         styles.role,
                       ]}
                       allowFontScaling={false}
@@ -731,9 +735,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                       <View style={styles.textContainerAll}>
                         <Text
                           style={[
-                            styles.name,
-                            globalStyles.h6,
-                            globalStyles.fontfm,
+                            styles.leadData,
+                            globalStyles.fs1, globalStyles.h5,globalStyles.tc
                           ]}
                           allowFontScaling={false}
                         >
@@ -741,8 +744,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                         </Text>
                         <Text
                           style={[
-                            globalStyles.h7,
-                            globalStyles.fontfm,
+                            globalStyles.h8,
+                            globalStyles.fs3,
+                            globalStyles.tc2,
                             styles.role,
                           ]}
                           allowFontScaling={false}
@@ -822,9 +826,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                   <View style={styles.textContainerAll}>
                     <Text
                       style={[
-                        styles.name,
-                        globalStyles.h6,
-                        globalStyles.fontfm,
+                        styles.leadData,
+                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
                       ]}
                       allowFontScaling={false}
                     >
@@ -832,8 +835,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     </Text>
                     <Text
                       style={[
-                        globalStyles.h7,
-                        globalStyles.fontfm,
+                        globalStyles.h8,
+                        globalStyles.fs3,
+                        globalStyles.tc2,
                         styles.role,
                       ]}
                       allowFontScaling={false}
@@ -890,9 +894,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                   <View style={styles.textContainerAll}>
                     <Text
                       style={[
-                        styles.name,
-                        globalStyles.h6,
-                        globalStyles.fontfm,
+                        styles.leadData,
+                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
                       ]}
                       allowFontScaling={false}
                     >
@@ -900,8 +903,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     </Text>
                     <Text
                       style={[
-                        globalStyles.h7,
-                        globalStyles.fontfm,
+                        globalStyles.h8,
+                        globalStyles.fs3,
+                        globalStyles.tc2,
                         styles.role,
                       ]}
                       allowFontScaling={false}
@@ -953,12 +957,11 @@ const Dashboard: React.FC<CustomProps> = () => {
             {permission?.ADMIN || permission.CRM ? (
               <>
                 <View style={styles.row}>
-                  <View style={styles.textContainerAll}>
+                  {/* <View style={styles.textContainerAll}>
                     <Text
                       style={[
-                        styles.name,
-                        globalStyles.h6,
-                        globalStyles.fontfm,
+                        styles.leadData,
+                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
                       ]}
                       allowFontScaling={false}
                     >
@@ -966,15 +969,16 @@ const Dashboard: React.FC<CustomProps> = () => {
                     </Text>
                     <Text
                       style={[
-                        globalStyles.h7,
-                        globalStyles.fontfm,
+                        globalStyles.h8,
+                        globalStyles.fs3,
+                        globalStyles.tc2,
                         styles.role,
                       ]}
                       allowFontScaling={false}
                     >
                       {dashboardData.project.projects_total} Total
                     </Text>
-                  </View>
+                  </View> */}
                   <View style={styles.iconFord}>
                     {/* <AntDesign name="right" size={24} color="black" /> */}
                   </View>
@@ -995,7 +999,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                     </View>
                   ))} */}
 
-                  <View style={styles.leadsContainer}>
+                  {/* <View style={styles.leadsContainer}>
                     {staticData.myProjects.map((project) => (
                       <CustomBigCard
                         key={project.id}
@@ -1009,7 +1013,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                         }
                       />
                     ))}
-                  </View>
+                  </View> */}
                 </ScrollView>
               </>
             ) : (
@@ -1018,12 +1022,11 @@ const Dashboard: React.FC<CustomProps> = () => {
             {permission["MY-Dashboard"] ? (
               <>
                 <View style={styles.row}>
-                  <View style={styles.textContainerAll}>
+                  {/* <View style={styles.textContainerAll}>
                     <Text
                       style={[
-                        styles.name,
-                        globalStyles.h6,
-                        globalStyles.fontfm,
+                        styles.leadData,
+                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
                       ]}
                       allowFontScaling={false}
                     >
@@ -1031,15 +1034,16 @@ const Dashboard: React.FC<CustomProps> = () => {
                     </Text>
                     <Text
                       style={[
-                        globalStyles.h7,
-                        globalStyles.fontfm,
+                        globalStyles.h8,
+                        globalStyles.fs3,
+                        globalStyles.tc2,
                         styles.role,
                       ]}
                       allowFontScaling={false}
                     >
                       {dashboardData.project.projects_total} Total
                     </Text>
-                  </View>
+                  </View> */}
                   <View style={styles.iconFord}>
                     {/* <AntDesign name="right" size={24} color="black" /> */}
                   </View>
@@ -1059,7 +1063,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                       />
                     </View>
                   ))} */}
-                  <View style={styles.leadsContainer}>
+                  {/* <View style={styles.leadsContainer}>
                     {projectData.map((project) => (
                       <CustomBigCard
                         key={project.id}
@@ -1073,7 +1077,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                         }
                       />
                     ))}
-                  </View>
+                  </View> */}
                 </ScrollView>
               </>
             ) : (
@@ -1092,7 +1096,7 @@ const Dashboard: React.FC<CustomProps> = () => {
 
 const styles = StyleSheet.create({
   contmain: {
-    backgroundColor: "#F4F9FD",
+    backgroundColor: "#FFFFFF",
     flex: 1,
   },
   header: {
@@ -1100,20 +1104,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 20,
-    marginTop: 20,
+    marginTop: 30,
   },
   imageContainer: {
     marginRight: 12,
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 5,
-    padding: 5,
+    padding: 10,
     justifyContent: "center",
     alignItems: "center",
   },
   image: {
     width: 35,
-    height: 35,
+    height: 40,
   },
   textContainer: {
     flexDirection: "column",
@@ -1126,11 +1127,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    marginLeft: 22,
+    marginLeft: 10,
   },
   role: {
-    marginLeft: 25,
-    paddingTop: 5,
+    padding:10
+  },
+  leadData :{
+    marginLeft: 20,
+    padding:5
   },
   card: {
     padding: 10,
@@ -1163,11 +1167,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   viewAll: {
-    color: "#007bff",
-    marginRight: 5,
+    marginRight: 10,
   },
   icon: {
-    marginLeft: 5,
+    marginRight: 15,
   },
   leadsContainer: {
     flexDirection: "row",

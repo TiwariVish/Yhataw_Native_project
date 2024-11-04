@@ -70,7 +70,7 @@ const Navigation: React.FC = () => {
                   </Text>
                 ),
                 headerStyle: {
-                  backgroundColor: "#F4F9FD",
+                  backgroundColor: "#FFFFFF",
                   ...({} as any),
                 },
                 headerShadowVisible: false,

@@ -27,6 +27,7 @@ const LoginScreen = () => {
   const [backendEmailError, setBackendEmailError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mobilePattern, setMobilePattern] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
 
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const dispatch = useDispatch();
@@ -64,6 +65,7 @@ const LoginScreen = () => {
       setIsLoading(true);
       const response = await login(email, password);
       if (response?.message?.settings?.success) {
+        setPasswordError(false);
         const {
           accessToken,
           fullName,
@@ -86,9 +88,16 @@ const LoginScreen = () => {
         if (authenticated) {
           navigation.navigate("Dashboard");
         }
+      } else {
+        if (response?.message?.settings?.message === "Password Not Match") {
+          setPasswordError(true);
+        } else {
+          setPasswordError(false);
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
+      setPasswordError(true);
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +121,10 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image source={require("../../assets/Logo.png")} style={styles.image} />
+        <Image
+          source={require("../../assets/new_pulse_logo.png")}
+          style={styles.image}
+        />
         <Text
           style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm]}
           allowFontScaling={false}
@@ -181,7 +193,7 @@ const LoginScreen = () => {
           <View style={styles.passwordContainer}>
             <View style={styles.inlineInput}>
               <Image
-                source={require("../../assets/Lock_icon.png")}
+                source={require("../../assets/Lock_alt_duotone_line.png")}
                 style={styles.icon}
               />
               <TextInput
@@ -199,16 +211,24 @@ const LoginScreen = () => {
                 <Image
                   source={
                     showPassword
-                      ? require("../../assets/View_light.png")
-                      : require("../../assets/View_hide_light.png")
+                      ? require("../../assets/Eye_light.png")
+                      : require("../../assets/Eye Not Visible.png")
                   }
+                  style={styles.icon}
                 />
               </TouchableOpacity>
             </View>
           </View>
         )}
-
-        {showPasswordInput && (
+        {passwordError && (
+          <Text
+            style={[styles.errorText, globalStyles.fontfm, globalStyles.h6]}
+            allowFontScaling={false}
+          >
+            Please enter the correct password
+          </Text>
+        )}
+        {/* {showPasswordInput && (
           <TouchableOpacity
             style={styles.forgotPassword}
             onPress={getForgotPassword}
@@ -224,7 +244,7 @@ const LoginScreen = () => {
               Forgot Password?
             </Text>
           </TouchableOpacity>
-        )}
+        )} */}
 
         <TouchableOpacity
           onPress={showPasswordInput ? handleLogin : handleProceed}
@@ -257,6 +277,8 @@ const styles = StyleSheet.create({
   },
   image: {
     marginBottom: 10,
+    height: 35,
+    width: 30,
   },
   inputContainer: {
     width: "100%",
@@ -272,10 +294,13 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 0,
+    height: 25,
+    width: 25,
   },
   input: {
     flex: 1,
     padding: 10,
+    borderWidth: 0,
   },
   passwordContainer: {
     marginBottom: 20,

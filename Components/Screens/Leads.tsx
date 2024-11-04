@@ -194,7 +194,7 @@ function Leads() {
                 selectedCard === 5
               ) {
                 return (
-                  <View key={`${item.id}-${index}`}>
+                  <View style={styles.noDataFound} key={`${item.id}-${index}`}>
                     <Text>{item.name}</Text>
                   </View>
                 );
@@ -227,15 +227,15 @@ function Leads() {
 
 const styles = StyleSheet.create({
   mainCont: {
-    backgroundColor: "#F4F9FD",
+    backgroundColor: "#FFFFFF",
     height: "100%",
   },
   scrollViewContainer: {
-    backgroundColor: "#F4F9FD",
+    backgroundColor: "#FFFFFF",
     flexGrow: 1,
   },
   content: {
-    backgroundColor: "#F4F9FD",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 10,
   },
   loadingMore: {
@@ -245,6 +245,11 @@ const styles = StyleSheet.create({
   newAliment: {
     marginHorizontal: 10,
   },
+  noDataFound:{
+    justifyContent:"center",
+    alignItems:"center",
+    margin:20
+  }
 });
 
 export default Leads;

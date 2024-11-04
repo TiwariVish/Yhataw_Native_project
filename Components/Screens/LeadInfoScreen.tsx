@@ -103,21 +103,21 @@ const LeadInfoScreen = () => {
     setMemberModalVisible(true);
   };
 
-
   const onSelectMember = (member: any) => {
-    const selectedMembers: Member[] = 
+    const selectedMembers: Member[] =
       Array.isArray(member) && member.length > 0
         ? member.map((m) => ({ id: m._id, name: m.name }))
         : [];
     setAssignedToMembers((prevMembers) => {
-      const selectedIds = selectedMembers.map(m => m.id);
+      const selectedIds = selectedMembers.map((m) => m.id);
       const uniqueMembers = [
         ...prevMembers,
-        ...selectedMembers.filter(newMember => 
-          !prevMembers.some(prevMember => prevMember.id === newMember.id)
-        )
+        ...selectedMembers.filter(
+          (newMember) =>
+            !prevMembers.some((prevMember) => prevMember.id === newMember.id)
+        ),
       ];
-  
+
       return uniqueMembers;
     });
   };
@@ -160,15 +160,17 @@ const LeadInfoScreen = () => {
       }
 
       await Promise.all(waitCallApi);
-  
+
       if (statusChanged && membersChanged) {
-        alert("Your status and member assignment have been changed successfully.");
+        alert(
+          "Your status and member assignment have been changed successfully."
+        );
       } else if (statusChanged) {
         alert("Your status has been changed successfully.");
       } else if (membersChanged) {
         alert("Your member has been changed successfully.");
       }
-      
+
       navigation.navigate("Leads");
     } catch (error) {
       console.error("Failed to process change or assign member:", error);
@@ -196,13 +198,18 @@ const LeadInfoScreen = () => {
       <>
         <View>
           <Text
-            style={[globalStyles.h5, globalStyles.fontfm]}
+            style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]}
             allowFontScaling={false}
           >
             Lead ID
           </Text>
           <Text
-            style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+            style={[
+              globalStyles.h6,
+              globalStyles.fs1,
+              globalStyles.tc,
+              styles.value,
+            ]}
             allowFontScaling={false}
           >
             {data.uid}
@@ -210,27 +217,39 @@ const LeadInfoScreen = () => {
         </View>
         <View>
           <Text
-            style={[globalStyles.h5, globalStyles.fontfm]}
+            style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]}
             allowFontScaling={false}
           >
             Project
           </Text>
           <Text
-            style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+            style={[
+              globalStyles.h6,
+              globalStyles.fs1,
+              globalStyles.tc,
+              styles.value,
+            ]}
             allowFontScaling={false}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
             {data.form_name}
           </Text>
         </View>
         <View>
           <Text
-            style={[globalStyles.h5, globalStyles.fontfm]}
+            style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]}
             allowFontScaling={false}
           >
             Source
           </Text>
           <Text
-            style={[globalStyles.h7, globalStyles.fontfm, styles.value]}
+            style={[
+              globalStyles.h6,
+              globalStyles.fs1,
+              globalStyles.tc,
+              styles.value,
+            ]}
             allowFontScaling={false}
           >
             {data.source}
@@ -250,54 +269,58 @@ const LeadInfoScreen = () => {
 
             {permission?.ADMIN || permission.CRM ? (
               <>
-                <Text
-                  style={[globalStyles.h7, globalStyles.fontfm]}
-                  allowFontScaling={false}
-                >
-                  Assigned To
-                </Text>
-                <TouchableOpacity
-                  style={[styles.dropdown, styles.value]}
-                  onPress={() => setMemberModalVisible(true)}
-                >
-                  <Text style={styles.dropdownText}>
-                  {selectedTeams.length > 0 ? selectedTeams.join(', ') : "Select Team"}
+                <View style={styles.details}>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    Assigned To
                   </Text>
-                  <Icon
-                    name="chevron-down-outline"
-                    size={20}
-                    style={[
-                      styles.dropdownIcon,
-                      openDropdown === 1 && styles.dropdownIconOpen,
-                    ]}
-                  />
-                </TouchableOpacity>
-                <Text
-                  style={[globalStyles.h7, globalStyles.fontfm]}
-                  allowFontScaling={false}
-                >
-                  Assigned To Member
-                </Text>
-                <TouchableOpacity
-                  style={[styles.dropdown, styles.value]}
-                  onPress={() =>  setisassineMemberModalVisible(true)}
-                >
-                  <Text style={styles.dropdownText}>
-                    {assignedToMembers.length > 0
-                      ? assignedToMembers
-                          .map((member) => member.name)
-                          .join(", ")
-                      : "Assigned To Member"}
+                  <TouchableOpacity
+                    style={[styles.dropdown, styles.value]}
+                    onPress={() => setMemberModalVisible(true)}
+                  >
+                    <Text style={styles.dropdownText}>
+                      {selectedTeams.length > 0
+                        ? selectedTeams.join(", ")
+                        : "Select Team"}
+                    </Text>
+                    <Icon
+                      name="chevron-down-outline"
+                      size={20}
+                      style={[
+                        styles.dropdownIcon,
+                        openDropdown === 1 && styles.dropdownIconOpen,
+                      ]}
+                    />
+                  </TouchableOpacity>
+                  <Text
+                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    allowFontScaling={false}
+                  >
+                    Assigned To Member
                   </Text>
-                  <Icon
-                    name="chevron-down-outline"
-                    size={20}
-                    style={[
-                      styles.dropdownIcon,
-                      openDropdown === 2 && styles.dropdownIconOpen,
-                    ]}
-                  />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.dropdown, styles.value]}
+                    onPress={() => setisassineMemberModalVisible(true)}
+                  >
+                    <Text style={styles.dropdownText}>
+                      {assignedToMembers.length > 0
+                        ? assignedToMembers
+                            .map((member) => member.name)
+                            .join(", ")
+                        : "Assigned To Member"}
+                    </Text>
+                    <Icon
+                      name="chevron-down-outline"
+                      size={20}
+                      style={[
+                        styles.dropdownIcon,
+                        openDropdown === 2 && styles.dropdownIconOpen,
+                      ]}
+                    />
+                  </TouchableOpacity>
+                </View>
               </>
             ) : null}
 
@@ -329,10 +352,10 @@ const LeadInfoScreen = () => {
         {selectedCards.includes(2) && (
           <View style={styles.contactContainer}>
             <Text
-              style={[globalStyles.h5, globalStyles.fontfm]}
+              style={[globalStyles.h6, globalStyles.fs1,globalStyles.tc]}
               allowFontScaling={false}
             >
-              Contact Info
+             Contact Us
             </Text>
             <View style={styles.contactInfo}>
               <View style={styles.infoRow}>
@@ -340,8 +363,9 @@ const LeadInfoScreen = () => {
                 <Text
                   style={[
                     globalStyles.h7,
-                    globalStyles.fontfm,
+                    globalStyles.fs2,
                     styles.valueContent,
+                    globalStyles.tc
                   ]}
                   allowFontScaling={false}
                 >
@@ -356,8 +380,9 @@ const LeadInfoScreen = () => {
                 <Text
                   style={[
                     globalStyles.h7,
-                    globalStyles.fontfm,
+                    globalStyles.fs2,
                     styles.valueContent,
+                    globalStyles.tc
                   ]}
                   allowFontScaling={false}
                 >
@@ -374,14 +399,14 @@ const LeadInfoScreen = () => {
           <View style={styles.containerRem}>
             <View style={styles.headerRem}>
               <Text
-                style={[globalStyles.h5, globalStyles.fontfm]}
+                style={[globalStyles.h6, globalStyles.fs1,globalStyles.tc]}
                 allowFontScaling={false}
               >
                 Reminders
               </Text>
               <TouchableOpacity onPress={() => setRminderIsVisible(true)}>
                 <Text
-                  style={[globalStyles.h7, globalStyles.fontfm, styles.addNew]}
+                  style={[globalStyles.h7, globalStyles.fontfm,globalStyles.tc3]}
                   allowFontScaling={false}
                 >
                   Add New
@@ -418,14 +443,14 @@ const LeadInfoScreen = () => {
           <View style={styles.containerRem}>
             <View style={styles.headerRem}>
               <Text
-                style={[globalStyles.h5, globalStyles.fontfm]}
+                style={[globalStyles.h6, globalStyles.fs1,globalStyles.tc]}
                 allowFontScaling={false}
               >
                 Remark
               </Text>
               <TouchableOpacity onPress={() => setIsVisible(true)}>
                 <Text
-                  style={[globalStyles.h7, globalStyles.fontfm, styles.addNew]}
+                  style={[globalStyles.h7, globalStyles.fontfm,globalStyles.tc3]}
                   allowFontScaling={false}
                 >
                   Add Remark
@@ -460,26 +485,34 @@ const LeadInfoScreen = () => {
                 <View style={styles.headerLeft}>
                   <View style={styles.statusBadge}>
                     <Text
-                      style={[styles.statusText, globalStyles.h8]}
+                      style={[globalStyles.h8, globalStyles.tc4]}
                       allowFontScaling={false}
                     >
                       {leadData.stage}
                     </Text>
                   </View>
                   <Text
-                    style={[globalStyles.h4, globalStyles.fs1]}
+                    style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]}
                     allowFontScaling={false}
                   >
                     {leadData.leadName}
                   </Text>
                   <Text
-                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    style={[
+                      globalStyles.tc2,
+                      globalStyles.h8,
+                      globalStyles.tc2,
+                    ]}
                     allowFontScaling={false}
                   >
                     {leadData.project_name}
                   </Text>
                   <Text
-                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    style={[
+                      globalStyles.tc2,
+                      globalStyles.h8,
+                      globalStyles.tc2,
+                    ]}
                     allowFontScaling={false}
                   >
                     {leadData.projecttype_name}
@@ -499,7 +532,7 @@ const LeadInfoScreen = () => {
               <View style={styles.headerLeft}>
                 <View style={styles.statusBadge}>
                   <Text
-                    style={[styles.statusText, globalStyles.h8]}
+                    style={[globalStyles.h8, globalStyles.tc4]}
                     allowFontScaling={false}
                   >
                     {myLeadData.stage}
@@ -590,7 +623,7 @@ const LeadInfoScreen = () => {
         visible={isassineMemberModalVisible}
         onClose={() => setisassineMemberModalVisible(false)}
         onStatusSelect={onSelectMember}
-        selectedMembers = {assignedToMembers}
+        selectedMembers={assignedToMembers}
       />
       <MemberPopOver
         visible={isMemberModalVisible}
@@ -620,7 +653,7 @@ const LeadInfoScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F4F9FD",
+    backgroundColor: "#FFFFFF",
   },
   scrollView: {
     padding: 20,
@@ -639,15 +672,15 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   statusBadge: {
-    backgroundColor: "#FF6B6B",
-    borderRadius: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    alignSelf: "flex-start",
-    marginTop: 5,
-  },
-  statusText: {
-    color: "#FFF",
+    backgroundColor: "#FFBEC4",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 5,
+    marginBottom: 3,
+    width: 67,
+    height: 23,
+    justifyContent: "center",
+    alignItems: "center",
   },
   icon: {
     marginHorizontal: 10,
@@ -657,7 +690,7 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     marginBottom: 20,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     padding: 15,
     borderRadius: 15,
     shadowColor: "transparent",
@@ -691,7 +724,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   contactContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
     padding: 10,
     borderRadius: 15,
     shadowColor: "transparent",
@@ -743,11 +776,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "white",
   },
-  addNew: {
-    color: "#3D48E5",
-    fontWeight: "bold",
-  },
-
   leftpush: {
     marginLeft: 30,
   },
@@ -759,6 +787,11 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderWidth: 2,
     borderColor: "#00C853",
+  },
+  details: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginVertical: 5,
   },
 });
 
