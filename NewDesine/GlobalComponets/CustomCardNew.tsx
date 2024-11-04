@@ -33,7 +33,7 @@ const CustomCardNew: React.FC<CustomCardProps> = ({
   // Handler for card press
   const handleCardPress = () => {
       if (onCardPress) {
-      onCardPress({ title, count, id}); 
+      onCardPress({ title, count, id }); 
     }
   };
 
@@ -44,30 +44,30 @@ const CustomCardNew: React.FC<CustomCardProps> = ({
         {imageUrl ? (
           <View style={styles.circleOutLine}>
             <Image 
-             source={{ uri: imageUrl }}
+              source={{ uri: imageUrl }}
               style={styles.image} 
               resizeMode="contain" 
             /> 
           </View>
         ) : showInitial ? (
           <View style={styles.circleOutLine}>
-            <Text style={[globalStyles.h2, globalStyles.fs3]} allowFontScaling={false}>
-              {title ? title.charAt(0).toUpperCase() : ''}
-            </Text>
+            <View style={styles.circleInner}>
+              <Text style={[globalStyles.h2, globalStyles.fs3]} allowFontScaling={false}>
+                {title ? title.slice(0,2).toUpperCase() : ''}
+              </Text>
+            </View>
           </View>
         ) : null}
-
-        {/* Conditional rendering of the calendar icon */}
         {iconName && (
           <View style={[styles.iconContainer, { backgroundColor: iconBackgroundColor }]}>
-          <AntDesign  name="calendar" size={25} color="white" />
+            <AntDesign name="calendar" size={25} color="white" />
           </View>
         )}
 
         {/* Title and other content */}
-        <Text style={[styles.title, globalStyles.h5, globalStyles.fs2]} allowFontScaling={false}>{title}</Text>
-        {post && <Text style={styles.post} allowFontScaling={false}>{post}</Text>} 
-        {count && <Text style={styles.count} allowFontScaling={false}>{count}</Text>}
+        <Text style={[globalStyles.h7, globalStyles.fs1,globalStyles.tc]} allowFontScaling={false}>{title}</Text>
+        {post && <Text style={[globalStyles.tc2,globalStyles.h7]} allowFontScaling={false}>{post}</Text>} 
+        {count && <Text style={[styles.count,globalStyles.tc2,globalStyles.h8,globalStyles.fs3]} allowFontScaling={false}>{count}</Text>}
       
         {postCounter && (
           <View style={styles.countContainer}>
@@ -81,18 +81,18 @@ const CustomCardNew: React.FC<CustomCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    minWidth: 145, 
-    minHeight: 180, 
+    minWidth: 143, 
+    minHeight: 154, 
     padding: 20,
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 10,
-    shadowColor: '#000', 
-    shadowOpacity: 0.1,
+    shadowColor: '#000000', 
+    shadowOpacity: 0.06,
     shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 10},
     justifyContent: 'flex-start', 
-    elevation: 5,
+    elevation: 2,
   },
   iconContainer: {
     width: 60,
@@ -102,18 +102,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10, 
   },
-  title: {
-    marginTop: 10,
-  },
-  post: {
-    marginTop: 5,   
-    fontSize: 14,
-    color: '#555',
-  },
+
   count: {
-    marginTop: 10,
-    fontSize: 18,
-    color: '#333',
+    marginTop: 6,
   },
   countContainer: {
     width: 100,
@@ -128,13 +119,25 @@ const styles = StyleSheet.create({
   circleOutLine: {
     width: 70, 
     height: 70, 
-    borderWidth: 3, 
-    borderColor: 'blue',
+    borderWidth: 2, 
+    borderColor: '#C5C8F7', 
     borderRadius: 35, 
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden', 
     marginBottom: 10,
+    position: 'relative', 
+  },
+  circleInner: {
+    backgroundColor: '#EEEEEE', 
+    width: '85%', 
+    height: '85%', 
+    borderRadius: 35, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    position: 'absolute', 
+    top: '7.5%', 
+    left: '7.5%', 
   },
   image: {
     width: '85%', 

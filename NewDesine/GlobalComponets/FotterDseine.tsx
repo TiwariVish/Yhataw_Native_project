@@ -1,21 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity,Image } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Avatar } from 'react-native-paper';
-import { getPerosnalDetails } from '../../Components/Screens/MyProfileService';
-import store from '../../utils/store';
-import BottomSheetModal from '../../Global/PopAndModels/BottomSheetModal';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Avatar } from "react-native-paper";
+import { getPerosnalDetails } from "../../Components/Screens/MyProfileService";
+import store from "../../utils/store";
+import BottomSheetModal from "../../Global/PopAndModels/BottomSheetModal";
 
-
-
-
-const FotterDseine = ({ navigate , onHomePress  }) => {
-
+const FotterDseine = ({ navigate, onHomePress }) => {
   const [userData, setUserData] = useState<any>(null);
   const [selectedIcon, setSelectedIcon] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  
+
   useEffect(() => {
     fetchUserData();
   }, []);
@@ -31,47 +32,70 @@ const FotterDseine = ({ navigate , onHomePress  }) => {
 
   const handleIconPress = (iconName) => {
     if (iconName === "home") {
-      onHomePress();  
+      onHomePress();
     }
     setSelectedIcon(iconName);
     if (iconName === "user") {
       navigate("UserProfile");
     }
     if (iconName === "pluscircle") {
-      setIsVisible(true); 
+      setIsVisible(true);
     }
   };
 
   return (
     <>
-    <View style={styles.footerContainer}>
-      <View style={styles.triangle} />
+      {/* <ImageBackground
+        source={require("../../assets/Bottom_bg223.png")}
+        style={styles.footerContainer}
+        resizeMode="cover"
+      > */}
+    <View   style={styles.footerContainer}>
+        <View style={styles.iconContainer}>
+          <TouchableOpacity
+            style={styles.leftIcon}
+            onPress={() => handleIconPress("home")}
+          >
+            <Image
+              source={require("../../assets/home_icon.png")}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.leftIcon}   onPress={() => handleIconPress("home")}>
-      <Image
-            source={require("../../assets/home_icon.png")}
-            style={styles.icon}
-          />
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => handleIconPress("pluscircle")}
+          >
+            <MaterialIcons name="add" size={24} color="white" />
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.fab}   onPress={() => handleIconPress("pluscircle")}>
-        <MaterialIcons name="add" size={24} color="white" />
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.rightIcon}
+            onPress={() => handleIconPress("user")}
+          >
+            {userData?.profile_image ? (
+              <Image
+                source={{ uri: userData.profile_image }}
+                style={styles.icon}
+              />
+            ) : (
+              <Avatar.Icon
+                size={35}
+                icon="account"
+                color="white"
+                style={{ backgroundColor: "#3D48E5" }}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+      {/* </ImageBackground> */}
+      </View>
 
-      <TouchableOpacity style={styles.rightIcon}   onPress={() => handleIconPress("user")}>
-      <Avatar.Icon 
-        size={35} 
-        icon="account" 
-        color="white"
-        style={{ backgroundColor: '#3D48E5' }} 
+      <BottomSheetModal
+        visible={isVisible}
+        onClose={() => setIsVisible(false)}
       />
-      </TouchableOpacity>
-    </View>
-     <BottomSheetModal
-     visible={isVisible}
-     onClose={() => setIsVisible(false)}
-   />
-   </>
+    </>
   );
 };
 
@@ -79,46 +103,43 @@ export default FotterDseine;
 
 const styles = StyleSheet.create({
   footerContainer: {
-    backgroundColor: '#FFFFFF',
-    height: '10%',
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 85, // Set a fixed height for the footer
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative", // Ensure positioning context for children
+    backgroundColor:"#FFFFFF"
   },
-  triangle: {
-    position: 'absolute',
+  iconContainer: {
+    position: "absolute",
+    width: "100%",
     top: 0, 
-    width: 0,
-    height: 0,
-    borderLeftWidth: 200,
-    borderRightWidth: 200,
-    borderTopWidth: 50, 
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: '#F4F9FD', 
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1, 
   },
   fab: {
-    backgroundColor: 'blue',
+    backgroundColor: "blue",
     width: 56,
     height: 56,
     borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5, 
-    position: 'absolute',
-    bottom: 25, 
-    left: '50%', 
-    marginLeft: -28, 
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    position: "absolute",
+    top: 0,
+    left: "50%",
+    marginLeft: -28,
   },
   leftIcon: {
-    position: 'absolute',
-    left: 20, 
-    bottom: 25, 
+    position: "absolute",
+    left: 20,
+    top: 40, 
   },
   rightIcon: {
-    position: 'absolute',
+    position: "absolute",
     right: 20,
-    bottom: 25, 
+    top: 40, 
   },
   icon: {
     width: 30,

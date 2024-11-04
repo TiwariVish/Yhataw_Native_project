@@ -27,7 +27,7 @@ const LeadCard: React.FC<CustomCardProps> = ({
     <View style={styles.cardContainer}>
       <View style={styles.cardContent}>
         <View style={styles.leftColumn}>
-        {imageUrl ? (
+          {imageUrl ? (
             <View style={styles.circleOutline}>
               <Image
                 source={{ uri: imageUrl }} 
@@ -37,7 +37,7 @@ const LeadCard: React.FC<CustomCardProps> = ({
             </View>
           ) : (
             <View style={styles.circleOutline}>
-              <Text  style={[globalStyles.h2, globalStyles.fs3]} allowFontScaling={false}>{firstLetter}</Text>
+              <Text style={[globalStyles.h2, globalStyles.fs3]} allowFontScaling={false}>{firstLetter}</Text>
             </View>
           )}
         </View>
@@ -45,13 +45,13 @@ const LeadCard: React.FC<CustomCardProps> = ({
           <View style={styles.nameRow}>
             {status && (
               <View style={styles.statusBadge}>
-                <Text style={styles.statusText} allowFontScaling={false}>{status}</Text>
+                <Text style={[globalStyles.h8 ,globalStyles.fs3,globalStyles.tc4]} allowFontScaling={false}> {status.charAt(0).toUpperCase() + status.slice(1)}</Text>
               </View>
             )}
-            <Text style={styles.nameText} allowFontScaling={false}>{name}</Text>
+            <Text style={[globalStyles.h7,globalStyles.fs1,globalStyles.tc]} allowFontScaling={false}>{name}</Text>
           </View>
-          <Text style={styles.locationText} allowFontScaling={false}>{location}</Text>
-          <Text style={styles.locationText} allowFontScaling={false}>{projectName}</Text>
+          <Text style={[globalStyles.tc2,globalStyles.h8,globalStyles.tc2]} allowFontScaling={false}>{location}</Text>
+          <Text style={[globalStyles.tc2,globalStyles.h8,globalStyles.tc2]} allowFontScaling={false}>{projectName}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onCallPress} style={styles.rightColumn}>
           <View style={styles.callIconCircle}>
@@ -75,37 +75,38 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
     width: '100%',
-    height: 135,
+    height: 144,
   },
   cardContent: {
     flexDirection: 'row',
-    alignItems: 'flex-start', 
+    alignItems: 'center', 
   },
   leftColumn: {
     flex: 1,
-    justifyContent: 'flex-start', 
-    alignItems: 'flex-start', 
+    justifyContent: 'center', 
+    alignItems: 'center',
   },
   middleColumn: {
     flex: 3,
-    justifyContent: 'flex-start',
+    justifyContent: 'center', 
+    alignItems: 'flex-start',
     width: '75%', 
+     padding:10
   },
   rightColumn: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    top:30
+    justifyContent: 'center', 
+    alignItems: 'center',
   },
   circleOutline: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 72,
+    height: 72,
+    borderRadius: 40,
     borderWidth: 2,
-    borderColor: 'blue',
+    borderColor: '#C5C8F7',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+  
   },
   image: {
     width: '90%',
@@ -118,23 +119,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   statusBadge: {
-    backgroundColor: '#FF808B',
+    backgroundColor: '#FFBEC4',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 5,
     marginBottom: 3,
-  },
-  statusText: {
-    fontSize: 12,
-    color: '#FFFFFF',
-  },
-  nameText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  locationText: {
-    fontSize: 14,
-    color: '#757575',
+    width:67,
+    height:23,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   callIconCircle: {
     justifyContent: 'center',
