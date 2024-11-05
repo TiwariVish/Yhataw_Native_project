@@ -25,11 +25,16 @@ const LeadCard: React.FC<CustomCardProps> = ({
   // const firstLetter = name.charAt(0).toUpperCase();
   // const firstLetter = name ? name.slice(0,2).toUpperCase() : '';
   const firstLetter = name
-    ? name
-        .split(" ")
-        .map((m) => m.charAt(0).toUpperCase())
-        .join("")
-    : "";
+  ? name
+      .split(" ")
+      .map((m) => {
+          const initial = m.charAt(0).toUpperCase(); 
+          return m.length >= 3 ? initial : ""; 
+      })
+      .filter(Boolean) 
+      .slice(0, 2) 
+      .join("") 
+  : "";
   return (
     <View style={styles.cardContainer}>
       <View style={styles.cardContent}>
