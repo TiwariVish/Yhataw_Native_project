@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setLeadDatad, setMyLeadData } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
 import { getAllUsers, getAllUsersMyLead } from "./LeadsService";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import LeadCard from "../../NewDesine/GlobalComponets/LeadCard";
@@ -46,6 +46,11 @@ function Leads() {
     getAllLeadsData(false, 0);
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh();
+    }, [])
+  );
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -114,7 +119,9 @@ function Leads() {
     if (searchQuery) {
       const firstThreeChars = searchQuery.substring(0, 3).toLowerCase();
       return leadsToFilter.filter(
-        (lead) => lead.leadName && lead.leadName.toLowerCase().startsWith(firstThreeChars)
+        (lead) =>
+          lead.leadName &&
+          lead.leadName.toLowerCase().startsWith(firstThreeChars)
       );
     }
     return leadsToFilter;
@@ -245,11 +252,11 @@ const styles = StyleSheet.create({
   newAliment: {
     marginHorizontal: 10,
   },
-  noDataFound:{
-    justifyContent:"center",
-    alignItems:"center",
-    margin:20
-  }
+  noDataFound: {
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 20,
+  },
 });
 
 export default Leads;

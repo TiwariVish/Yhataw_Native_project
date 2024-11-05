@@ -371,7 +371,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   };
 
   const navigateToSection = (id: number) => {
-    if(id > 6) return
+    if (id > 6) return;
     dispatch(setLeadId(id));
     navigation.navigate("Leads");
     setModalVisible(false);
@@ -398,9 +398,6 @@ const Dashboard: React.FC<CustomProps> = () => {
       },
     }
   );
-
- 
-
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -443,13 +440,13 @@ const Dashboard: React.FC<CustomProps> = () => {
               </View>
               <View style={styles.textContainer}>
                 <Text
-                  style={[globalStyles.fs1, globalStyles.h5,globalStyles.tc]}
+                  style={[globalStyles.fs1, globalStyles.h5, globalStyles.tc]}
                   allowFontScaling={false}
                 >
                   {userData?.name}
                 </Text>
                 <Text
-                  style={[globalStyles.h8, globalStyles.fs3,globalStyles.tc1]}
+                  style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc1]}
                   allowFontScaling={false}
                 >
                   {roleFromRedux}
@@ -479,7 +476,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     <Text
                       style={[
                         styles.leadData,
-                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
+                        globalStyles.fs1,
+                        globalStyles.h5,
+                        globalStyles.tc,
                       ]}
                       allowFontScaling={false}
                     >
@@ -514,7 +513,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                         styles.viewAll,
                         globalStyles.h7,
                         globalStyles.fontfm,
-                        globalStyles.tc3
+                        globalStyles.tc3,
                       ]}
                       allowFontScaling={false}
                     >
@@ -575,19 +574,21 @@ const Dashboard: React.FC<CustomProps> = () => {
                     <Text
                       style={[
                         styles.leadData,
-                        globalStyles.fs1, globalStyles.h5,globalStyles.tc2
+                        globalStyles.fs1,
+                        globalStyles.h5,
+                        globalStyles.tc,
                       ]}
                       allowFontScaling={false}
                     >
                       My Leads
                     </Text>
                     <Text
-                    style={[
-                      globalStyles.h8,
-                      globalStyles.fs3,
-                      globalStyles.tc2,
-                      styles.role,
-                    ]}
+                      style={[
+                        globalStyles.h8,
+                        globalStyles.fs3,
+                        globalStyles.tc2,
+                        styles.role,
+                      ]}
                       allowFontScaling={false}
                     >
                       {dashboardDataMyLead.lead_my_total_count}
@@ -612,7 +613,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                           styles.viewAll,
                           globalStyles.h7,
                           globalStyles.fontfm,
-                          globalStyles.tc3
+                          globalStyles.tc3,
                         ]}
                         allowFontScaling={false}
                       >
@@ -673,7 +674,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     <Text
                       style={[
                         styles.leadData,
-                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
+                        globalStyles.fs1,
+                        globalStyles.h5,
+                        globalStyles.tc,
                       ]}
                       allowFontScaling={false}
                     >
@@ -736,7 +739,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                         <Text
                           style={[
                             styles.leadData,
-                            globalStyles.fs1, globalStyles.h5,globalStyles.tc
+                            globalStyles.fs1,
+                            globalStyles.h5,
+                            globalStyles.tc,
                           ]}
                           allowFontScaling={false}
                         >
@@ -827,7 +832,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     <Text
                       style={[
                         styles.leadData,
-                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
+                        globalStyles.fs1,
+                        globalStyles.h5,
+                        globalStyles.tc,
                       ]}
                       allowFontScaling={false}
                     >
@@ -895,7 +902,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                     <Text
                       style={[
                         styles.leadData,
-                        globalStyles.fs1, globalStyles.h5,globalStyles.tc
+                        globalStyles.fs1,
+                        globalStyles.h5,
+                        globalStyles.tc,
                       ]}
                       allowFontScaling={false}
                     >
@@ -1130,11 +1139,11 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   role: {
-    padding:10
+    padding: 10,
   },
-  leadData :{
+  leadData: {
     marginLeft: 20,
-    padding:5
+    padding: 5,
   },
   card: {
     padding: 10,

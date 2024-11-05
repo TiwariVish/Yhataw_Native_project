@@ -233,7 +233,9 @@ const LeadInfoScreen = () => {
             numberOfLines={1}
             ellipsizeMode="tail"
           >
-            {data.form_name}
+            {data.form_name.split(" ").length < 2
+              ? data.form_name
+              : data.form_name.split(" ").slice(0, 2).join(" ") + "..."}
           </Text>
         </View>
         <View>
@@ -352,10 +354,10 @@ const LeadInfoScreen = () => {
         {selectedCards.includes(2) && (
           <View style={styles.contactContainer}>
             <Text
-              style={[globalStyles.h6, globalStyles.fs1,globalStyles.tc]}
+              style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]}
               allowFontScaling={false}
             >
-             Contact Us
+              Contact Us
             </Text>
             <View style={styles.contactInfo}>
               <View style={styles.infoRow}>
@@ -365,7 +367,7 @@ const LeadInfoScreen = () => {
                     globalStyles.h7,
                     globalStyles.fs2,
                     styles.valueContent,
-                    globalStyles.tc
+                    globalStyles.tc,
                   ]}
                   allowFontScaling={false}
                 >
@@ -382,7 +384,7 @@ const LeadInfoScreen = () => {
                     globalStyles.h7,
                     globalStyles.fs2,
                     styles.valueContent,
-                    globalStyles.tc
+                    globalStyles.tc,
                   ]}
                   allowFontScaling={false}
                 >
@@ -399,14 +401,18 @@ const LeadInfoScreen = () => {
           <View style={styles.containerRem}>
             <View style={styles.headerRem}>
               <Text
-                style={[globalStyles.h6, globalStyles.fs1,globalStyles.tc]}
+                style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]}
                 allowFontScaling={false}
               >
                 Reminders
               </Text>
               <TouchableOpacity onPress={() => setRminderIsVisible(true)}>
                 <Text
-                  style={[globalStyles.h7, globalStyles.fontfm,globalStyles.tc3]}
+                  style={[
+                    globalStyles.h7,
+                    globalStyles.fontfm,
+                    globalStyles.tc3,
+                  ]}
                   allowFontScaling={false}
                 >
                   Add New
@@ -443,14 +449,18 @@ const LeadInfoScreen = () => {
           <View style={styles.containerRem}>
             <View style={styles.headerRem}>
               <Text
-                style={[globalStyles.h6, globalStyles.fs1,globalStyles.tc]}
+                style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]}
                 allowFontScaling={false}
               >
                 Remark
               </Text>
               <TouchableOpacity onPress={() => setIsVisible(true)}>
                 <Text
-                  style={[globalStyles.h7, globalStyles.fontfm,globalStyles.tc3]}
+                  style={[
+                    globalStyles.h7,
+                    globalStyles.fontfm,
+                    globalStyles.tc3,
+                  ]}
                   allowFontScaling={false}
                 >
                   Add Remark
@@ -488,7 +498,8 @@ const LeadInfoScreen = () => {
                       style={[globalStyles.h8, globalStyles.tc4]}
                       allowFontScaling={false}
                     >
-                      {leadData.stage.charAt(0).toUpperCase() + leadData.stage.slice(1)}
+                      {leadData.stage.charAt(0).toUpperCase() +
+                        leadData.stage.slice(1)}
                     </Text>
                   </View>
                   <Text
@@ -535,7 +546,8 @@ const LeadInfoScreen = () => {
                     style={[globalStyles.h8, globalStyles.tc4]}
                     allowFontScaling={false}
                   >
-                    {myLeadData.stage.charAt(0).toUpperCase() + myLeadData.stage.slice(1)}
+                    {myLeadData.stage.charAt(0).toUpperCase() +
+                      myLeadData.stage.slice(1)}
                   </Text>
                 </View>
                 <Text
@@ -672,13 +684,13 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   statusBadge: {
-    backgroundColor: "#FFBEC4",
+    backgroundColor: "#FF8690",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 5,
     marginBottom: 3,
-    width: 67,
-    height: 23,
+    minWidth: 67,
+    minHeight: 23,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -789,7 +801,7 @@ const styles = StyleSheet.create({
     borderColor: "#00C853",
   },
   details: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     marginVertical: 5,
   },
