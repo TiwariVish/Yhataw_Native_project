@@ -113,7 +113,7 @@ const Navigation: React.FC = () => {
                     }}
                     allowFontScaling={false}
                   >
-                    Lead Info Screen
+                    Lead Info 
                   </Text>
                 ),
                 headerStyle: {

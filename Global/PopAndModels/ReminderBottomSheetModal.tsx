@@ -88,7 +88,6 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
     };
   });
   const showDatePicker = () => {
-    console.log("================");
     setDatePickerVisibility(true);
   };
 
@@ -120,13 +119,13 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                   <View style={styles.containerdiv}>
                     <Text
-                      style={[globalStyles.h4, globalStyles.fs1, styles.header]}
+                      style={[globalStyles.h5, globalStyles.fs1, styles.header ,globalStyles.tc]}
                       allowFontScaling={false}
                     >
                       Add Reminder
                     </Text>
                     <Text
-                      style={[globalStyles.h8, globalStyles.fs1, styles.header]}
+                      style={[globalStyles.h7, globalStyles.fs2, styles.header ,globalStyles.textColor]}
                       allowFontScaling={false}
                     >
                       Add new reminder for the lead
@@ -135,8 +134,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                     <View style={styles.inputContainer}>
                       <Text
                         style={[
-                          globalStyles.h7,
-                          globalStyles.fs1,
+                          globalStyles.h7, globalStyles.fs2,globalStyles.textColor,
                           styles.header,
                         ]}
                         allowFontScaling={false}
@@ -160,8 +158,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                     <View style={styles.inputContainer}>
                       <Text
                         style={[
-                          globalStyles.h7,
-                          globalStyles.fs1,
+                          globalStyles.h7, globalStyles.fs2,globalStyles.textColor,
                           styles.header,
                         ]}
                         allowFontScaling={false}
@@ -195,8 +192,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                     <View style={styles.inputContainer}>
                       <Text
                         style={[
-                          globalStyles.h7,
-                          globalStyles.fs1,
+                          globalStyles.h7, globalStyles.fs2,globalStyles.textColor,
                           styles.header,
                         ]}
                         allowFontScaling={false}

@@ -13,7 +13,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
-import { assignToMembers, getAllTeamMembersData } from "../../Components/Screens/LeadInfoScreenService";
+import { getAllTeamMembersData } from "../../Components/Screens/LeadInfoScreenService";
 import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
@@ -31,55 +31,43 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
   visible,
   onClose,
   onStatusSelect,
-  selectedMembers
+  selectedMembers,
 }) => {
-  const [userData, setUserData] = useState<any[]>([]); 
+  const [userData, setUserData] = useState<any[]>([]);
+  const [selected, setSelected] = useState(selectedMembers);
   const { leadData } = useSelector((state: RootState) => state.auth);
   const assignToIds = leadData.AssignTo.map((item) => item._id);
   const scale = useSharedValue(visible ? 1 : 0.8);
   const opacity = useSharedValue(visible ? 1 : 0);
 
   useEffect(() => {
-    scale.value = withSpring(visible ? 1 : 0.8, {
-      damping: 20,
-      stiffness: 150,
-    });
-    opacity.value = withSpring(visible ? 1 : 0, {
-      damping: 20,
-      stiffness: 150,
-    });
+    scale.value = withSpring(visible ? 1 : 0.8, { damping: 20, stiffness: 150 });
+    opacity.value = withSpring(visible ? 1 : 0, { damping: 20, stiffness: 150 });
+
     if (visible) {
       fetchMemberLeadStage(assignToIds);
-    } else {
-      resetSelection();
     }
-  }, [visible]);
+  }, [visible]); 
+
+  useEffect(() => {
+    setSelected(selectedMembers);
+  }, [selectedMembers]);
 
   const fetchMemberLeadStage = async (ids: string[]) => {
     try {
-      const payload = { team_id: ids };
-      const res = await getAllTeamMembersData(payload);
+      const res = await getAllTeamMembersData({ team_id: ids });
       const members = res.data.flatMap((team) =>
         team.team_members.flatMap((member) => member.users)
       );
 
       const updatedMembers = members.map((item) => ({
         ...item,
-        checked: selectedMembers.some((selected) => selected.id === item._id),
+        checked: selected.some((selected) => selected.id === item._id), 
       }));
       setUserData(updatedMembers);
     } catch (error) {
       console.error("API Error:", error);
     }
-  };
-
-  const resetSelection = () => {
-    setUserData((prevData) =>
-      prevData.map((item) => ({
-        ...item,
-        checked: selectedMembers.some((selected) => selected.id === item._id),
-      }))
-    );
   };
 
   const toggleCheckbox = useCallback(
@@ -88,7 +76,6 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
         const updatedItems = prevData.map((item) =>
           item._id === id ? { ...item, checked: !item.checked } : item
         );
-        
         const selectedItems = updatedItems.filter((item) => item.checked);
         onStatusSelect(selectedItems);
         

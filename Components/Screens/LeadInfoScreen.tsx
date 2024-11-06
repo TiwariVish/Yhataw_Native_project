@@ -103,22 +103,26 @@ const LeadInfoScreen = () => {
     setMemberModalVisible(true);
   };
 
-  const onSelectMember = (member: any) => {
-    const selectedMembers: Member[] =
-      Array.isArray(member) && member.length > 0
-        ? member.map((m) => ({ id: m._id, name: m.name }))
-        : [];
+  const onSelectMember = (member: any[]) => {
+    console.log(member, 'Selected Members'); 
+    const selectedMembers = Array.isArray(member)
+      ? member.map((m) => ({ id: m._id, name: m.name })) 
+      : [];
+  
     setAssignedToMembers((prevMembers) => {
-      const selectedIds = selectedMembers.map((m) => m.id);
+      const selectedIds = selectedMembers.map((m) => m.id); 
+      const updatedMembers = prevMembers.filter((prevMember) =>
+        selectedIds.includes(prevMember.id)
+      );
       const uniqueMembers = [
-        ...prevMembers,
+        ...updatedMembers,
         ...selectedMembers.filter(
-          (newMember) =>
-            !prevMembers.some((prevMember) => prevMember.id === newMember.id)
+          (newMember) => !updatedMembers.some((member) => member.id === newMember.id)
         ),
       ];
-
-      return uniqueMembers;
+  
+      console.log(uniqueMembers, 'Unique Members'); 
+      return uniqueMembers; 
     });
   };
 
@@ -132,50 +136,52 @@ const LeadInfoScreen = () => {
   };
 
   const handleChangeStage = async () => {
+    console.log('handleChangeStage triggered');
     try {
-      let statusChanged = false;
-      let membersChanged = false;
-      const waitCallApi = [];
+        let statusChanged = false;
+        let membersChanged = false;
+        const waitCallApi = [];
+        if (myLeadData?._id && selectedStatus && selectedStatus !== myLeadData.stage) {
+            const bodyForStageChange = {
+                id: myLeadData._id,
+                stage: selectedStatus,
+            };
+            waitCallApi.push(changeStage(bodyForStageChange));
+            statusChanged = true;
+        }
+        if (leadData?._id && assignedToMembers) {
+            const currentAssignedIds = leadData.AssignTo.map((item) => item._id);
+            const newAssignedIds = assignedToMembers.map((member) => member.id);
+            const membersAreSame =
+                currentAssignedIds.length === newAssignedIds.length &&
+                currentAssignedIds.every((id) => newAssignedIds.includes(id));
+            if (!membersAreSame) {
+                const assignedToUserIds = newAssignedIds.map((id) => `'${id}'`).join(",");
+                const bodyForAssignMembers = {
+                    id: leadData._id,
+                    AssignToUser: assignedToUserIds,
+                };
+                waitCallApi.push(assignToMembers(bodyForAssignMembers));
+                membersChanged = true;
+            }
+        }
 
-      if (myLeadData?._id && selectedStatus) {
-        const bodyForStageChange = {
-          id: myLeadData?._id,
-          stage: selectedStatus,
-        };
-        waitCallApi.push(changeStage(bodyForStageChange));
-        statusChanged = true;
-      }
+        await Promise.all(waitCallApi);
+        if (statusChanged && membersChanged) {
+            alert("Your status and member assignment have been changed successfully.");
+        } else if (statusChanged) {
+            alert("Your status has been changed successfully.");
+        } else if (membersChanged) {
+            alert("Your member assignment has been changed successfully.");
+        } else {
+            alert("No changes detected.");
+        }
 
-      if (leadData?._id && assignedToMembers && assignedToMembers.length > 0) {
-        const assignedToUserIds = assignedToMembers
-          .map((member) => member.id)
-          .map((id) => `'${id}'`)
-          .join(",");
-        const bodyForAssignMembers = {
-          id: leadData._id,
-          AssignToUser: assignedToUserIds,
-        };
-        waitCallApi.push(assignToMembers(bodyForAssignMembers));
-        membersChanged = true;
-      }
-
-      await Promise.all(waitCallApi);
-
-      if (statusChanged && membersChanged) {
-        alert(
-          "Your status and member assignment have been changed successfully."
-        );
-      } else if (statusChanged) {
-        alert("Your status has been changed successfully.");
-      } else if (membersChanged) {
-        alert("Your member has been changed successfully.");
-      }
-
-      navigation.navigate("Leads");
+        navigation.navigate("Leads");
     } catch (error) {
-      console.error("Failed to process change or assign member:", error);
+        console.error("Failed to process change or assign member:", error);
     }
-  };
+};
 
   const handleDialPress = useCallback((phoneNumber) => {
     const url = `tel:${phoneNumber}`;
@@ -271,25 +277,25 @@ const LeadInfoScreen = () => {
 
             {permission?.ADMIN || permission.CRM ? (
               <>
-                <View style={styles.details}>
+                <View>
                   <Text
-                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    style={[globalStyles.h7, globalStyles.fontfm ,styles.dropdownText ]}
                     allowFontScaling={false}
                   >
                     Assigned To
                   </Text>
                   <TouchableOpacity
-                    style={[styles.dropdown, styles.value]}
+                    style={[styles.dropdown]}
                     onPress={() => setMemberModalVisible(true)}
                   >
-                    <Text style={styles.dropdownText}>
+                    <Text style={[globalStyles.h7, globalStyles.fontfm,globalStyles.tc]} allowFontScaling={false}>
                       {selectedTeams.length > 0
                         ? selectedTeams.join(", ")
                         : "Select Team"}
                     </Text>
                     <Icon
                       name="chevron-down-outline"
-                      size={20}
+                      size={24}
                       style={[
                         styles.dropdownIcon,
                         openDropdown === 1 && styles.dropdownIconOpen,
@@ -297,16 +303,16 @@ const LeadInfoScreen = () => {
                     />
                   </TouchableOpacity>
                   <Text
-                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    style={[globalStyles.h7, globalStyles.fontfm,styles.dropdownText]}
                     allowFontScaling={false}
                   >
                     Assigned To Member
                   </Text>
                   <TouchableOpacity
-                    style={[styles.dropdown, styles.value]}
+                    style={[styles.dropdown]}
                     onPress={() => setisassineMemberModalVisible(true)}
                   >
-                    <Text style={styles.dropdownText}>
+                    <Text style={[globalStyles.h7, globalStyles.fontfm,globalStyles.tc,styles.textWrap]} allowFontScaling={false}>
                       {assignedToMembers.length > 0
                         ? assignedToMembers
                             .map((member) => member.name)
@@ -315,7 +321,7 @@ const LeadInfoScreen = () => {
                     </Text>
                     <Icon
                       name="chevron-down-outline"
-                      size={20}
+                      size={24}
                       style={[
                         styles.dropdownIcon,
                         openDropdown === 2 && styles.dropdownIconOpen,
@@ -325,29 +331,30 @@ const LeadInfoScreen = () => {
                 </View>
               </>
             ) : null}
-
+            <View >
             <Text
-              style={[globalStyles.h7, globalStyles.fontfm]}
+              style={[globalStyles.h7, globalStyles.fontfm,styles.dropdownText ]}
               allowFontScaling={false}
             >
               Status
             </Text>
             <TouchableOpacity
-              style={[styles.dropdown, styles.value]}
+              style={[styles.dropdown]}
               onPress={() => handleStatusSelect("")}
             >
-              <Text style={styles.dropdownText}>
+              <Text style={[globalStyles.h7, globalStyles.fontfm,globalStyles.tc]} allowFontScaling={false}>
                 {selectedStatus || "Select Status"}
               </Text>
               <Icon
                 name="chevron-down-outline"
-                size={20}
+                size={24}
                 style={[
                   styles.dropdownIcon,
                   openDropdown === 3 && styles.dropdownIconOpen,
                 ]}
               />
             </TouchableOpacity>
+            </View>
           </View>
         )}
 
@@ -721,19 +728,25 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginVertical: 5,
+    minHeight:42,
+
   },
-  dropdownText: {
-    color: "#333",
+  textWrap: {
+    flex: 1, 
+    flexWrap: "wrap",
+    alignItems:"center"
   },
+ 
   dropdownIcon: {
     marginLeft: 10,
     color: "#0078FF",
+   alignItems:"center"
   },
   dropdownIconOpen: {
     transform: [{ rotate: "180deg" }],
   },
   value: {
-    marginTop: 5,
+    marginVertical: 15,
   },
   contactContainer: {
     backgroundColor: "#FFFFFF",
@@ -800,11 +813,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#00C853",
   },
-  details: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    marginVertical: 5,
-  },
+  dropdownText:{
+    padding:5
+  }
+
 });
 
 export default LeadInfoScreen;
