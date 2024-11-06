@@ -136,7 +136,6 @@ const LeadInfoScreen = () => {
   };
 
   const handleChangeStage = async () => {
-    console.log('handleChangeStage triggered');
     try {
         let statusChanged = false;
         let membersChanged = false;
@@ -148,8 +147,7 @@ const LeadInfoScreen = () => {
             };
             waitCallApi.push(changeStage(bodyForStageChange));
             statusChanged = true;
-        }
-        if (leadData?._id && assignedToMembers) {
+        } else if (leadData?._id && assignedToMembers) {
             const currentAssignedIds = leadData.AssignTo.map((item) => item._id);
             const newAssignedIds = assignedToMembers.map((member) => member.id);
             const membersAreSame =
@@ -165,7 +163,6 @@ const LeadInfoScreen = () => {
                 membersChanged = true;
             }
         }
-
         await Promise.all(waitCallApi);
         if (statusChanged && membersChanged) {
             alert("Your status and member assignment have been changed successfully.");
@@ -176,8 +173,9 @@ const LeadInfoScreen = () => {
         } else {
             alert("No changes detected.");
         }
-
-        navigation.navigate("Leads");
+        if (statusChanged || membersChanged) {
+            navigation.navigate("Leads");
+        }
     } catch (error) {
         console.error("Failed to process change or assign member:", error);
     }
