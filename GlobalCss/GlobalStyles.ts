@@ -55,4 +55,7 @@ export const globalStyles = StyleSheet.create({
   tc4: {
     color:"#FFFFFF"
   },
+  textColor:{
+    color:"#565F6C"
+  }
 });
