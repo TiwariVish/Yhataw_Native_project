@@ -23,6 +23,8 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import LeadCard from "../../NewDesine/GlobalComponets/LeadCard";
+import Communications from 'react-native-communications';
+
 
 function Leads() {
   const dispatch = useDispatch();
@@ -127,18 +129,37 @@ function Leads() {
     return leadsToFilter;
   }, [selectedCard, leadData, dataMyLead, searchQuery]);
 
-  const handleDialPress = useCallback((phoneNumber) => {
+  const handleDialPress = useCallback(async (phoneNumber) => {
     const url = `tel:${phoneNumber}`;
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(url);
-        } else {
-          console.log("Phone dialer is not available");
-        }
-      })
-      .catch((err) => console.error("Error opening dialer:", err));
+    // const url = 'tel:1234567890';
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        console.log("Phone dialer is not available");
+      }
+    } catch (err) {
+      console.error("Error opening dialer:", err);
+    }
   }, []);
+
+  // =========================================
+  // const handleDialPress = (phoneNumber) => {
+  //   const args = {
+  //     number: phoneNumber, 
+  //     prompt: true,        
+  //   };
+  
+  //   call(args).catch((err) => {
+  //     console.error("Error opening dialer:", err);
+  //   });
+  // };
+// ==================================================
+//   const handleDialPress = useCallback((phoneNumber) => {
+//     alert(phoneNumber)
+//     Communications.phonecall(phoneNumber, false);
+// }, []);
 
   const handleCardDataLeads = (item: any) => {
     switch (selectedCard) {

@@ -2,7 +2,9 @@
   "expo": {
     "android": {
       "permissions": [
-        "INTERNET"
+        "INTERNET",
+        "READ_PHONE_STATE",
+        "CALL_PHONE"
       ],
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
@@ -13,7 +15,7 @@
     },
     "name": "Yhataw_Native",
     "slug": "vishal",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/crm_icon.png",
     "userInterfaceStyle": "light",
