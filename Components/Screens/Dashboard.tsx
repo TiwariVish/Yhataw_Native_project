@@ -15,11 +15,13 @@ import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { LoginScreenNavigationProp } from "../type";
 import {
+  getAllUsers,
   getDataAllLead,
   getDataAttendance,
   getDataMyAttendance,
   getDataMylead,
   getDataProject,
+  getTeamList,
   getTeamUserWise,
   getTeamWiseMember,
 } from "./DashboardService";
@@ -230,6 +232,11 @@ const Dashboard: React.FC<CustomProps> = () => {
     attendance: [],
   });
 
+  const [dashboardAllLead, setDashboardAllLead] = useState<any>([]);
+  const [memberdropdownItems, setMemberDropdownItems] = useState<any>([]);
+  console.log(memberdropdownItems,'memberdropdownItemsmemberdropdownItemsmemberdropdownItems');
+  
+
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([]);
@@ -282,6 +289,44 @@ const Dashboard: React.FC<CustomProps> = () => {
 
     fetchData();
   }, [userId]);
+
+
+
+
+
+  useEffect(()=>{
+    getDataAllLeadData()
+    getMemberLeadStage()
+  },[])
+  const getDataAllLeadData = async() =>{
+    try {
+      const payload = {
+        startDate:  "",
+        endDate: "",
+        pageNumber:"",
+        pageSize:"",
+        teamId: "",
+        search: "",
+      };
+
+      const resLead = await getAllUsers (payload)
+      console.log(resLead,'resLeadresLeadresLeadresLead');
+      setDashboardAllLead(resLead.metadata[0])
+    } catch (error) {
+      
+    }
+  }
+
+    const getMemberLeadStage = async () => {
+      try {
+        const res = await getTeamList();
+        setMemberDropdownItems(res.data);
+        
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
 
   const getPermissionForView = () => {
     const permissionObj: Record<string, boolean> = {};
@@ -363,6 +408,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   };
 
   const handleCardClick = async (team) => {
+    console.log(team,'teamteamteam');
     setSelectedTeam(team);
     try {
       const response = await getTeamWiseMember(team.id);
@@ -493,7 +539,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                       ]}
                       allowFontScaling={false}
                     >
-                      {dashboardData.allLead.lead_total_count}
+                      {dashboardAllLead?.total}
                     </Text>
                   </View>
                   {/* <View style={styles.iconFord}>
@@ -691,7 +737,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                       ]}
                       allowFontScaling={false}
                     >
-                      {teamData.length}
+                      {memberdropdownItems.length}
                     </Text>
                   </View>
                   {/* <TouchableOpacity style={styles.viewAllContainer}>
@@ -718,7 +764,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                   showsHorizontalScrollIndicator={false}
                   style={styles.horizontalScroll}
                 >
-                  {teamData.map((item) => (
+                  {memberdropdownItems.map((item) => (
                     <TouchableOpacity key={item.id}>
                       <View style={styles.cardContainer}>
                         <CustomCardNew

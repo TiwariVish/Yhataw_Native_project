@@ -18,12 +18,13 @@ import LeadStatus from "./LeadStatus";
 import { useSelector, useDispatch } from "react-redux";
 import { setLeadDatad, setMyLeadData } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
-import { getAllUsers, getAllUsersMyLead } from "./LeadsService";
+import {getAllUsersMyLead } from "./LeadsService";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import LeadCard from "../../NewDesine/GlobalComponets/LeadCard";
 import Communications from 'react-native-communications';
+import { getAllUsers } from "./DashboardService";
 
 
 function Leads() {
@@ -34,6 +35,7 @@ function Leads() {
   const [leadData, setLeadData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [dataMyLead, setDataMyLead] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
@@ -45,7 +47,7 @@ function Leads() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    getAllLeadsData(false, 0);
+    getAllLeadsData(false, 1);
   }, []);
 
   useFocusEffect(
@@ -58,6 +60,7 @@ function Leads() {
     try {
       setLeadData([]);
       setDataMyLead([]);
+      setDataLoaded(false);
       await getAllLeadsData(false, 0);
     } catch (error) {
       console.error("Error during refresh:", error);
@@ -70,7 +73,7 @@ function Leads() {
     try {
       if (isLoadMore) setLoadingMore(true);
       else setLoading(true);
-
+      if (dataLoaded) return;
       const payload = {
         userId: store.getState().auth.userId,
         pageNo,
@@ -91,6 +94,7 @@ function Leads() {
       setLoadingMore(false);
     }
   };
+console.log(leadData,'leadDataleadDataleadDataleadDataleadData');
 
   const filteredLeads = useMemo(() => {
     const defaultNoData = [{ id: 1, name: "NO DATA FOUND" }];
@@ -179,7 +183,8 @@ function Leads() {
   };
 
   const handleLoadMore = () => {
-    if (!loadingMore) {
+    const totalDataLength = leadData.length + dataMyLead.length; 
+    if (!loadingMore && totalDataLength >= 25) {
       setPaginationModel((prevModel) => ({
         ...prevModel,
         page: prevModel.page + 1,

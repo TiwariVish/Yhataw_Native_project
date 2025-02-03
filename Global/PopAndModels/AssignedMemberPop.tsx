@@ -17,6 +17,8 @@ import { getAllTeamMembersData } from "../../Components/Screens/LeadInfoScreenSe
 import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -34,24 +36,25 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
   selectedMembers,
 }) => {
   const [userData, setUserData] = useState<any[]>([]);
-  const [selected, setSelected] = useState(selectedMembers);
   const { leadData } = useSelector((state: RootState) => state.auth);
   const assignToIds = leadData.AssignTo.map((item) => item._id);
   const scale = useSharedValue(visible ? 1 : 0.8);
   const opacity = useSharedValue(visible ? 1 : 0);
 
   useEffect(() => {
-    scale.value = withSpring(visible ? 1 : 0.8, { damping: 20, stiffness: 150 });
-    opacity.value = withSpring(visible ? 1 : 0, { damping: 20, stiffness: 150 });
+    scale.value = withSpring(visible ? 1 : 0.8, {
+      damping: 20,
+      stiffness: 150,
+    });
+    opacity.value = withSpring(visible ? 1 : 0, {
+      damping: 20,
+      stiffness: 150,
+    });
 
     if (visible) {
       fetchMemberLeadStage(assignToIds);
     }
-  }, [visible]); 
-
-  useEffect(() => {
-    setSelected(selectedMembers);
-  }, [selectedMembers]);
+  }, [visible]);
 
   const fetchMemberLeadStage = async (ids: string[]) => {
     try {
@@ -62,7 +65,7 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
 
       const updatedMembers = members.map((item) => ({
         ...item,
-        checked: selected.some((selected) => selected.id === item._id), 
+        checked: selectedMembers.some((selected) => selected.id === item._id),
       }));
       setUserData(updatedMembers);
     } catch (error) {
@@ -76,9 +79,7 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
         const updatedItems = prevData.map((item) =>
           item._id === id ? { ...item, checked: !item.checked } : item
         );
-        const selectedItems = updatedItems.filter((item) => item.checked);
-        onStatusSelect(selectedItems);
-        
+        onStatusSelect(updatedItems.filter((item) => item.checked));
         return updatedItems;
       });
     },
@@ -96,13 +97,23 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
       onPress={() => toggleCheckbox(item._id)}
     >
       <View style={styles.checkboxContainer}>
-        <View
-          style={[
-            styles.checkbox,
-            item.checked && styles.checkboxChecked,
-          ]}
-        />
-        <Text style={[globalStyles.h5, globalStyles.fontfm]} allowFontScaling={false}>
+        {item.checked ? (
+          <MaterialCommunityIcons
+            name="checkbox-marked"
+            size={24}
+            color="#3D48E5"
+          />
+        ) : (
+          <MaterialIcons
+            name="check-box-outline-blank"
+            size={24}
+            color="#565F6C"
+          />
+        )}
+        <Text
+          style={[globalStyles.h5, globalStyles.fontfm, styles.textPadding, { color: item.checked ? "#3D48E5" : "#565F6C" },]}
+          allowFontScaling={false}
+        >
           {item.name}
         </Text>
       </View>
@@ -164,23 +175,15 @@ const styles = StyleSheet.create({
   checkboxItem: {
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    // borderBottomWidth: 1,
+    // borderBottomColor: "#ccc",
   },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "#000",
-    marginRight: 10,
-  },
-  checkboxChecked: {
-    backgroundColor: "#000",
+  textPadding: {
+    paddingLeft: 10,
   },
 });
 

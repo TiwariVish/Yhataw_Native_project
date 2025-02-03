@@ -70,6 +70,7 @@ const LoginScreen = () => {
           accessToken,
           fullName,
           role,
+          hierarchyLevel,
           _id,
           email: userEmail,
           role_privileges,
@@ -81,6 +82,7 @@ const LoginScreen = () => {
             userName: fullName,
             email: userEmail,
             role,
+            hierarchyLevel,
             userId: _id,
             privileges: role_privileges || {},
           })

@@ -123,3 +123,18 @@ export async function getDataAllLead(roleId?: any) {
       throw error;
     }
   }
+
+  export async function getAllUsers(payload: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(
+        urls.LEADDATA +
+          `?start_date=${payload.startDate || ""}&end_date=${payload.endDate || ""}&id=${payload.userId}&page=${payload.pageNo}&limit=${payload.pageSize}&teamId=${payload.team_id || ""}&formId=${payload.formId || ""}&search=${payload.search || ""}`,
+        callParams
+      );
+      console.log(response,"fbskjfskfjsvdkfsvfkjsdfsdfs")
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

@@ -8,6 +8,7 @@ export interface AuthState {
   userName: string;
   email: string;
   role?: string;
+  hierarchyLevel?:string,
   userId: string;
   privileges: any,
   currLead:any,
@@ -22,6 +23,7 @@ const initialState: AuthState = {
   userName: "",
   email: "",
   role: "",
+  hierarchyLevel :"",
   userId: "",
   privileges: {},
   currLead:1,
@@ -41,6 +43,7 @@ export const authSlice = createSlice({
         userName: string;
         email: string;
         role: string;
+        hierarchyLevel:string;
         userId: string;
         privileges: any;
       }>
@@ -50,6 +53,7 @@ export const authSlice = createSlice({
       state.userName = action.payload.userName;
       state.email = action.payload.email;
       state.role = action.payload.role;
+      state.hierarchyLevel = action.payload.hierarchyLevel
       state.userId = action.payload.userId;
       state.privileges = action.payload.privileges;
     },
@@ -63,6 +67,7 @@ export const authSlice = createSlice({
       state.userName = "";
       state.email = "";
       state.role = "";
+      state.hierarchyLevel ="";
       state.userId = "";
       state.privileges = {};
     },
@@ -86,6 +91,7 @@ export const selectLoading = (state: RootState) => state.auth.loading;
 export const selectEmail = (state: RootState) => state.auth.email;
 export const selectName = (state: RootState) => state.auth.userName;
 export const selectRole = (state: RootState) => state.auth.role;
+export const hierarchyLevel =(state :RootState) =>state.auth.hierarchyLevel
 export const selectUserId = (state: RootState) => state.auth.userId;
 export const selectPrivileges = (state: RootState) => state.auth.privileges;
 export const selectCurrLead = (state: RootState) => state.auth.currLead;

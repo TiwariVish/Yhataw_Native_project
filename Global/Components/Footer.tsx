@@ -69,20 +69,20 @@ function Footer({ navigate , onHomePress  }) {
           style={styles.iconContainer}
           onPress={() => handleIconPress("user")}
         >
-          {/* <Image
+          <Image
             source={
               userData?.profile_image
                 ? { uri: userData.profile_image }
                 : require("../../assets/user_icon.png")
             }
             style={styles.icon}
-          /> */}
-             <Avatar.Icon 
+          />
+             {/* <Avatar.Icon 
         size={35} 
         icon="account" 
         color="white"
         style={{ backgroundColor: '#3D48E5' }} 
-      />
+      /> */}
           <Text style={[styles.iconLabel , globalStyles.h8]}  allowFontScaling={false}>Profile</Text>
         </TouchableOpacity>
       </View>
