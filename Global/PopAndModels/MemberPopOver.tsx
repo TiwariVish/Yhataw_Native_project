@@ -3,24 +3,17 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { BlurView } from "expo-blur";
 import { useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import { getTeamList } from "../../Components/Screens/DashboardService";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface MemberPopOverProps {
   visible: boolean;
@@ -32,6 +25,7 @@ interface DropdownItem {
   id: string;
   team_name: string;
   checked: boolean;
+  sub_teams?: DropdownItem[];
 }
 
 const MemberPopOver: React.FC<MemberPopOverProps> = ({
@@ -39,58 +33,73 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({
   onClose,
   onStatusSelect,
 }) => {
-  const [memberdropdownItems, setMemberDropdownItems] = useState<
-    DropdownItem[]
-  >([]);
+  const [memberDropdownItems, setMemberDropdownItems] = useState<DropdownItem[]>([]);
   const { leadData } = useSelector((state: RootState) => state.auth);
 
+  // Animated values
   const scale = useSharedValue(visible ? 1 : 0.8);
   const opacity = useSharedValue(visible ? 1 : 0);
 
   useEffect(() => {
-    scale.value = withSpring(visible ? 1 : 0.8, {
-      damping: 20,
-      stiffness: 150,
-    });
-    opacity.value = withSpring(visible ? 1 : 0, {
-      damping: 20,
-      stiffness: 150,
-    });
     if (visible) {
-      getMemberLeadStage();
+      scale.value = withSpring(1, { damping: 20, stiffness: 150 });
+      opacity.value = withSpring(1, { damping: 20, stiffness: 150 });
+      fetchTeams();
+    } else {
+      scale.value = withSpring(0.8, { damping: 20, stiffness: 150 });
+      opacity.value = withSpring(0, { damping: 20, stiffness: 150 });
     }
   }, [visible]);
 
-  const getMemberLeadStage = async () => {
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  const fetchTeams = async () => {
     try {
       const res = await getTeamList();
-      setMemberDropdownItems(res.data);
-      handleCheckboxChange(res.data);
+      const updatedItems = res.data.map((team: DropdownItem) => ({
+        ...team,
+        checked: leadData.AssignTo.some(
+          (assigned) => assigned.team_name === team.team_name
+        ),
+        sub_teams: team.sub_teams?.map((subTeam) => ({
+          ...subTeam,
+          checked: leadData.AssignTo.some(
+            (assigned) => assigned.team_name === subTeam.team_name
+          ),
+        })),
+      }));
+      setMemberDropdownItems(updatedItems);
+      handleSelection(updatedItems);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleCheckboxChange = (items: DropdownItem[]) => {
-    const updatedItems = items.map((item) => {
-      const isChecked = leadData.AssignTo.some(
-        (assignItem) => assignItem.team_name === item.team_name
-      );
-      return { ...item, checked: isChecked };
+  const toggleSubTeamCheckbox = (parentId: string, subId: string) => {
+    const updatedItems = memberDropdownItems.map((item) => {
+      if (item.id === parentId) {
+        const updatedSubTeams = item.sub_teams?.map((subTeam) =>
+          subTeam.id === subId ? { ...subTeam, checked: !subTeam.checked } : subTeam
+        );
+        return { ...item, sub_teams: updatedSubTeams };
+      }
+      return item;
     });
     setMemberDropdownItems(updatedItems);
-    const selectedTeams = updatedItems
-      .filter((item) => item.checked)
-      .map((item) => item.team_name);
-    onStatusSelect(selectedTeams);
+    handleSelection(updatedItems);
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-      opacity: opacity.value,
-    };
-  });
+  const handleSelection = (items: DropdownItem[]) => {
+    const selectedTeams = items.flatMap((item) =>
+      item.checked
+        ? [item.team_name, ...(item.sub_teams?.filter((st) => st.checked).map((st) => st.team_name) || [])]
+        : item.sub_teams?.filter((st) => st.checked).map((st) => st.team_name) || []
+    );
+    onStatusSelect(selectedTeams);
+  };
 
   return (
     <>
@@ -99,43 +108,57 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({
           <BlurView style={styles.blurView} intensity={200}>
             <Animated.View style={[styles.modal, animatedStyle]}>
               <ScrollView contentContainerStyle={styles.dropdownMenu}>
-                {memberdropdownItems.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={styles.checkboxItem}
-                    // onPress={() => toggleCheckbox(item.id)}
-                  >
-                    {/* <View style={styles.checkboxContainer}>
-                      <View
-                        style={[
-                          styles.checkbox,
-                          item.checked && styles.checkboxChecked,
-                        ]}
-                      />
-                      <Text style={[globalStyles.h5,globalStyles.fontfm]} allowFontScaling={false}>{item.team_name}</Text>
-                    </View> */}
-                    <View style={styles.checkboxContainer}>
-                      {item.checked ? (
-                        <MaterialCommunityIcons
-                          name="checkbox-marked"
-                          size={24}
-                          color="#3D48E5"
-                        />
-                      ) : (
-                        <MaterialIcons
-                          name="check-box-outline-blank"
-                          size={24}
-                          color="#565F6C"
-                        />
-                      )}
-                      <Text
-                        style={[globalStyles.h5, globalStyles.fontfm,styles.checkboxChecked,{ color: item.checked ? "#3D48E5" : "#565F6C" },]}
-                        allowFontScaling={false}
-                      >
-                        {item.team_name}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+                {memberDropdownItems.map((item) => (
+                  <View key={item.id}>
+                    <TouchableOpacity style={styles.checkboxItem}>
+                      <View style={styles.checkboxContainer}>
+                        {item.checked ? (
+                          <MaterialCommunityIcons name="checkbox-marked" size={24} color="#3D48E5" />
+                        ) : (
+                          <MaterialIcons name="check-box-outline-blank" size={24} color="#565F6C" />
+                        )}
+                        <Text
+                          style={[
+                            globalStyles.h5,
+                            globalStyles.fontfm,
+                            styles.checkboxText,
+                            { color: item.checked ? "#3D48E5" : "#565F6C" },
+                          ]}
+                          allowFontScaling={false}
+                        >
+                          {item.team_name}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                    {item.sub_teams?.length > 0 && (
+                      <View style={styles.subTeamContainer}>
+                        {item.sub_teams.map((subTeam) => (
+                          <TouchableOpacity
+                            key={subTeam.id}
+                            style={styles.subCheckboxItem}
+                          >
+                            <View style={styles.checkboxContainer}>
+                              {subTeam.checked ? (
+                                <MaterialCommunityIcons name="checkbox-marked" size={24} color="#3D48E5" />
+                              ) : (
+                                <MaterialIcons name="check-box-outline-blank" size={24} color="#565F6C" />
+                              )}
+                              <Text
+                                style={[
+                                  globalStyles.h6,
+                                  globalStyles.fontfm,
+                                  { color: subTeam.checked ? "#3D48E5" : "#565F6C" },
+                                ]}
+                                allowFontScaling={false}
+                              >
+                                {subTeam.team_name}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  </View>
                 ))}
               </ScrollView>
             </Animated.View>
@@ -161,9 +184,9 @@ const styles = StyleSheet.create({
   },
   modal: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 10,
+    borderRadius: 5,
     padding: 16,
-    width: 300,
+    width: 320,
     maxHeight: 500,
     elevation: 10,
     shadowOffset: { width: 0, height: 2 },
@@ -176,24 +199,20 @@ const styles = StyleSheet.create({
   checkboxItem: {
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+  },
+  subCheckboxItem: {
+    paddingVertical: 8,
+    paddingLeft: 30, 
+  },
+  subTeamContainer: {
+    paddingLeft: 10,
   },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "#000",
-    marginRight: 10,
-  },
-  checkboxChecked: {
-    // backgroundColor: "#000",
-    paddingLeft:10
+  checkboxText: {
+    paddingLeft: 10,
   },
 });
 

@@ -14,6 +14,7 @@ import ErrorPage from "../Global/Components/ErrorPage";
 import { Alert, Text } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import ForgotPassword from "./Screens/ForgotPassword";
+import AllTeamList from "./Screens/AllTeamList";
 
 const Stack = createNativeStackNavigator();
 
@@ -90,6 +91,29 @@ const Navigation: React.FC = () => {
                     allowFontScaling={false}
                   >
                     My Profile
+                  </Text>
+                ),
+                headerStyle: {
+                  backgroundColor: "white",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="AllTeamList"
+              component={AllTeamList}
+              options={{
+                headerTitle: () => (
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
+                  Teams
                   </Text>
                 ),
                 headerStyle: {

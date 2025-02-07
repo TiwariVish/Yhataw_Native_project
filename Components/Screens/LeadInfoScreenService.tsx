@@ -11,6 +11,18 @@ export async function getAllStage() {
     }
   }
 
+  export async function getStage() {
+  
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(urls.GETSTAGEDATA, callParams);
+      console.log(response,"reminderResponseData")
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 
   export async function getTeamList() {
     try {
@@ -57,6 +69,16 @@ export async function getAllStage() {
     try {
       const callParams = await getCallParams("PUT", body);
       const response = await makeCall(urls.ASSIGNTOMEMBERS, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  export async function getAllTeamData(id: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(`${urls.GETTEAMDROP}/${id}`, callParams);
       return response;
     } catch (error) {
       throw error;

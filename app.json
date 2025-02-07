@@ -11,7 +11,8 @@
         "foregroundImage": "./assets/crm_icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.vishal_tiwari.Yhataw_Native"
+      "package": "com.vishal_tiwari.Yhataw_Native",
+      "newArchEnabled": true 
     },
     "name": "Yhataw_Native",
     "slug": "vishal",
@@ -25,7 +26,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "newArchEnabled": true 
     },
     "web": {
       "favicon": "./assets/favicon.png"

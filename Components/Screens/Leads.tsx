@@ -18,14 +18,16 @@ import LeadStatus from "./LeadStatus";
 import { useSelector, useDispatch } from "react-redux";
 import { setLeadDatad, setMyLeadData } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
-import {getAllUsersMyLead } from "./LeadsService";
+import { getAllUsersMyLead } from "./LeadsService";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import LeadCard from "../../NewDesine/GlobalComponets/LeadCard";
-import Communications from 'react-native-communications';
+import Communications from "react-native-communications";
 import { getAllUsers } from "./DashboardService";
-
+import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
+import CustomSearchBar from "../../NewDesine/GlobalComponets/CustomSearchBar";
+import CustomFlipBar from "../../NewDesine/GlobalComponets/CustomFlipBar";
 
 function Leads() {
   const dispatch = useDispatch();
@@ -94,7 +96,7 @@ function Leads() {
       setLoadingMore(false);
     }
   };
-console.log(leadData,'leadDataleadDataleadDataleadDataleadData');
+  console.log(leadData, "leadDataleadDataleadDataleadDataleadData");
 
   const filteredLeads = useMemo(() => {
     const defaultNoData = [{ id: 1, name: "NO DATA FOUND" }];
@@ -151,19 +153,19 @@ console.log(leadData,'leadDataleadDataleadDataleadDataleadData');
   // =========================================
   // const handleDialPress = (phoneNumber) => {
   //   const args = {
-  //     number: phoneNumber, 
-  //     prompt: true,        
+  //     number: phoneNumber,
+  //     prompt: true,
   //   };
-  
+
   //   call(args).catch((err) => {
   //     console.error("Error opening dialer:", err);
   //   });
   // };
-// ==================================================
-//   const handleDialPress = useCallback((phoneNumber) => {
-//     alert(phoneNumber)
-//     Communications.phonecall(phoneNumber, false);
-// }, []);
+  // ==================================================
+  //   const handleDialPress = useCallback((phoneNumber) => {
+  //     alert(phoneNumber)
+  //     Communications.phonecall(phoneNumber, false);
+  // }, []);
 
   const handleCardDataLeads = (item: any) => {
     switch (selectedCard) {
@@ -183,7 +185,7 @@ console.log(leadData,'leadDataleadDataleadDataleadDataleadData');
   };
 
   const handleLoadMore = () => {
-    const totalDataLength = leadData.length + dataMyLead.length; 
+    const totalDataLength = leadData.length + dataMyLead.length;
     if (!loadingMore && totalDataLength >= 25) {
       setPaginationModel((prevModel) => ({
         ...prevModel,
@@ -212,10 +214,17 @@ console.log(leadData,'leadDataleadDataleadDataleadDataleadData');
         }
       >
         <View style={styles.content}>
-          <LeadStatus
+          {/* <LeadStatus
             selectedCard={selectedCard}
             setSelectedCard={setSelectedCard}
             onSearchChange={(query) => setSearchQuery(query)}
+          /> */}
+          <CustomFlipBar  selectedCard={selectedCard}
+            setSelectedCard={setSelectedCard}  leadData = {leadData}/>
+          <CustomSearchBar
+            value={searchQuery}
+            onChangeText={(query) => setSearchQuery(query)}
+            onFilterPress={() => console.log("Filter button pressed")}
           />
           {loading && !loadingMore ? (
             <LeadsSkeleton />
@@ -234,12 +243,20 @@ console.log(leadData,'leadDataleadDataleadDataleadDataleadData');
               } else {
                 return (
                   <View style={styles.newAliment} key={index}>
-                    <LeadCard
+                    {/* <LeadCard
                       name={item.leadName}
                       location={item.form_name}
                       status={item.stage}
                       projectName={item.projecttype_name}
                       onCallPress={() => handleDialPress(item.leadPhone)}
+                      onTextPress={() => handleCardDataLeads(item)}
+                    /> */}
+
+                    <CustomCardLead
+                      name={item.leadName}
+                      status={item.stage}
+                      onCallPress={() => handleDialPress(item.leadPhone)}
+                      onMorePress={() => console.log("More Options Pressed")}
                       onTextPress={() => handleCardDataLeads(item)}
                     />
                   </View>
@@ -249,7 +266,7 @@ console.log(leadData,'leadDataleadDataleadDataleadDataleadData');
           )}
           {loadingMore && (
             <View style={styles.loadingMore}>
-              <ActivityIndicator size="large" color="#0000ff" />
+              <ActivityIndicator size={30} color="#0000ff" />
             </View>
           )}
         </View>
@@ -269,14 +286,14 @@ const styles = StyleSheet.create({
   },
   content: {
     backgroundColor: "#FFFFFF",
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
   },
   loadingMore: {
     marginVertical: 20,
     alignItems: "center",
   },
   newAliment: {
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
   },
   noDataFound: {
     justifyContent: "center",

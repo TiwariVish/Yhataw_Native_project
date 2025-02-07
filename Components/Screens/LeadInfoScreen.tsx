@@ -16,6 +16,8 @@ import {
   assignToMembers,
   changeStage,
   getAllStage,
+  getAllTeamData,
+  getAllTeamMembersData,
   getTeamList,
 } from "./LeadInfoScreenService";
 import StatusPop from "../../Global/PopAndModels/StatusPop";
@@ -44,8 +46,6 @@ interface Member {
 
 const LeadInfoScreen = () => {
   const { leadData } = useSelector((state: RootState) => state.auth);
-  console.log(leadData,'leadDataleadDataleadDataleadDataleadDataleadDataleadData');
-  
   const { myLeadData } = useSelector((state: RootState) => state.auth);
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
   const [isVisible, setIsVisible] = useState(false);
@@ -57,6 +57,14 @@ const LeadInfoScreen = () => {
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [dropdownItems, setDropdownItems] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isAllAssinetoMember ,setAllAssineTomember] =useState([])
+ 
+  const check = isAllAssinetoMember.map((item) => 
+    item.sub_teams.flatMap((sub) => 
+      sub.team_members.map((mem) => mem.userId)
+    )
+  ).flat();
+  
   const [isMemberModalVisible, setMemberModalVisible] = useState(false);
   const [isassineMemberModalVisible, setisassineMemberModalVisible] =
     useState(false);
@@ -64,12 +72,46 @@ const LeadInfoScreen = () => {
   const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
   const [allReminder, setAllRemider] = useState<any>([]);
   const [newRemarks, setNewRemarks] = useState([]);
+   const [userData, setUserData] = useState<any[]>([]);
   const [reminderLeads, setRemiderLeads] = useState([]);
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const assignToIds = leadData.AssignTo.map((item) => item._id);
+
 
   useEffect(() => {
     getLeadStage();
+    getAllTeamDataMember()
+    fetchMemberLeadStage(assignToIds,leadData._id)
+    
   }, []);
+
+
+   const fetchMemberLeadStage = async (ids: string[], id: string) => {
+      try {
+        const payload = {
+          team_id: ids,
+          lead_id: id,
+        };
+        const res = await getAllTeamMembersData(payload);
+        if (!res.data || !Array.isArray(res.data)) {
+          console.error("Invalid data structure returned from the API");
+          return;
+        }
+        const members = res.data.map((team) =>
+          team.team_members.map((member) => ({
+            ...member,
+            name : member.users[0].name,
+            checked: member.is_available === 1, 
+          }))
+        ).flat(); 
+  
+        console.log(members, 'flattened members:', members);
+  
+        setUserData(members);
+      } catch (error) {
+        console.error("API Error:", error);
+      }
+    };
 
   const getPermissionForView = () => {
     const permissionObj: Record<string, boolean> = {};
@@ -138,6 +180,19 @@ const LeadInfoScreen = () => {
     console.log("Remark Submitted: ", newRemark);
   };
 
+  const getAllTeamDataMember =async() =>{
+    try {
+      const res =await getAllTeamData (leadData._id)
+     
+      setAllAssineTomember(res.data)
+
+      
+    } catch (error) {
+      
+    }
+    
+  }
+
   const handleChangeStage = async () => {
     try {
       let statusChanged = false;
@@ -156,7 +211,14 @@ const LeadInfoScreen = () => {
         statusChanged = true;
       } else if (leadData?._id && assignedToMembers) {
         const currentAssignedIds = leadData.AssignTo.map((item) => item._id);
-        const newAssignedIds = assignedToMembers.map((member) => member.id);
+        // const newAssignedIds = assignedToMembers.map((member) => member.id);
+        // const newAssignedIds = userData.map((mem) =>mem.userId)
+
+        const newAssignedIds = userData
+        .filter((mem) => assignedToMembers.some((assigned) => assigned.id === mem._id))
+        .map((mem) => mem.userId); 
+
+        
         const membersAreSame =
           currentAssignedIds.length === newAssignedIds.length &&
           currentAssignedIds.every((id) => newAssignedIds.includes(id));

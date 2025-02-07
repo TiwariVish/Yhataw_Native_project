@@ -74,7 +74,7 @@ const staticData = {
   leads: [
     {
       id: 2,
-      content: "Just Now",
+      content: "Initial",
       cardColor: "#E8B86D",
       calendarBackgroundColor: "#E8B86D",
       leadDataKey: "lead_total_new_count",
@@ -234,9 +234,6 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   const [dashboardAllLead, setDashboardAllLead] = useState<any>([]);
   const [memberdropdownItems, setMemberDropdownItems] = useState<any>([]);
-  console.log(memberdropdownItems,'memberdropdownItemsmemberdropdownItemsmemberdropdownItems');
-  
-
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([]);
@@ -310,7 +307,6 @@ const Dashboard: React.FC<CustomProps> = () => {
       };
 
       const resLead = await getAllUsers (payload)
-      console.log(resLead,'resLeadresLeadresLeadresLead');
       setDashboardAllLead(resLead.metadata[0])
     } catch (error) {
       
@@ -427,6 +423,12 @@ const Dashboard: React.FC<CustomProps> = () => {
     navigation.navigate("MyProfile");
   };
 
+  const navigateToTeams = (selectedTeam: any) =>{
+    // navigation.navigate("AllTeamList", { allTeams: selectedTeam });
+    navigation.navigate("AllTeamList");
+    
+  }
+
   const [isFooterVisible, setFooterVisible] = useState(true);
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -460,9 +462,9 @@ const Dashboard: React.FC<CustomProps> = () => {
     }
   };
 
-  const testing = () => {
-    // navigation.navigate("DashboardNew");
-  };
+  // const testing = () => {
+  //   // navigation.navigate("DashboardNew");
+  // };
   return (
     <>
       {loading ? (
@@ -740,12 +742,16 @@ const Dashboard: React.FC<CustomProps> = () => {
                       {memberdropdownItems.length}
                     </Text>
                   </View>
-                  {/* <TouchableOpacity style={styles.viewAllContainer}>
+                  <TouchableOpacity
+                    style={styles.viewAllContainer}
+                    onPress={() => navigateToTeams(1)}
+                  >
                     <Text
                       style={[
                         styles.viewAll,
-                        globalStyles.h6,
+                        globalStyles.h7,
                         globalStyles.fontfm,
+                        globalStyles.tc3,
                       ]}
                       allowFontScaling={false}
                     >
@@ -754,10 +760,10 @@ const Dashboard: React.FC<CustomProps> = () => {
                     <Feather
                       name="chevron-right"
                       size={24}
-                      color="#007bff"
+                      color="#3F8CFF"
                       style={styles.icon}
                     />
-                  </TouchableOpacity> */}
+                  </TouchableOpacity>
                 </View>
                 <ScrollView
                   horizontal
@@ -771,7 +777,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                           id={item._id}
                           title={item.team_name}
                           count=""
-                          onCardPress={handleCardClick}
+                          // onCardPress={handleCardClick}
+                          onCardPress={navigateToTeams}
                         />
                       </View>
                     </TouchableOpacity>

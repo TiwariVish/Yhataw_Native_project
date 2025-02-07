@@ -1,11 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
-import { getAllStage } from '../../Components/Screens/LeadInfoScreenService';
-import { globalStyles } from '../../GlobalCss/GlobalStyles';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import { BlurView } from "expo-blur";
+import {
+  getAllStage,
+  getStage,
+} from "../../Components/Screens/LeadInfoScreenService";
+import { globalStyles } from "../../GlobalCss/GlobalStyles";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface StatusPopProps {
   visible: boolean;
@@ -13,103 +27,141 @@ interface StatusPopProps {
   onStatusSelect: (status: string) => void;
 }
 
-const StatusPop: React.FC<StatusPopProps> = ({ visible, onClose ,onStatusSelect}) => {
-    const scale = useSharedValue(visible ? 1 : 0.8);
-    const opacity = useSharedValue(visible ? 1 : 0);
+const StatusPop: React.FC<StatusPopProps> = ({
+  visible,
+  onClose,
+  onStatusSelect,
+}) => {
+  const scale = useSharedValue(visible ? 1 : 0.8);
+  const opacity = useSharedValue(visible ? 1 : 0);
 
-    const [dropdownData, setDropdownData] = useState<any>([]);
-    const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-    
-    useEffect(() => {
-      scale.value = withSpring(visible ? 1 : 0.8, {
-        damping: 20,
-        stiffness: 150,
-      });
-      opacity.value = withSpring(visible ? 1 : 0, {
-        damping: 20,
-        stiffness: 150,
-      });
-      getLeadStage();
-    }, [visible]);
-    
-    const animatedStyle = useAnimatedStyle(() => {
-      return {
-        transform: [{ scale: scale.value }],
-        opacity: opacity.value,
-      };
+  const [dropdownData, setDropdownData] = useState<any>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    scale.value = withSpring(visible ? 1 : 0.8, {
+      damping: 20,
+      stiffness: 150,
     });
+    opacity.value = withSpring(visible ? 1 : 0, {
+      damping: 20,
+      stiffness: 150,
+    });
+    getLeadStage();
+  }, [visible]);
 
-    const getLeadStage = async () => {
-        try {
-          const res = await getAllStage();
-          setDropdownData(res.data);
-        } catch (error) {
-          console.error(error);
-        }
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
     };
+  });
 
-    const handleDropdownItemPress = (statusName: string) => {
-        onStatusSelect(statusName);
-        onClose(); 
-    };
+  const getLeadStage = async () => {
+    try {
+      // const res = await getAllStage();
+      const resData = await getStage();
+      console.log(resData, "resDataresDataresDataresDataresData");
 
-    return (
-      <>
-        {visible && (
-          <TouchableOpacity style={styles.overlay} onPress={onClose}>
-            <BlurView style={styles.blurView} intensity={200}>
-              <Animated.View style={[styles.modal, animatedStyle]}>
-                <ScrollView contentContainerStyle={styles.dropdownMenu}>
-                  {dropdownData.map((item) => (
+      setDropdownData(resData.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  console.log(dropdownData, "dropdownDatadropdownDatadropdownData");
+
+  const handleDropdownItemPress = (statusName: string) => {
+    onStatusSelect(statusName);
+    onClose();
+  };
+
+  return (
+    <>
+      {visible && (
+        <TouchableOpacity style={styles.overlay} onPress={onClose}>
+          <BlurView style={styles.blurView} intensity={200}>
+            <Animated.View style={[styles.modal, animatedStyle]}>
+              <ScrollView contentContainerStyle={styles.dropdownMenu}>
+                {dropdownData.map((item) => (
+                  <View key={item._id}>
                     <TouchableOpacity
-                      key={item._id}
-                      onPress={() => handleDropdownItemPress(item.status_name)}
+                      // onPress={() => handleDropdownItemPress(item.stage_Name)}
                     >
-                      <Text style={[globalStyles.h5,globalStyles.fontfm,styles.dropdownItem]} allowFontScaling={false}>{item.status_name}</Text>
+                      <Text
+                        style={[
+                          globalStyles.h5,
+                          globalStyles.fontfm,
+                          styles.dropdownItem,
+                        ]}
+                        allowFontScaling={false}
+                      >
+                        {item.stage_Name}
+                      </Text>
                     </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </Animated.View>
-            </BlurView>
-          </TouchableOpacity>
-        )}
-      </>
-    );
+                    {item.sub_Stage_name.length > 0 && (
+                      <View style={styles.subStageContainer}>
+                        {item.sub_Stage_name.map((subItem) => (
+                          <TouchableOpacity
+                            key={subItem._id}
+                            onPress={() =>
+                              handleDropdownItemPress(subItem.stage_Name)
+                            }
+                          >
+                            <Text style={styles.subDropdownItem}>
+                              {subItem.stage_Name}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </ScrollView>
+            </Animated.View>
+          </BlurView>
+        </TouchableOpacity>
+      )}
+    </>
+  );
 };
 
 const styles = StyleSheet.create({
   overlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    // justifyContent: 'center',
-    // alignItems: 'center',
   },
   blurView: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   modal: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     padding: 16,
     width: 300,
-    maxHeight: 500, 
-    // justifyContent: 'center',
-    // alignItems: 'center',
+    maxHeight: 500,
     elevation: 10,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
   dropdownMenu: {
-    width: '100%',
+    width: "100%",
   },
   dropdownItem: {
     paddingVertical: 10,
+  },
+  subStageContainer: {
+    paddingLeft: 20, 
+  },
+  subDropdownItem: {
+    paddingVertical: 6,
+    fontSize: 14,
+    color: "black",
   },
 });
 

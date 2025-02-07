@@ -35,7 +35,7 @@ const FlipButtonBar: React.FC<FlipButtonBarProps> = ({ segments, showSearch = fa
     <View style={[styles.container, style]}>
       <View style={styles.segmentedControl}>
         <ScrollView
-          ref={scrollViewRef} // Pass the ref to ScrollView
+          ref={scrollViewRef} 
           horizontal={isScrollable}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}
@@ -65,9 +65,6 @@ const FlipButtonBar: React.FC<FlipButtonBarProps> = ({ segments, showSearch = fa
               onChangeText={handleSearchChange}
             />
           </View>
-          {/* <View style={styles.filterContainer}>
-            <Feather name="filter" size={20} color="#333" />
-          </View> */}
         </View>
       )}
     </View>
@@ -103,6 +100,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     marginHorizontal: 5,
     height: '100%',
+    borderWidth: 1, 
+    borderColor: '#EEEEEE', 
   },
   activeSegment: {
     backgroundColor: '#3A86FF',

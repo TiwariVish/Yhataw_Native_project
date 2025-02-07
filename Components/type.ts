@@ -9,6 +9,7 @@ export type RootStackParamList = {
   CustomerFeedback:undefined
   ErrorPage:undefined
   ForgotPassword :undefined
+  AllTeamList :{ allTeams: any }
 };
 
 // types.ts
@@ -21,6 +22,7 @@ export type RootStackParamList1 = {
   CustomerFeedback:undefined
   ErrorPage:undefined
   ForgotPassword :undefined
+  AllTeamList :{ allTeams: any }
 };
 
 export type LoginScreenNavigationProp = StackNavigationProp<

@@ -226,6 +226,8 @@ class UrlConstants extends StringConstants {
   GETTEAMWISEMEMBER = `${this.url_prod}/getTeamWiseMember/`;
   GETTEAMUSERWISE =  `${this.url_prod}/getTeamUserWise/`;
 
+   GETSTAGEDATA =`${this.url_prod}/getLeadStage`
+
 
 
   //add Loan
@@ -249,6 +251,7 @@ class UrlConstants extends StringConstants {
   GETVISITSREPORT = `${this.url_prod}/getVisitReport`;
   GETPROJECTREPORT = `${this.url_prod}/getProjectReport`;
   GETCLOSUREREPORT = `${this.url_prod}/getClosureReport`;
+  GETPRESALESREPORT = `${this.url_prod}/getPreSalesReport`;
 
 
   // Banner
