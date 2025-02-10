@@ -56,10 +56,10 @@ const FotterDseine = ({ navigate, onHomePress }) => {
             style={styles.leftIcon}
             onPress={() => handleIconPress("home")}
           >
-            <Image
+            {/* <Image
               source={require("../../assets/home_icon.png")}
               style={styles.icon}
-            />
+            /> */}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -74,10 +74,11 @@ const FotterDseine = ({ navigate, onHomePress }) => {
             onPress={() => handleIconPress("user")}
           >
             {userData?.profile_image ? (
-              <Image
-                source={{ uri: userData.profile_image }}
-                style={styles.icon}
-              />
+              // <Image
+              //   source={{ uri: userData.profile_image }}
+              //   style={styles.icon}
+              // />
+              ""
             ) : (
               <Avatar.Icon
                 size={35}

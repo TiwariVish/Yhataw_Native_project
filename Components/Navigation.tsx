@@ -15,6 +15,7 @@ import { Alert, Text } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import ForgotPassword from "./Screens/ForgotPassword";
 import AllTeamList from "./Screens/AllTeamList";
+import DashboardNew from "../NewDesine/Dashboard/DashboardNew";
 
 const Stack = createNativeStackNavigator();
 
@@ -47,7 +48,7 @@ const Navigation: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {authenticated ? (
+        {/* {authenticated ? (
           <>
             <Stack.Screen
               name="Dashboard"
@@ -113,7 +114,7 @@ const Navigation: React.FC = () => {
                     }}
                     allowFontScaling={false}
                   >
-                  Teams
+                    Teams
                   </Text>
                 ),
                 headerStyle: {
@@ -137,7 +138,7 @@ const Navigation: React.FC = () => {
                     }}
                     allowFontScaling={false}
                   >
-                    Lead Info 
+                    Lead Info
                   </Text>
                 ),
                 headerStyle: {
@@ -184,19 +185,25 @@ const Navigation: React.FC = () => {
           </>
         ) : (
           <>
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
 
-          <Stack.Screen
-          name="ForgotPassword"
-          component={ForgotPassword}
-          options={{ headerShown: false }}
-        />
-        </>
-        )}
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPassword}
+              options={{ headerShown: false }}
+            />
+          </>
+        )} */}
+
+<Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
       </Stack.Navigator>
     </NavigationContainer>
   );

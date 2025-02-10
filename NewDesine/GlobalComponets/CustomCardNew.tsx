@@ -40,14 +40,13 @@ const CustomCardNew: React.FC<CustomCardProps> = ({
   return (
     <TouchableOpacity onPress={handleCardPress} activeOpacity={0.7}>
       <View style={[styles.card, style]}>
-        {/* Conditional rendering of the image or first letter */}
         {imageUrl ? (
           <View style={styles.circleOutLine}>
-            <Image 
+            {/* <Image 
               source={{ uri: imageUrl }}
               style={styles.image} 
               resizeMode="contain" 
-            /> 
+            />  */}
           </View>
         ) : showInitial ? (
           <View style={styles.circleOutLine}>

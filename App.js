@@ -40,20 +40,20 @@ export default function App() {
           {isVideoPlaying ? (
             <Video
               ref={videoRef}
-              source={require('./assets/Pulse_Splash2.mp4')} // Path to your video file
+              source={require('./assets/Pulse_Splash2.mp4')} 
               style={styles.video}
               resizeMode="cover"
               shouldPlay
               isLooping={true} 
               onPlaybackStatusUpdate={(status) => {
                 if (status.didJustFinish) {
-                  setIsVideoPlaying(true); // Stop video once it's done playing
-                  SplashScreen.hideAsync(); // Hide the splash screen
+                  setIsVideoPlaying(true); 
+                  SplashScreen.hideAsync(); 
                 }
               }}
             />
           ) : (
-            // Wrap the Navigation and StatusBar inside a View to avoid Text errors
+           
             <View style={{ flex: 1 }}>
               <Navigation />
               <StatusBar style="auto" />
@@ -74,6 +74,6 @@ const styles = StyleSheet.create({
   },
   video: {
     width: '100%',
-    height: '100%', // Video covers the entire screen
+    height: '100%', 
   },
 });

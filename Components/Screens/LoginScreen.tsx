@@ -123,10 +123,10 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={require("../../assets/new_pulse_logo.png")}
+        {/* <Image
+          source={require("../../assets/pulse_logo12.png")}
           style={styles.image}
-        />
+        /> */}
         <Text
           style={[globalStyles.h1, globalStyles.fs1, globalStyles.fontfm]}
           allowFontScaling={false}
@@ -143,12 +143,12 @@ const LoginScreen = () => {
 
       <View style={styles.inputContainer}>
         <View style={styles.inlineInput}>
-          {!mobilePattern && (
+          {/* {!mobilePattern && (
             <Image
               source={require("../../assets/User_box_light.png")}
               style={styles.icon}
             />
-          )}
+          )} */}
           <TextInput
             style={[
               styles.input,
@@ -194,10 +194,10 @@ const LoginScreen = () => {
         {showPasswordInput && (
           <View style={styles.passwordContainer}>
             <View style={styles.inlineInput}>
-              <Image
+              {/* <Image
                 source={require("../../assets/Lock_alt_duotone_line.png")}
                 style={styles.icon}
-              />
+              /> */}
               <TextInput
                 style={[styles.input, globalStyles.fontfm, globalStyles.h6]}
                 placeholder="Password"
@@ -210,14 +210,14 @@ const LoginScreen = () => {
                 onPress={handleTogglePasswordVisibility}
                 style={styles.eyeIcon}
               >
-                <Image
+                {/* <Image
                   source={
                     showPassword
                       ? require("../../assets/Eye_light.png")
                       : require("../../assets/Eye Not Visible.png")
                   }
                   style={styles.icon}
-                />
+                /> */}
               </TouchableOpacity>
             </View>
           </View>

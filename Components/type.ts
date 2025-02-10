@@ -9,6 +9,7 @@ export type RootStackParamList = {
   CustomerFeedback:undefined
   ErrorPage:undefined
   ForgotPassword :undefined
+  DashboardNew:undefined
   AllTeamList :{ allTeams: any }
 };
 
@@ -22,6 +23,7 @@ export type RootStackParamList1 = {
   CustomerFeedback:undefined
   ErrorPage:undefined
   ForgotPassword :undefined
+  DashboardNew:undefined
   AllTeamList :{ allTeams: any }
 };
 

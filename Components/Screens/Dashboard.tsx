@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
@@ -480,12 +479,12 @@ const Dashboard: React.FC<CustomProps> = () => {
           >
             {/* Header section */}
             <View style={styles.header}>
-              <View style={styles.imageContainer}>
+              {/* <View style={styles.imageContainer}>
                 <Image
                   source={require("../../assets/new_pulse_logo.png")}
                   style={styles.image}
                 />
-              </View>
+              </View> */}
               <View style={styles.textContainer}>
                 <Text
                   style={[globalStyles.fs1, globalStyles.h5, globalStyles.tc]}
@@ -771,7 +770,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                   style={styles.horizontalScroll}
                 >
                   {memberdropdownItems.map((item) => (
-                    <TouchableOpacity key={item.id}>
+                    <TouchableOpacity  key={item._id}>
                       <View style={styles.cardContainer}>
                         <CustomCardNew
                           id={item._id}
@@ -1168,16 +1167,16 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     marginTop: 30,
   },
-  imageContainer: {
-    marginRight: 12,
-    padding: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  image: {
-    width: 35,
-    height: 40,
-  },
+  // imageContainer: {
+  //   marginRight: 12,
+  //   padding: 10,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  // },
+  // image: {
+  //   width: 35,
+  //   height: 40,
+  // },
   textContainer: {
     flexDirection: "column",
     alignItems: "flex-start",
