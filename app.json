@@ -6,9 +6,9 @@
         "READ_PHONE_STATE",
         "CALL_PHONE"
       ],
-      "usesCleartextTraffic": true,
+    
       "adaptiveIcon": {
-        "foregroundImage": "./assets/crm_icon.png",
+        "foregroundImage": "",
         "backgroundColor": "#ffffff"
       },
       "package": "com.vishal_tiwari.Yhataw_Native",
@@ -18,10 +18,10 @@
     "slug": "vishal",
     "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/crm_icon.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/pulse_Logo_big.png",
+      "image": "./assets/pulse_Logo12.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

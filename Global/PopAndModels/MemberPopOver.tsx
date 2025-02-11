@@ -85,7 +85,7 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({
   };
 
   const renderTeamItem = (item: DropdownItem, level = 0) => (
-    <View key={item.id} style={{ paddingLeft: level * 20 }}>
+    <View key={item.id || `${item.team_name}_${Math.random()}`} style={{ paddingLeft: level * 20 }}>
       <TouchableOpacity style={styles.checkboxItem}>
         <View style={styles.checkboxContainer}>
           {item.checked ? (

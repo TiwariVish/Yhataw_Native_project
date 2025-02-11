@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
-  FlatList,
+  ScrollView,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -19,8 +18,6 @@ import { RootState } from "../../utils/store";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface AssignedMemberPopProps {
   visible: boolean;
@@ -37,21 +34,14 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
 }) => {
   const [userData, setUserData] = useState<any[]>([]);
   const { leadData } = useSelector((state: RootState) => state.auth);
-  const assignToIds = leadData.AssignTo.map((item) => item._id);
+  const assignToIds = useMemo(() => leadData.AssignTo.map((item) => item._id), [leadData]);
 
-  
   const scale = useSharedValue(visible ? 1 : 0.8);
   const opacity = useSharedValue(visible ? 1 : 0);
 
   useEffect(() => {
-    scale.value = withSpring(visible ? 1 : 0.8, {
-      damping: 20,
-      stiffness: 150,
-    });
-    opacity.value = withSpring(visible ? 1 : 0, {
-      damping: 20,
-      stiffness: 150,
-    });
+    scale.value = withSpring(visible ? 1 : 0.8, { damping: 20, stiffness: 150 });
+    opacity.value = withSpring(visible ? 1 : 0, { damping: 20, stiffness: 150 });
 
     if (visible && leadData?._id) {
       fetchMemberLeadStage(assignToIds, leadData._id);
@@ -60,24 +50,22 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
 
   const fetchMemberLeadStage = async (ids: string[], id: string) => {
     try {
-      const payload = {
-        team_id: ids,
-        lead_id: id,
-      };
+      const payload = { team_id: ids, lead_id: id };
       const res = await getAllTeamMembersData(payload);
-      if (!res.data || !Array.isArray(res.data)) {
+
+      if (!res?.data || !Array.isArray(res.data)) {
         console.error("Invalid data structure returned from the API");
         return;
       }
-      const members = res.data.map((team) =>
-        team.team_members.map((member) => ({
-          ...member,
-          name : member.users[0].name,
-          checked: member.is_available === 1, 
-        }))
-      ).flat(); 
-
-      console.log(members, 'flattened members:', members);
+      const members = res.data
+        .flatMap((team) =>
+          team.team_members.map((member) => ({
+            ...member,
+            name: member.users?.[0]?.name || "Unknown",
+            checked: member.is_available === 1,
+          }))
+        )
+        .filter((member, index, self) => self.findIndex((m) => m._id === member._id) === index); 
 
       setUserData(members);
     } catch (error) {
@@ -88,16 +76,10 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
   const toggleCheckbox = useCallback(
     (id: string) => {
       setUserData((prevData) => {
-        const updatedItems = prevData.map((item) => {
-          if (item._id === id) {
-            return { ...item, checked: !item.checked };
-          }
-          return item;
-        });
-        console.log(updatedItems.filter((item) => item.checked), 'selected items');
-        const selectedItems = updatedItems.filter((item) => item.checked);
-        onStatusSelect(selectedItems);
-
+        const updatedItems = prevData.map((item) =>
+          item._id === id ? { ...item, checked: !item.checked } : item
+        );
+        onStatusSelect(updatedItems.filter((item) => item.checked));
         return updatedItems;
       });
     },
@@ -109,66 +91,27 @@ const AssignedMemberPop: React.FC<AssignedMemberPopProps> = ({
     opacity: opacity.value,
   }));
 
-  const renderCheckboxItem = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.checkboxItem}
-      onPress={() => toggleCheckbox(item._id)}
-    >
-      <View style={styles.checkboxContainer}>
-        {item.checked ? (
-          <Animated.View
-            style={{ opacity: withSpring(item.checked ? 1 : 0.5) }}
-          >
-            <MaterialCommunityIcons
-              name="checkbox-marked"
-              size={24}
-              color="#3D48E5"
-            />
-          </Animated.View>
-        ) : (
-          <Animated.View
-            style={{ opacity: withSpring(item.checked ? 0.5 : 1) }}
-          >
-            <MaterialIcons
-              name="check-box-outline-blank"
-              size={24}
-              color="#565F6C"
-            />
-          </Animated.View>
-        )}
-        <Text
-          style={[
-            globalStyles.h5,
-            globalStyles.fontfm,
-            styles.textPadding,
-            { color: item.checked ? "#3D48E5" : "#565F6C" },
-          ]}
-          allowFontScaling={false}
-          accessibilityLabel={`Checkbox for ${item.name}`}
-          accessibilityHint={`Tap to ${item.checked ? 'deselect' : 'select'} ${item.name}`}
-        >
-          {item.name}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
     visible && (
-      <TouchableOpacity
-        style={styles.overlay}
-        onPress={onClose}
-        activeOpacity={1}
-      >
+      <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
         <BlurView style={styles.blurView} intensity={200}>
           <Animated.View style={[styles.modal, animatedStyle]}>
-            <FlatList
-              data={userData}
-              keyExtractor={(item) => item._id || item.id}
-              renderItem={renderCheckboxItem}
-              contentContainerStyle={styles.dropdownMenu}
-              showsVerticalScrollIndicator={false}
-            />
+            <ScrollView style={styles.scrollView} keyboardShouldPersistTaps="handled">
+              {userData.map((item) => (
+                <TouchableOpacity key={item._id} style={styles.checkboxItem} onPress={() => toggleCheckbox(item._id)}>
+                  <View style={styles.checkboxContainer}>
+                    {item.checked ? (
+                      <MaterialCommunityIcons name="checkbox-marked" size={24} color="#3D48E5" />
+                    ) : (
+                      <MaterialIcons name="check-box-outline-blank" size={24} color="#565F6C" />
+                    )}
+                    <Text style={[globalStyles.h5, globalStyles.fontfm, styles.text, { color: item.checked ? "#3D48E5" : "#565F6C" }]}>
+                      {item.name}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </Animated.View>
         </BlurView>
       </TouchableOpacity>
@@ -193,7 +136,7 @@ const styles = StyleSheet.create({
   },
   modal: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 5,
+    borderRadius: 8,
     padding: 16,
     width: 320,
     maxHeight: 500,
@@ -202,8 +145,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
-  dropdownMenu: {
-    width: "100%",
+  scrollView: {
+    maxHeight: 400,
   },
   checkboxItem: {
     paddingVertical: 10,
@@ -213,7 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  textPadding: {
+  text: {
     paddingLeft: 10,
   },
 });

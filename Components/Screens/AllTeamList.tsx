@@ -5,7 +5,7 @@ import { getTeamList } from "./DashboardService";
 import { RootStackParamList } from "../type";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
-import {getPreSalesDetails} from "./AllTeamListService";
+import { getPreSalesDetails } from "./AllTeamListService";
 
 const AllTeamList = () => {
   const [leadStatus, setLeadStatus] = useState<string[]>([]);
@@ -13,13 +13,12 @@ const AllTeamList = () => {
   const [allTeams, setAllTeams] = useState<any[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<any>(null);
   const [selectedSubSegment, setSelectedSubSegment] = useState<string>("");
-  const [selectPreSalesData, setSelectPreSalesData] = useState<any>([]);
+  const [selectPreSalesData, setSelectPreSalesData] = useState<any[]>([]);
 
   type RouteProps = RouteProp<RootStackParamList, "AllTeamList">;
   const route = useRoute<RouteProps>();
-
-  const passedTeams = route.params?.allTeams || []; // Retrieve passed data
-  console.log(passedTeams, "passedTeamspassedTeamspassedTeams");
+  const passedTeam = route.params?.allTeams || null;
+  console.log(passedTeam, "Passed Team Data");
 
   useEffect(() => {
     getMemberLeadStage();
@@ -44,57 +43,44 @@ const AllTeamList = () => {
       };
       const res = await getPreSalesDetails(payload);
       setSelectPreSalesData(res.data);
-      // const resSlaes = await getSalesDetails(payload);
-      // console.log(resSlaes,'resSlaesresSlaes');
-
-      // const allUser = getAllUsersAll(payload)
-      // console.log(allUser,'allUserallUserallUser');
-      
-      
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error fetching PreSales details:", error);
+    }
   };
 
   const getMemberLeadStage = async () => {
     try {
       const res = await getTeamList();
-      setAllTeams(res.data);
-      const segments = res.data.map((team: any) => team.team_name);
-      console.log(segments, "segmentssegmentssegmentssegments");
+      const teams = res.data || [];
+
+      setAllTeams(teams);
+      const segments = teams.map((team: any) => team.team_name);
       setLeadStatus(segments);
-  
-      console.log("passedTeams:::::::::::::", typeof passedTeams);
-      console.log("res.data:::::::::::::::", Array.isArray(res.data) ? "Array" : typeof res.data);
-  
-      console.log("Checking for a match...::::::::");
-  
+
       let matchedTeam = null;
-      
-      const passedTeamsArray = Array.isArray(passedTeams) ? passedTeams : [];
-  
-      if (passedTeamsArray.length > 0) {
-        matchedTeam = res.data.find((team: any) =>
-          passedTeamsArray.some((p: any) => {
-            console.log(`Comparing Passed: ${p.title} with Fetched: ${team.team_name}`);
-            return p.title.trim().toLowerCase() === team.team_name.trim().toLowerCase();
-          })
+
+      if (passedTeam) {
+        matchedTeam = teams.find(
+          (team: any) =>
+            team.id === passedTeam.id || 
+            team.team_name.trim().toLowerCase() === passedTeam.title.trim().toLowerCase()
         );
       }
-  
+
       console.log("Matched Team:", matchedTeam);
-  
+
       if (matchedTeam) {
-        console.log(`✅ Matched Team Found: ${matchedTeam.team_name}`);
         setSelectedSegment(matchedTeam.team_name);
         setSelectedTeam(matchedTeam);
-  
+
         if (matchedTeam.sub_teams.length > 0) {
           setSelectedSubSegment(matchedTeam.sub_teams[0].team_name);
         }
-      } else if (segments.length > 0) {
-        const firstTeam = res.data[0];
+      } else if (teams.length > 0) {
+        const firstTeam = teams[0];
         setSelectedSegment(firstTeam.team_name);
         setSelectedTeam(firstTeam);
-  
+
         if (firstTeam.sub_teams.length > 0) {
           setSelectedSubSegment(firstTeam.sub_teams[0].team_name);
         }
@@ -105,11 +91,7 @@ const AllTeamList = () => {
   };
 
   const handleSegmentChange = (segment: string) => {
-    console.log(segment,'segmentsegmentsegmentsegment');
-    
     const team = allTeams.find((t: any) => t.team_name === segment);
-    console.log(team,'teamteamteam');
-    
     if (team) {
       setSelectedTeam(team);
       setSelectedSegment(segment);
@@ -159,39 +141,41 @@ const AllTeamList = () => {
         </View>
       )}
       <View style={styles.contentContainer}>
-  {selectedSubSegment ? (
-    selectPreSalesData.length > 0 ? (
-      selectPreSalesData.map((item, index) => {
-        const status = item.Initial
-          ? "Initial"
-          : item.Interested
-          ? "Interested"
-          : item["Call Back"]
-          ? "Call Back"
-          : "Unknown";
+        {selectedSubSegment ? (
+          selectPreSalesData.length > 0 ? (
+            selectPreSalesData.map((item, index) => {
+              const status = item.Initial
+                ? "Initial"
+                : item.Interested
+                ? "Interested"
+                : item["Call Back"]
+                ? "Call Back"
+                : "Unknown";
 
-        return (
-          <CustomCardLead
-            key={item._id || index}
-            name={item.user_name}
-            status={status}
-            onCallPress={() => console.log("Call Pressed", item.user_name)}
-            onMorePress={() => console.log("More Options Pressed", item.user_name)}
-            onTextPress={() => console.log("Text Pressed", item.user_name)}
-          />
-        );
-      })
-    ) : (
-      <View>
-        <Text>No data available</Text>
+              return (
+                <CustomCardLead
+                  key={item._id || index}
+                  name={item.user_name}
+                  status={status}
+                  onCallPress={() => console.log("Call Pressed", item.user_name)}
+                  onMorePress={() =>
+                    console.log("More Options Pressed", item.user_name)
+                  }
+                  onTextPress={() => console.log("Text Pressed", item.user_name)}
+                />
+              );
+            })
+          ) : (
+            <View>
+              <Text>No data available</Text>
+            </View>
+          )
+        ) : (
+          <View>
+            <Text>Based on clicked data is coming</Text>
+          </View>
+        )}
       </View>
-    )
-  ) : (
-    <View>
-      <Text>Based on clicked data is coming</Text>
-    </View>
-  )}
-</View>
     </View>
   );
 };
@@ -200,7 +184,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    // padding: 10,
   },
   tabContainer: {
     flexDirection: "row",

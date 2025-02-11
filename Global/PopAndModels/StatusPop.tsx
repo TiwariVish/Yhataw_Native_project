@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   modal: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 10,
+    borderRadius: 5,
     padding: 16,
     width: 300,
     maxHeight: 500,

@@ -55,7 +55,7 @@
     "react-native-communications": "^2.2.1",
     "react-native-datepicker": "^1.7.2",
     "react-native-funnel-chart": "^1.1.5",
-    "react-native-gesture-handler": "~2.20.2",
+    "react-native-gesture-handler": "^2.23.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-mmkv-storage": "^0.9.1",
     "react-native-modal": "^13.0.1",

@@ -424,8 +424,8 @@ const Dashboard: React.FC<CustomProps> = () => {
   };
 
   const navigateToTeams = (selectedTeam: any) =>{
-    // navigation.navigate("AllTeamList", { allTeams: selectedTeam });
-    navigation.navigate("AllTeamList");
+    navigation.navigate("AllTeamList", { allTeams: selectedTeam });
+    // navigation.navigate("AllTeamList");
     
   }
 
