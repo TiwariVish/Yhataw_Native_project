@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 15,
     marginVertical: 3,
-    elevation: 2,
+    // elevation: 1,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },

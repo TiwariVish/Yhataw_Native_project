@@ -34,7 +34,7 @@ export async function getPreSalesDetails(payload:any) {
     try {
       const callParams = await getCallParams("GET");
       const response = await makeCall(
-        `${urls.GETALLUSER}?start_date=${payload.startDate}&end_date=${payload.endDate}&page=${payload.pageNumber}&limit=${payload.pageSize}&team_id=${payload.team_id}&search=${payload.search}`,
+        `${urls.GETALLUSER}?start_date=${payload.startDate}&end_date=${payload.endDate}&page=${payload.pageNumber}&limit=${payload.pageSize}&team_id=${payload.teamId}&search=${payload.search}`,
         callParams
       );
       return response;

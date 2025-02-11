@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Pressable, Text } from "react-native";
+import { View, StyleSheet, Pressable, Text, ScrollView } from "react-native";
 import FlipButtonBar from "../../Global/Components/FlipButtonBar";
 import { getTeamList } from "./DashboardService";
 import { RootStackParamList } from "../type";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
-import { getPreSalesDetails } from "./AllTeamListService";
+import { getAllUsersAll, getPreSalesDetails, getSalesDetails } from "./AllTeamListService";
 
 const AllTeamList = () => {
   const [leadStatus, setLeadStatus] = useState<string[]>([]);
@@ -14,6 +14,7 @@ const AllTeamList = () => {
   const [selectedTeam, setSelectedTeam] = useState<any>(null);
   const [selectedSubSegment, setSelectedSubSegment] = useState<string>("");
   const [selectPreSalesData, setSelectPreSalesData] = useState<any[]>([]);
+  const [allUserTeamWise,setAllUserTeamwise] = useState<any[]>([]);
 
   type RouteProps = RouteProp<RootStackParamList, "AllTeamList">;
   const route = useRoute<RouteProps>();
@@ -36,13 +37,16 @@ const AllTeamList = () => {
       const payload = {
         startDate: "",
         endDate: "",
-        pageNumber: "",
-        pageSize: "",
+        pageNumber: 0,
+        pageSize: 25,
         teamId: "",
         search: "",
       };
       const res = await getPreSalesDetails(payload);
       setSelectPreSalesData(res.data);
+      const res1 = await getSalesDetails(payload)
+      const resAllUser = await getAllUsersAll(payload)
+      setAllUserTeamwise(resAllUser.data)
     } catch (error) {
       console.error("Error fetching PreSales details:", error);
     }
@@ -52,13 +56,11 @@ const AllTeamList = () => {
     try {
       const res = await getTeamList();
       const teams = res.data || [];
-
       setAllTeams(teams);
+      // const segments = ["All", ...teams.map((team: any) => team.team_name)];
       const segments = teams.map((team: any) => team.team_name);
       setLeadStatus(segments);
-
       let matchedTeam = null;
-
       if (passedTeam) {
         matchedTeam = teams.find(
           (team: any) =>
@@ -66,9 +68,6 @@ const AllTeamList = () => {
             team.team_name.trim().toLowerCase() === passedTeam.title.trim().toLowerCase()
         );
       }
-
-      console.log("Matched Team:", matchedTeam);
-
       if (matchedTeam) {
         setSelectedSegment(matchedTeam.team_name);
         setSelectedTeam(matchedTeam);
@@ -112,72 +111,64 @@ const AllTeamList = () => {
     ? selectedTeam.sub_teams.map((subTeam: any) => subTeam.team_name)
     : [];
 
-  return (
-    <View style={styles.container}>
-      <FlipButtonBar
-        segments={leadStatus}
-        selectedSegment={selectedSegment}
-        onSegmentChange={handleSegmentChange}
-      />
-      {subTeams.length > 0 && (
-        <View style={styles.tabContainer}>
-          {subTeams.map((tab, index) => (
-            <Pressable
-              key={index}
-              onPress={() => handleSubSegmentChange(tab)}
-              style={styles.tab}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedSubSegment === tab && styles.selectedText,
-                ]}
+    return (
+      <View style={styles.container}>
+        <FlipButtonBar
+          segments={leadStatus}
+          selectedSegment={selectedSegment}
+          onSegmentChange={handleSegmentChange}
+        />
+        {subTeams.length > 0 && (
+          <View style={styles.tabContainer}>
+            {subTeams.map((tab, index) => (
+              <Pressable
+                key={index}
+                onPress={() => handleSubSegmentChange(tab)}
+                style={styles.tab}
               >
-                {tab}
-              </Text>
-              {selectedSubSegment === tab && <View style={styles.underline} />}
-            </Pressable>
-          ))}
-        </View>
-      )}
-      <View style={styles.contentContainer}>
-        {selectedSubSegment ? (
-          selectPreSalesData.length > 0 ? (
-            selectPreSalesData.map((item, index) => {
-              const status = item.Initial
-                ? "Initial"
-                : item.Interested
-                ? "Interested"
-                : item["Call Back"]
-                ? "Call Back"
-                : "Unknown";
-
-              return (
-                <CustomCardLead
-                  key={item._id || index}
-                  name={item.user_name}
-                  status={status}
-                  onCallPress={() => console.log("Call Pressed", item.user_name)}
-                  onMorePress={() =>
-                    console.log("More Options Pressed", item.user_name)
-                  }
-                  onTextPress={() => console.log("Text Pressed", item.user_name)}
-                />
-              );
-            })
-          ) : (
-            <View>
-              <Text>No data available</Text>
-            </View>
-          )
-        ) : (
-          <View>
-            <Text>Based on clicked data is coming</Text>
+                <Text
+                  style={[
+                    styles.tabText,
+                    selectedSubSegment === tab && styles.selectedText,
+                  ]}
+                >
+                  {tab}
+                </Text>
+                {selectedSubSegment === tab && <View style={styles.underline} />}
+              </Pressable>
+            ))}
           </View>
         )}
+        <View style={styles.contentContainer}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            {selectedSubSegment ? (
+              allUserTeamWise.length > 0 ? (
+                allUserTeamWise.map((item, index) => (
+                  <CustomCardLead
+                    key={item._id || index}
+                    name={item.name}
+                    status=""
+                    onCallPress={() => console.log("Call Pressed", item.user_name)}
+                    onMorePress={() =>
+                      console.log("More Options Pressed", item.user_name)
+                    }
+                    onTextPress={() => console.log("Text Pressed", item.user_name)}
+                  />
+                ))
+              ) : (
+                <View>
+                  <Text>No data available</Text>
+                </View>
+              )
+            ) : (
+              <View>
+                <Text>Based on clicked data is coming</Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
       </View>
-    </View>
-  );
+    );
 };
 
 const styles = StyleSheet.create({
@@ -211,6 +202,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   contentContainer: {
+    flex: 1,
     marginTop: 10,
     padding: 10,
   },

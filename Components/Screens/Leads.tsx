@@ -96,8 +96,6 @@ function Leads() {
       setLoadingMore(false);
     }
   };
-  console.log(leadData, "leadDataleadDataleadDataleadDataleadData");
-
   const filteredLeads = useMemo(() => {
     const defaultNoData = [{ id: 1, name: "NO DATA FOUND" }];
     let leadsToFilter: any[] = [];
