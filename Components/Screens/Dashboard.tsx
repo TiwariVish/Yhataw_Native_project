@@ -9,6 +9,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   RefreshControl,
+  Image
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
@@ -479,12 +480,12 @@ const Dashboard: React.FC<CustomProps> = () => {
           >
             {/* Header section */}
             <View style={styles.header}>
-              {/* <View style={styles.imageContainer}>
+              <View style={styles.imageContainer}>
                 <Image
-                  source={require("../../assets/new_pulse_logo.png")}
+                  source={require("../../assets/pulse_logo12.png")}
                   style={styles.image}
                 />
-              </View> */}
+              </View>
               <View style={styles.textContainer}>
                 <Text
                   style={[globalStyles.fs1, globalStyles.h5, globalStyles.tc]}
@@ -1167,16 +1168,16 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     marginTop: 30,
   },
-  // imageContainer: {
-  //   marginRight: 12,
-  //   padding: 10,
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  // },
-  // image: {
-  //   width: 35,
-  //   height: 40,
-  // },
+  imageContainer: {
+    marginRight: 12,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: 35,
+    height: 40,
+  },
   textContainer: {
     flexDirection: "column",
     alignItems: "flex-start",

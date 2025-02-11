@@ -48,7 +48,7 @@ const Navigation: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* {authenticated ? (
+        {authenticated ? (
           <>
             <Stack.Screen
               name="Dashboard"
@@ -197,13 +197,13 @@ const Navigation: React.FC = () => {
               options={{ headerShown: false }}
             />
           </>
-        )} */}
+        )}
 
-<Stack.Screen
+{/* <Stack.Screen
               name="Login"
               component={LoginScreen}
               options={{ headerShown: false }}
-            />
+            /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );

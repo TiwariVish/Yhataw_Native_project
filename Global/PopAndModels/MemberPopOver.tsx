@@ -36,7 +36,6 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({
   const [memberDropdownItems, setMemberDropdownItems] = useState<DropdownItem[]>([]);
   const { leadData } = useSelector((state: RootState) => state.auth);
 
-  // Animated values
   const scale = useSharedValue(visible ? 1 : 0.8);
   const opacity = useSharedValue(visible ? 1 : 0);
 
@@ -59,18 +58,7 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({
   const fetchTeams = async () => {
     try {
       const res = await getTeamList();
-      const updatedItems = res.data.map((team: DropdownItem) => ({
-        ...team,
-        checked: leadData.AssignTo.some(
-          (assigned) => assigned.team_name === team.team_name
-        ),
-        sub_teams: team.sub_teams?.map((subTeam) => ({
-          ...subTeam,
-          checked: leadData.AssignTo.some(
-            (assigned) => assigned.team_name === subTeam.team_name
-          ),
-        })),
-      }));
+      const updatedItems = res.data.map((team: DropdownItem) => markChecked(team));
       setMemberDropdownItems(updatedItems);
       handleSelection(updatedItems);
     } catch (error) {
@@ -78,94 +66,62 @@ const MemberPopOver: React.FC<MemberPopOverProps> = ({
     }
   };
 
-  const toggleSubTeamCheckbox = (parentId: string, subId: string) => {
-    const updatedItems = memberDropdownItems.map((item) => {
-      if (item.id === parentId) {
-        const updatedSubTeams = item.sub_teams?.map((subTeam) =>
-          subTeam.id === subId ? { ...subTeam, checked: !subTeam.checked } : subTeam
-        );
-        return { ...item, sub_teams: updatedSubTeams };
-      }
-      return item;
-    });
-    setMemberDropdownItems(updatedItems);
-    handleSelection(updatedItems);
-  };
+  const markChecked = (team: DropdownItem): DropdownItem => ({
+    ...team,
+    checked: leadData.AssignTo.some((assigned) => assigned.team_name === team.team_name),
+    sub_teams: team.sub_teams?.map(markChecked),
+  });
 
   const handleSelection = (items: DropdownItem[]) => {
-    const selectedTeams = items.flatMap((item) =>
-      item.checked
-        ? [item.team_name, ...(item.sub_teams?.filter((st) => st.checked).map((st) => st.team_name) || [])]
-        : item.sub_teams?.filter((st) => st.checked).map((st) => st.team_name) || []
-    );
+    const selectedTeams: string[] = [];
+    
+    const collectCheckedTeams = (team: DropdownItem) => {
+      if (team.checked) selectedTeams.push(team.team_name);
+      team.sub_teams?.forEach(collectCheckedTeams);
+    };
+
+    items.forEach(collectCheckedTeams);
     onStatusSelect(selectedTeams);
   };
 
+  const renderTeamItem = (item: DropdownItem, level = 0) => (
+    <View key={item.id} style={{ paddingLeft: level * 20 }}>
+      <TouchableOpacity style={styles.checkboxItem}>
+        <View style={styles.checkboxContainer}>
+          {item.checked ? (
+            <MaterialCommunityIcons name="checkbox-marked" size={24} color="#3D48E5" />
+          ) : (
+            <MaterialIcons name="check-box-outline-blank" size={24} color="#565F6C" />
+          )}
+          <Text
+            style={[
+              globalStyles.h5,
+              globalStyles.fontfm,
+              styles.checkboxText,
+              { color: item.checked ? "#3D48E5" : "#565F6C" },
+            ]}
+            allowFontScaling={false}
+          >
+            {item.team_name}
+          </Text>
+        </View>
+      </TouchableOpacity>
+      {item.sub_teams?.map((subTeam) => renderTeamItem(subTeam, level + 1))}
+    </View>
+  );
+
   return (
-    <>
-      {visible && (
-        <TouchableOpacity style={styles.overlay} onPress={onClose}>
-          <BlurView style={styles.blurView} intensity={200}>
-            <Animated.View style={[styles.modal, animatedStyle]}>
-              <ScrollView contentContainerStyle={styles.dropdownMenu}>
-                {memberDropdownItems.map((item) => (
-                  <View key={item.id}>
-                    <TouchableOpacity style={styles.checkboxItem}>
-                      <View style={styles.checkboxContainer}>
-                        {item.checked ? (
-                          <MaterialCommunityIcons name="checkbox-marked" size={24} color="#3D48E5" />
-                        ) : (
-                          <MaterialIcons name="check-box-outline-blank" size={24} color="#565F6C" />
-                        )}
-                        <Text
-                          style={[
-                            globalStyles.h5,
-                            globalStyles.fontfm,
-                            styles.checkboxText,
-                            { color: item.checked ? "#3D48E5" : "#565F6C" },
-                          ]}
-                          allowFontScaling={false}
-                        >
-                          {item.team_name}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                    {item.sub_teams?.length > 0 && (
-                      <View style={styles.subTeamContainer}>
-                        {item.sub_teams.map((subTeam) => (
-                          <TouchableOpacity
-                            key={subTeam.id}
-                            style={styles.subCheckboxItem}
-                          >
-                            <View style={styles.checkboxContainer}>
-                              {subTeam.checked ? (
-                                <MaterialCommunityIcons name="checkbox-marked" size={24} color="#3D48E5" />
-                              ) : (
-                                <MaterialIcons name="check-box-outline-blank" size={24} color="#565F6C" />
-                              )}
-                              <Text
-                                style={[
-                                  globalStyles.h6,
-                                  globalStyles.fontfm,
-                                  { color: subTeam.checked ? "#3D48E5" : "#565F6C" },
-                                ]}
-                                allowFontScaling={false}
-                              >
-                                {subTeam.team_name}
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    )}
-                  </View>
-                ))}
-              </ScrollView>
-            </Animated.View>
-          </BlurView>
-        </TouchableOpacity>
-      )}
-    </>
+    visible && (
+      <TouchableOpacity style={styles.overlay} onPress={onClose}>
+        <BlurView style={styles.blurView} intensity={200}>
+          <Animated.View style={[styles.modal, animatedStyle]}>
+            <ScrollView contentContainerStyle={styles.dropdownMenu}>
+              {memberDropdownItems.map((item) => renderTeamItem(item))}
+            </ScrollView>
+          </Animated.View>
+        </BlurView>
+      </TouchableOpacity>
+    )
   );
 };
 
@@ -199,13 +155,6 @@ const styles = StyleSheet.create({
   checkboxItem: {
     paddingVertical: 10,
     paddingHorizontal: 15,
-  },
-  subCheckboxItem: {
-    paddingVertical: 8,
-    paddingLeft: 30, 
-  },
-  subTeamContainer: {
-    paddingLeft: 10,
   },
   checkboxContainer: {
     flexDirection: "row",

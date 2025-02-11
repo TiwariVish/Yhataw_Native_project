@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { AntDesign } from "@expo/vector-icons"; 
+import { AntDesign, MaterialIcons } from "@expo/vector-icons"; 
 import { globalStyles } from '../../GlobalCss/GlobalStyles';
 
 interface CustomCardProps {
@@ -42,11 +42,11 @@ const CustomCardNew: React.FC<CustomCardProps> = ({
       <View style={[styles.card, style]}>
         {imageUrl ? (
           <View style={styles.circleOutLine}>
-            {/* <Image 
+            <Image 
               source={{ uri: imageUrl }}
               style={styles.image} 
               resizeMode="contain" 
-            />  */}
+            /> 
           </View>
         ) : showInitial ? (
           <View style={styles.circleOutLine}>
@@ -60,6 +60,7 @@ const CustomCardNew: React.FC<CustomCardProps> = ({
         {iconName && (
           <View style={[styles.iconContainer, { backgroundColor: iconBackgroundColor }]}>
             <AntDesign name="calendar" size={25} color="white" />
+            {/* <MaterialIcons name="calendar-today" size={24} color="white" /> */}
           </View>
         )}
 

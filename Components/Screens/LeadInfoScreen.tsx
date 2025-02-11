@@ -143,7 +143,13 @@ const LeadInfoScreen = () => {
   };
 
   const handleSelectedTeamsChange = (teams: string[]) => {
-    setSelectedTeams(teams);
+    // setSelectedTeams(teams);
+    setAssignedToMembers(
+      teams.map((team, index) => ({
+        id: index.toString(), 
+        name: team,
+      }))
+    );
     setMemberModalVisible(true);
   };
 
@@ -398,21 +404,19 @@ const LeadInfoScreen = () => {
                     style={[styles.dropdown]}
                     onPress={() => setisassineMemberModalVisible(true)}
                   >
-                    <Text
-                      style={[
-                        globalStyles.h7,
-                        globalStyles.fontfm,
-                        globalStyles.tc,
-                        styles.textWrap,
-                      ]}
-                      allowFontScaling={false}
-                    >
-                      {assignedToMembers.length > 0
-                        ? assignedToMembers
-                            .map((member) => member.name)
-                            .join(", ")
-                        : "Assigned To Member"}
-                    </Text>
+                  <Text
+  style={[
+    globalStyles.h7,
+    globalStyles.fontfm,
+    globalStyles.tc,
+    styles.textWrap,
+  ]}
+  allowFontScaling={false}
+>
+  {assignedToMembers.length > 0
+    ? assignedToMembers.map((member) => member.name).join(", ")
+    : "Assigned To Member"}
+</Text>
                     <Icon
                       name="chevron-down-outline"
                       size={24}
