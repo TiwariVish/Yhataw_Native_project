@@ -37,6 +37,7 @@ import CustomCardNew from "../../NewDesine/GlobalComponets/CustomCardNew";
 import FotterDseine from "../../NewDesine/GlobalComponets/FotterDseine";
 import CustomBigCard from "../../NewDesine/GlobalComponets/CustomBigCard";
 import Footer from "../../Global/Components/Footer";
+import { getAllUsersMyLead } from "./LeadsService";
 
 const projectData = [
   {
@@ -231,12 +232,17 @@ const Dashboard: React.FC<CustomProps> = () => {
     allLead: [],
     attendance: [],
   });
-
+  const [paginationModel, setPaginationModel] = useState({
+    pageSize: 25,
+    page: 0,
+  });
   const [dashboardAllLead, setDashboardAllLead] = useState<any>([]);
   const [memberdropdownItems, setMemberDropdownItems] = useState<any>([]);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([]);
+  console.log(dashboardDataMyLead,'z222222');
+  
   const [dashboardDataProject, setDashboardDataProject] = useState<any>([]);
   const [dashboardDataAttendance, setDashboardDataAttendance] = useState<any>(
     []
@@ -374,11 +380,18 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   const fetchMyDashboardData = async () => {
     try {
+        const payload = {
+              userId: store.getState().auth.userId,
+              pageNo:"",
+              pageSize: paginationModel.pageSize,
+            };
       const [myLeads, projects] = await Promise.all([
-        getDataMylead(),
+        // getDataMylead(),
+          getAllUsersMyLead(payload),
         getDataProject(),
       ]);
-      setDashboardDataMyLead(myLeads?.data[0] || []);
+      // setDashboardDataMyLead(myLeads?.data[0] || []);
+        setDashboardDataMyLead(myLeads?.metadata[0] || []);
       setDashboardDataProject(projects?.data[0] || []);
     } catch (error) {
       console.error("Error fetching my dashboard data", error);
@@ -639,7 +652,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                       ]}
                       allowFontScaling={false}
                     >
-                      {dashboardDataMyLead.lead_my_total_count}
+                      {/* {dashboardDataMyLead.lead_my_total_count} */}
+                      {dashboardDataMyLead?.total}
                     </Text>
                   </View>
                   {/* <View style={styles.iconFord}>
@@ -651,7 +665,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                     />
                   </View> */}
 
-                  {dashboardDataMyLead.lead_my_total_count > 0 && (
+                  {dashboardDataMyLead?.total > 0 && (
                     <TouchableOpacity
                       style={styles.viewAllContainer}
                       onPress={() => navigateToSection(3)}

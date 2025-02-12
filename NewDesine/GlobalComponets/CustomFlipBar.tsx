@@ -8,31 +8,36 @@ interface LeadStatusProps {
   selectedCard: number;
   setSelectedCard: (id: number) => void;
   leadData: any[];
+  dataMyLead:any[]
 }
 
-const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData }) => {
+const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData,dataMyLead }) => {
+  console.log(dataMyLead,'dataMyLeaddataMyLeaddataMyLeaddataMyLeaddataMyLead');
+  
   const listRef = useRef<FlatList>(null);
   const itemWidths = useRef<{ [key: number]: number }>({});
   const { privileges } = useSelector((state: RootState) => state.auth);
   const defaultWidth = 80;
+  const data = useMemo(
+    () => [
+      { id: 1, title: "All Leads", count: leadData?.length || 0 },
+      { id: 2, title: "Initial", count: 499 },
+      { id: 3, title: "My Leads", count: dataMyLead?.length || 0 },
+      { id: 4, title: "Site Visit", count: 568 },
+      { id: 5, title: "Pipeline", count: 499 },
+      { id: 6, title: "Reminders", count: 251 },
+    ],
+    [leadData,dataMyLead]
+  );
 
-  const data = useMemo(() => [
-    { id: 1, title: "All Leads", count: leadData?.length || 0 }, 
-    { id: 2, title: "Initial", count: 499 },
-    { id: 3, title: "My Leads", count: 251 },
-    { id: 4, title: "Site Visit", count: 568 },
-    { id: 5, title: "Pipeline", count: 499 },
-    { id: 6, title: "Reminders", count: 251 },
-  ], [leadData]);
-
-  const filteredLeadStatus = useMemo(() => 
-    data.filter((item) => item.id !== 1 || privileges["All Lead"]?.length > 0), 
+  const filteredLeadStatus = useMemo(
+    () => data.filter((item) => item.id !== 1 || privileges["All Lead"]?.length > 0),
     [data, privileges]
   );
 
   const scrollToSelectedCard = (selectedCardId: number) => {
     if (selectedCardId === 1 || !listRef.current) return;
-    const index = data.findIndex((item) => item.id === selectedCardId);
+    const index = filteredLeadStatus.findIndex((item) => item.id === selectedCardId);
     if (index !== -1) {
       listRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
     }
@@ -47,22 +52,41 @@ const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCar
     scrollToSelectedCard(id);
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={[styles.item, selectedCard === item.id && styles.selectedItem]}
-      onPress={() => handleCardPress(item.id)}
-      onLayout={(event) => (itemWidths.current[item.id] = event.nativeEvent.layout.width)}
-    >
-      <Text style={[globalStyles.h7, globalStyles.fs3, globalStyles.tc]} allowFontScaling={false}>
-        {item.title}
-      </Text>
-      <View style={[styles.countContainer, selectedCard === item.id && styles.selectedCount]}>
-        <Text style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc]} allowFontScaling={false}>
-          {item.count}
+  const renderItem = ({ item }: { item: { id: number; title: string; count: number } }) => {
+    const isSelected = selectedCard === item.id;
+    return (
+      <TouchableOpacity
+        style={[styles.item, isSelected && styles.selectedItem]}
+        onPress={() => handleCardPress(item.id)}
+        onLayout={(event) => (itemWidths.current[item.id] = event.nativeEvent.layout.width)}
+      >
+        <Text
+          style={[
+            globalStyles.h7,
+            globalStyles.fs3,
+            globalStyles.tc,
+            { color: isSelected ? "#fff" : "#000" },
+          ]}
+          allowFontScaling={false}
+        >
+          {item.title}
         </Text>
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={[styles.countContainer, isSelected && styles.selectedCount]}>
+          <Text
+            style={[
+              globalStyles.h8,
+              globalStyles.fs3,
+              globalStyles.tc,
+              { color: isSelected ? "#3F8CFF" : "#000" },
+            ]}
+            allowFontScaling={false}
+          >
+            {item.count}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>

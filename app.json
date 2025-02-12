@@ -21,7 +21,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/pulse_Logo12.png",
+      "image": "./assets/pulse_logo12.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

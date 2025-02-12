@@ -19,11 +19,6 @@ const CustomCardLead: React.FC<CustomCardLeadProps> = ({
   onMorePress,
   onTextPress,
 }) => {
-//   const initials = name
-//     .split(" ")
-//     .map((word) => word[0])
-//     .join("")
-//     .toUpperCase();
 
 const firstLetter = name
 ? name
@@ -41,7 +36,7 @@ const firstLetter = name
     <View style={styles.cardContainer}>
       <View style={styles.avatar}>
         <Text
-          style={[globalStyles.h2, globalStyles.fs3]}
+          style={[globalStyles.h5, globalStyles.fs3]}
           allowFontScaling={false}
         >
           {firstLetter}
@@ -70,7 +65,7 @@ const firstLetter = name
       </TouchableOpacity>
 
       <TouchableOpacity onPress={onMorePress} style={styles.icon}>
-        <Feather name="more-vertical" size={24} color="black" />
+        {/* <Feather name="more-vertical" size={24} color="black" /> */}
       </TouchableOpacity>
     </View>
   );
@@ -81,20 +76,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    padding: 15,
-    marginVertical: 3,
+    padding: 10,
+    // marginVertical: 3,
     // elevation: 1,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
   avatar: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 50,
     backgroundColor: "#EEEEEE",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 10,
+    marginRight: 20,
   },
   details: {
     flex: 1,

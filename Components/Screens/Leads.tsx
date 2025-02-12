@@ -218,7 +218,7 @@ function Leads() {
             onSearchChange={(query) => setSearchQuery(query)}
           /> */}
           <CustomFlipBar  selectedCard={selectedCard}
-            setSelectedCard={setSelectedCard}  leadData = {leadData}/>
+            setSelectedCard={setSelectedCard}  leadData = {leadData}  dataMyLead ={dataMyLead}/>
           <CustomSearchBar
             value={searchQuery}
             onChangeText={(query) => setSearchQuery(query)}
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   noDataFound: {
     justifyContent: "center",
     alignItems: "center",
-    margin: 20,
+    margin: 10,
   },
 });
 

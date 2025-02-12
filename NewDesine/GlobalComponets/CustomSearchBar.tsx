@@ -26,13 +26,13 @@ const CustomSearchBar: React.FC<CustomSearchBarProps> = ({
           value={value}
           onChangeText={onChangeText}
         />
-        <Feather
+        {/* <Feather
           name="sliders"
           size={20}
           color="#000"
           style={styles.filterIcon}
           onPress={onFilterPress}
-        />
+        /> */}
       </View>
     </View>
   );
@@ -41,7 +41,8 @@ const CustomSearchBar: React.FC<CustomSearchBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 10,
-    marginVertical: 10,
+    // marginVertical: 10,
+    // marginTop:10
   },
   inputContainer: {
     flexDirection: "row",
