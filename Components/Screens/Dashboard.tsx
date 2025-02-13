@@ -21,6 +21,7 @@ import {
   getDataMyAttendance,
   getDataMylead,
   getDataProject,
+  getPerosnalOffice,
   getTeamList,
   getTeamUserWise,
   getTeamWiseMember,
@@ -241,8 +242,6 @@ const Dashboard: React.FC<CustomProps> = () => {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([]);
-  console.log(dashboardDataMyLead,'z222222');
-  
   const [dashboardDataProject, setDashboardDataProject] = useState<any>([]);
   const [dashboardDataAttendance, setDashboardDataAttendance] = useState<any>(
     []
@@ -259,6 +258,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teamWiseMember, setTeamWiseMember] = useState([]);
   const roleFromRedux = useSelector(selectRole);
+  const [userRole , setUserRole] = useState<any>()
   const [refreshing, setRefreshing] = useState(false);
   const userId = store.getState().auth;
   const { authenticated, role, privileges } = useSelector(
@@ -409,15 +409,17 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await getPerosnalDetails(store.getState().auth?.userId);
+      const paylode = store.getState().auth?.userId
+      const response = await getPerosnalDetails(paylode);
       setUserData(response.data);
+      const resRole = await getPerosnalOffice(paylode)
+      setUserRole(resRole.data)
     } catch (error: any) {
       console.error("Error fetching user details:", error);
     }
   };
 
   const handleCardClick = async (team) => {
-    console.log(team,'teamteamteam');
     setSelectedTeam(team);
     try {
       const response = await getTeamWiseMember(team.id);
@@ -510,7 +512,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                   style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc1]}
                   allowFontScaling={false}
                 >
-                  {roleFromRedux}
+                  {/* {roleFromRedux} */}
+                  {userRole?.hierarchyName}
                 </Text>
               </View>
             </View>

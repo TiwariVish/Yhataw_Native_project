@@ -12,8 +12,6 @@ interface LeadStatusProps {
 }
 
 const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData,dataMyLead }) => {
-  console.log(dataMyLead,'dataMyLeaddataMyLeaddataMyLeaddataMyLeaddataMyLead');
-  
   const listRef = useRef<FlatList>(null);
   const itemWidths = useRef<{ [key: number]: number }>({});
   const { privileges } = useSelector((state: RootState) => state.auth);
@@ -21,11 +19,11 @@ const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCar
   const data = useMemo(
     () => [
       { id: 1, title: "All Leads", count: leadData?.length || 0 },
-      { id: 2, title: "Initial", count: 499 },
+      { id: 2, title: "Contact", count: 499 },
       { id: 3, title: "My Leads", count: dataMyLead?.length || 0 },
-      { id: 4, title: "Site Visit", count: 568 },
-      { id: 5, title: "Pipeline", count: 499 },
-      { id: 6, title: "Reminders", count: 251 },
+      { id: 4, title: "Propspect", count: 568 },
+      { id: 5, title: "Opportunity", count: 499 },
+      { id: 6, title: "Closure", count: 251 },
     ],
     [leadData,dataMyLead]
   );

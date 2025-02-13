@@ -28,6 +28,7 @@ import { getAllUsers } from "./DashboardService";
 import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
 import CustomSearchBar from "../../NewDesine/GlobalComponets/CustomSearchBar";
 import CustomFlipBar from "../../NewDesine/GlobalComponets/CustomFlipBar";
+import AllFilterBottomSheetModel from "../../Global/PopAndModels/AllFilterBottomSheetModel";
 
 function Leads() {
   const dispatch = useDispatch();
@@ -45,6 +46,7 @@ function Leads() {
     page: 0,
   });
   const [searchQuery, setSearchQuery] = useState<string>("");
+    const [isVisible, setIsVisible] = useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -222,7 +224,7 @@ function Leads() {
           <CustomSearchBar
             value={searchQuery}
             onChangeText={(query) => setSearchQuery(query)}
-            onFilterPress={() => console.log("Filter button pressed")}
+            onFilterPress={() =>  setIsVisible(true)}
           />
           {loading && !loadingMore ? (
             <LeadsSkeleton />
@@ -251,8 +253,10 @@ function Leads() {
                     /> */}
 
                     <CustomCardLead
-                      name={item.leadName}
-                      status={item.stage}
+                      name={item?.leadName}
+                      status={item?.stage}
+                      form_name={item?.form_name}
+                      dateTimeShow = {item?.createdAt}
                       onCallPress={() => handleDialPress(item.leadPhone)}
                       onMorePress={() => console.log("More Options Pressed")}
                       onTextPress={() => handleCardDataLeads(item)}
@@ -269,6 +273,10 @@ function Leads() {
           )}
         </View>
       </ScrollView>
+      <AllFilterBottomSheetModel
+        visible={isVisible}
+        onClose={() => setIsVisible(false)}
+      />
     </View>
   );
 }

@@ -26,13 +26,13 @@ const CustomSearchBar: React.FC<CustomSearchBarProps> = ({
           value={value}
           onChangeText={onChangeText}
         />
-        {/* <Feather
+        <Feather
           name="sliders"
           size={20}
           color="#000"
           style={styles.filterIcon}
           onPress={onFilterPress}
-        /> */}
+        />
       </View>
     </View>
   );

@@ -152,8 +152,6 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     marginRight: 12,
-    borderWidth: 1,
-    borderColor: "gray",
     borderRadius: 5,
     padding: 5,
     justifyContent: "center",

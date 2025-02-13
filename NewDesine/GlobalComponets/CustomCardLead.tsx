@@ -7,6 +7,8 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 interface CustomCardLeadProps {
   name: string;
   status: string;
+  form_name :string;
+  dateTimeShow:string
   onCallPress: () => void;
   onMorePress: () => void;
   onTextPress?: () => void;
@@ -15,6 +17,8 @@ interface CustomCardLeadProps {
 const CustomCardLead: React.FC<CustomCardLeadProps> = ({
   name,
   status,
+  form_name,
+  dateTimeShow,
   onCallPress,
   onMorePress,
   onTextPress,
@@ -32,6 +36,21 @@ const firstLetter = name
     .join("") 
 : "";
 
+const formatDateTime = (dateTime: string) => {
+  const date = new Date(dateTime);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); 
+  const year = date.getFullYear();
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12; 
+  return `${day}-${month}-${year}    ${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+};
+
+const formattedDateTime = dateTimeShow ? formatDateTime(dateTimeShow) : "";
+
+
   return (
     <View style={styles.cardContainer}>
       <View style={styles.avatar}>
@@ -42,6 +61,9 @@ const firstLetter = name
           {firstLetter}
         </Text>
       </View>
+      {/* <View style={styles.buzzCircle}>
+        <Text>R</Text>
+      </View> */}
       <TouchableOpacity onPress={onTextPress} style={styles.details}>
         <View>
           <Text
@@ -55,6 +77,23 @@ const firstLetter = name
             allowFontScaling={false}
           >
             {status}
+          </Text>
+          <Text
+            style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc1]}
+            allowFontScaling={false}
+          >
+            {form_name}
+          </Text>
+          <Text
+            style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc1]}
+            allowFontScaling={false}
+          >
+            {<Text
+            style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc1]}
+            allowFontScaling={false}
+          >
+            {formattedDateTime}
+          </Text>}
           </Text>
         </View>
       </TouchableOpacity>
@@ -77,19 +116,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     padding: 10,
-    // marginVertical: 3,
-    // elevation: 1,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    position: "relative",
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 72,
+    height: 72,
     borderRadius: 50,
     backgroundColor: "#EEEEEE",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 20,
+  },
+  buzzCircle :{
+    width: 20,
+    height: 20,
+    borderRadius: 50,
+    backgroundColor: "#FF808B",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute", 
+    top: 10, 
+    left: 60,
+   
   },
   details: {
     flex: 1,

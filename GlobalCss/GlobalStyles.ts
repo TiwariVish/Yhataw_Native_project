@@ -57,5 +57,8 @@ export const globalStyles = StyleSheet.create({
   },
   textColor:{
     color:"#565F6C"
+  },
+  tc5:{
+    color:"#BA3939"
   }
 });

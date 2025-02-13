@@ -138,3 +138,16 @@ export async function getDataAllLead(roleId?: any) {
       throw error;
     }
   }
+
+  export async function getPerosnalOffice(userId: String) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(
+        urls.GETEMPLOYEEOFFICEDETAILBYID + userId,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
