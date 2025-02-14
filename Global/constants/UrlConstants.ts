@@ -65,7 +65,7 @@ class UrlConstants extends StringConstants {
   login = `${this.url_prod}/auth/login`;
   GETALLUSER = `${this.url_prod}/allUser`;
   GETALLDEACTIVEUSER = `${this.url_prod}/allDeactivatedUser`;
-  GETALLLEADS = `${this.url_prod}/getForm`;
+  GETALLLFORMS = `${this.url_prod}/getForm`;
   LEADDATA = `${this.url_prod}/getLeadList`;
   LEADDATAASSIGN = `${this.url_prod}/getLeadListForReassign`;
   UPLOADLEAD = `${this.url_prod}/getUploadLead`;

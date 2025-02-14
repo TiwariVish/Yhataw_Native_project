@@ -13,6 +13,8 @@ import {
   ActivityIndicator,
   Linking,
   RefreshControl,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import LeadStatus from "./LeadStatus";
 import { useSelector, useDispatch } from "react-redux";
@@ -256,7 +258,7 @@ function Leads() {
                       name={item?.leadName}
                       status={item?.stage}
                       form_name={item?.form_name}
-                      dateTimeShow = {item?.createdAt}
+                      dateTimeShow={item?.createdAt}
                       onCallPress={() => handleDialPress(item.leadPhone)}
                       onMorePress={() => console.log("More Options Pressed")}
                       onTextPress={() => handleCardDataLeads(item)}
@@ -273,10 +275,23 @@ function Leads() {
           )}
         </View>
       </ScrollView>
-      <AllFilterBottomSheetModel
+
+      <Modal
         visible={isVisible}
-        onClose={() => setIsVisible(false)}
-      />
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setIsVisible(false)}>
+          <View style={styles.overlay} />
+        </TouchableWithoutFeedback>
+        <View style={styles.bottomSheetContainer}>
+          <AllFilterBottomSheetModel
+            visible={isVisible}
+            onClose={() => setIsVisible(false)}
+          />
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -305,6 +320,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
+  },
+  bottomSheetContainer: {
+    position: "absolute",
+    width: "100%",
+    backgroundColor: "white",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "white",
   },
 });
 

@@ -151,3 +151,13 @@ export async function getDataAllLead(roleId?: any) {
       throw error;
     }
   }
+
+  export async function getAllForms() {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(urls.GETALLLFORMS, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
