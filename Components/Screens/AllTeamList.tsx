@@ -158,6 +158,8 @@ const AllTeamList = () => {
                 key={item._id || index}
                 name={item.name}
                 status=""
+                form_name=""
+                dateTimeShow=""
                 onCallPress={() => console.log("Call Pressed", item.user_name)}
                 onMorePress={() =>
                   console.log("More Options Pressed", item.user_name)

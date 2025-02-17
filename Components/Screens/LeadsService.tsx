@@ -49,7 +49,7 @@ export async function getAllTeamData(id: any) {
       console.log(callParams, "callParams");
       const response = await makeCall(
         urls.MYLEAD +
-          `?start_date=&end_date=&id=${payload.userId}&page=${payload.pageNo}&limit=${payload.pageSize}`,
+          `?start_date=&end_date=&id=${payload.userId}&page=${payload.pageNo}&limit=${payload.pageSize}&formId=${payload.formId || ""}&stage=${payload.stage || ""}`,
         callParams
       );
       return response;

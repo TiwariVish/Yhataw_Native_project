@@ -19,22 +19,30 @@ import { getStage } from "../../Components/Screens/LeadInfoScreenService";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import { getAllForms } from "../../Components/Screens/DashboardService";
 import Feather from "react-native-vector-icons/Feather";
+import store from "../../utils/store";
+import { getAllUsersMyLead } from "../../Components/Screens/LeadsService";
 
 const { height: screenHeight } = Dimensions.get("window");
 
 const FilterBottomSheet: React.FC<{
   visible: boolean;
   onClose: () => void;
-}> = ({ visible, onClose }) => {
+  onApplyFilters: (filters: any) => void;
+}> = ({ visible, onClose,onApplyFilters  }) => {
   const translateY = useSharedValue(screenHeight);
   const [selectedCategory, setSelectedCategory] = useState("Stage");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [allData, setAllData] = useState<any[]>([]);
   const [allFormData, setAllFormData] = useState<any[]>([]);
-  const [value, setValue] = useState<string>(""); 
+  const [value, setValue] = useState<string>("");
   const [filteredData, setFilteredData] = useState<any[]>();
-  console.log(filteredData,'filteredDatafilteredDatafilteredData');
-  
+
+  const [selectedStages, setSelectedStages] = useState([]);
+
+  const [paginationModel, setPaginationModel] = React.useState({
+    pageSize: 25,
+    page: 0,
+  });
   useEffect(() => {
     translateY.value = withSpring(visible ? 0 : screenHeight, {
       damping: 15,
@@ -43,23 +51,32 @@ const FilterBottomSheet: React.FC<{
   }, [visible]);
 
   useEffect(() => {
-    getLeadStage();
-  }, []);
+    fetchData();
+  }, [selectedCategory]);
 
-  const getLeadStage = async () => {
+  const fetchData = async () => {
     try {
-      const [stageData, formData] = await Promise.all([
-        getStage(),
-        getAllForms(),
-      ]);
-      setAllData(stageData.data);
-      setAllFormData(formData.data);
+      const payload = {
+        pageNo: paginationModel.page,
+        pageSize: paginationModel.pageSize,
+        search: selectedCategory === "form" ? value : "",
+      };
+
+      if (selectedCategory === "Stage") {
+        const stageData = await getStage();
+        console.log(stageData, "stageDatastageDatastageData");
+
+        setAllData(stageData.data);
+      } else if (selectedCategory === "form") {
+        const formData = await getAllForms(payload);
+        setAllFormData(formData.data);
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
-  const memoizedFilteredData  = useMemo(() => {
+  const memoizedFilteredData = useMemo(() => {
     switch (selectedCategory) {
       case "Stage":
         return allData.filter((item) => item.stage_Name);
@@ -106,12 +123,12 @@ const FilterBottomSheet: React.FC<{
 
   const handleSearch = (text: string) => {
     setValue(text);
-    
+
     console.log("Search Query:", text);
     console.log("Selected Category:", selectedCategory);
-  
+
     let filteredItems = [];
-  
+
     if (selectedCategory === "Stage") {
       filteredItems = allData.filter((item) =>
         item.sub_Stage_name?.some((sub) =>
@@ -119,15 +136,61 @@ const FilterBottomSheet: React.FC<{
         )
       );
     } else if (selectedCategory === "form") {
-      filteredItems = allFormData.filter((form) =>
-        form.form_name?.toLowerCase().includes(text.toLowerCase())
-      );
+      // filteredItems = allFormData.filter((form) =>
+      //   form.form_name?.toLowerCase().includes(text.toLowerCase())
+      // );
+      fetchData();
     }
-  
+
     setFilteredData(filteredItems.length > 0 ? filteredItems : []);
   };
-  
-  
+  const handleFilterSelectionStage = (subItem) => {
+    setSelectedFilters((prev) => {
+      const updatedFilters = prev.includes(subItem.stage_Name)
+        ? prev.filter((id) => id !== subItem.stage_Name)
+        : [...prev, subItem.stage_Name];
+      const updatedStages = prev.includes(subItem.stage_Name)
+        ? prev.filter((stageName) => stageName !== subItem.stage_Name)
+        : [...prev, subItem.stage_Name];
+
+      setSelectedStages(updatedStages);
+      return updatedFilters;
+    });
+  };
+
+  const handleFilterData = async () => {
+    let formId;
+    let stage = selectedStages.join(",");
+    if (selectedCategory === "form") {
+      formId =
+        selectedFilters.length === getAllIds.length
+          ? getAllIds
+          : selectedFilters;
+    } else if (selectedCategory === "Stage") {
+      stage = selectedStages.join(",");
+    }
+    const payload = {
+      userId: store.getState().auth.userId,
+      pageNo: paginationModel.page,
+      pageSize: paginationModel.pageSize,
+      formId: formId,
+      stage: stage,
+    };
+    console.log(stage, "stagestagestage");
+
+    try {
+      const res = await getAllUsersMyLead(payload);
+      console.log(res, "resresresres");
+      const filters = {
+        formId,
+        stage,
+        selectedFilters,
+      };
+      onApplyFilters(filters)  
+      onClose();
+    } catch (error) {}
+  };
+
   return (
     <>
       {visible && (
@@ -169,6 +232,9 @@ const FilterBottomSheet: React.FC<{
                     <Text
                       style={[
                         styles.filterText,
+                        globalStyles.h7,
+                        globalStyles.fs2,
+                        globalStyles.tc,
                         selectedCategory === option.key && { color: "white" },
                       ]}
                       allowFontScaling={false}
@@ -196,7 +262,6 @@ const FilterBottomSheet: React.FC<{
                       value={value}
                       onChangeText={handleSearch}
                     />
-            
                   </View>
                 </View>
 
@@ -256,16 +321,12 @@ const FilterBottomSheet: React.FC<{
                             <View key={subItem._id} style={styles.checkboxRow}>
                               <Checkbox
                                 status={
-                                  selectedFilters.includes(subItem._id)
+                                  selectedFilters.includes(subItem.stage_Name)
                                     ? "checked"
                                     : "unchecked"
                                 }
                                 onPress={() =>
-                                  setSelectedFilters((prev) =>
-                                    prev.includes(subItem._id)
-                                      ? prev.filter((id) => id !== subItem._id)
-                                      : [...prev, subItem._id]
-                                  )
+                                  handleFilterSelectionStage(subItem)
                                 }
                                 color="#3F8CFF"
                                 uncheckedColor="#A0A0A0"
@@ -347,7 +408,7 @@ const FilterBottomSheet: React.FC<{
                 </TouchableOpacity>
               </View>
               <View style={{ flex: 1, alignItems: "center" }}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleFilterData}>
                   <Text
                     style={[
                       globalStyles.h7,
@@ -418,15 +479,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#3F8CFF",
   },
   filterText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
     textAlign: "left",
   },
   rightColumn: {
     width: "65%",
     padding: 10,
-    height: screenHeight - 80
+    height: screenHeight - 80,
   },
   checkboxRow: {
     flexDirection: "row",
@@ -451,16 +509,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   searchContainer: {
- 
     marginBottom: 10,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,  
-  borderColor: "#ccc",  
+    borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 5,
- 
   },
 
   input: {

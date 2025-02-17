@@ -152,10 +152,11 @@ export async function getDataAllLead(roleId?: any) {
     }
   }
 
-  export async function getAllForms() {
+  export async function getAllForms(payload: any) {
     try {
       const callParams = await getCallParams("GET");
-      const response = await makeCall(urls.GETALLLFORMS, callParams);
+      // const response = await makeCall(urls.GETALLLFORMS, callParams);
+      const response = await makeCall(urls.GETALLLFORMS+`?limit=${payload.pageSize}&search=${payload.search || ""}&page=${payload.pageNo}`, callParams);
       return response;
     } catch (error) {
       throw error;

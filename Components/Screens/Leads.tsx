@@ -42,6 +42,8 @@ function Leads() {
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [dataMyLead, setDataMyLead] = useState<any[]>([]);
+  const [filters, setFilters] = useState<any>({});
+  const [filteredLeadsnew, setFilteredLeads] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     pageSize: 25,
@@ -55,6 +57,11 @@ function Leads() {
   useEffect(() => {
     getAllLeadsData(false, 1);
   }, []);
+  useEffect(() => {
+    if (!isVisible) {
+      onRefresh(); // Reload data when filter modal is closed
+    }
+  }, [isVisible]);
 
   useFocusEffect(
     useCallback(() => {
@@ -75,6 +82,30 @@ function Leads() {
     }
   };
 
+  const handleApplyFilters = (filters: any) => {
+    setFilters(filters);
+    // console.log(filters,'filtersfiltersfiltersfiltersfiltersfiltersfilters');
+    // onRefresh();
+    // setIsVisible(false);
+    const fetchFilteredLeads = async () => {
+      try {
+
+        const payload = {
+          userId: store.getState().auth.userId,
+          pageNo:0,
+          pageSize: paginationModel.pageSize,
+          ...filters
+        };
+        const res = await getAllUsersMyLead(payload);
+        setFilteredLeads(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchFilteredLeads();
+  };
+
   const getAllLeadsData = async (isLoadMore = false, pageNo: number) => {
     try {
       if (isLoadMore) setLoadingMore(true);
@@ -84,6 +115,7 @@ function Leads() {
         userId: store.getState().auth.userId,
         pageNo,
         pageSize: paginationModel.pageSize,
+        ...filters
       };
 
       const [response1, response2] = await Promise.all([
@@ -125,6 +157,11 @@ function Leads() {
       default:
         leadsToFilter = [{ id: 1, name: "NO DATA FOUND" }];
         break;
+    }
+    if (filters.stage) {
+      leadsToFilter = leadsToFilter.filter(lead => lead.stage === filters.stage);
+      console.log(leadsToFilter,'leadsToFilterleadsToFilterleadsToFilterleadsToFilterleadsToFilterleadsToFilterleadsToFilter');
+      
     }
     if (searchQuery) {
       const firstThreeChars = searchQuery.substring(0, 3).toLowerCase();
@@ -196,6 +233,8 @@ function Leads() {
       getAllLeadsData(true, paginationModel.page + 1);
     }
   };
+
+ 
 
   return (
     <View style={styles.mainCont}>
@@ -289,6 +328,7 @@ function Leads() {
           <AllFilterBottomSheetModel
             visible={isVisible}
             onClose={() => setIsVisible(false)}
+            onApplyFilters={handleApplyFilters} 
           />
         </View>
       </Modal>
