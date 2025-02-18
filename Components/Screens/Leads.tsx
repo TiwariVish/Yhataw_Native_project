@@ -51,6 +51,8 @@ function Leads() {
   });
   const [searchQuery, setSearchQuery] = useState<string>("");
     const [isVisible, setIsVisible] = useState(false);
+    const [selectedStages, setSelectedStages] = useState([]);
+
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -59,7 +61,7 @@ function Leads() {
   }, []);
   useEffect(() => {
     if (!isVisible) {
-      onRefresh(); // Reload data when filter modal is closed
+      onRefresh();
     }
   }, [isVisible]);
 
@@ -76,7 +78,6 @@ function Leads() {
       setDataLoaded(false);
       await getAllLeadsData(false, 0);
     } catch (error) {
-      console.error("Error during refresh:", error);
     } finally {
       setRefreshing(false);
     }
@@ -84,9 +85,9 @@ function Leads() {
 
   const handleApplyFilters = (filters: any) => {
     setFilters(filters);
-    // console.log(filters,'filtersfiltersfiltersfiltersfiltersfiltersfilters');
-    // onRefresh();
-    // setIsVisible(false);
+    setIsVisible(false); 
+    const selectedStages = filters.stage ? filters.stage.split(",").map(stage => stage.trim()) : [];
+    setSelectedStages(selectedStages); 
     const fetchFilteredLeads = async () => {
       try {
 
@@ -125,6 +126,7 @@ function Leads() {
 
       setLeadData((prev) => [...prev, ...response1.data]);
       setDataMyLead((prev) => [...prev, ...response2.data]);
+      // setDataLoaded(true);
     } catch (error) {
       console.error("Error fetching leads data:", error);
     } finally {
@@ -135,6 +137,7 @@ function Leads() {
   const filteredLeads = useMemo(() => {
     const defaultNoData = [{ id: 1, name: "NO DATA FOUND" }];
     let leadsToFilter: any[] = [];
+    let noStageMatch = false;
     switch (selectedCard) {
       case 1:
         leadsToFilter = leadData;
@@ -159,10 +162,18 @@ function Leads() {
         break;
     }
     if (filters.stage) {
-      leadsToFilter = leadsToFilter.filter(lead => lead.stage === filters.stage);
-      console.log(leadsToFilter,'leadsToFilterleadsToFilterleadsToFilterleadsToFilterleadsToFilterleadsToFilterleadsToFilter');
-      
+      const stageArray = filters.stage.split(",").map((stage) => stage.trim());
+      leadsToFilter = leadsToFilter.filter((lead) => {
+        const isMatch = stageArray.includes(lead.stage); 
+        if (!isMatch && lead.stage) {
+          noStageMatch = true; 
+        }
+        return isMatch; 
+      });
     }
+  
+
+  
     if (searchQuery) {
       const firstThreeChars = searchQuery.substring(0, 3).toLowerCase();
       return leadsToFilter.filter(
@@ -172,7 +183,7 @@ function Leads() {
       );
     }
     return leadsToFilter;
-  }, [selectedCard, leadData, dataMyLead, searchQuery]);
+  }, [selectedCard, leadData, dataMyLead, searchQuery,filters.stage]);
 
   const handleDialPress = useCallback(async (phoneNumber) => {
     const url = `tel:${phoneNumber}`;
@@ -237,6 +248,7 @@ function Leads() {
  
 
   return (
+    
     <View style={styles.mainCont}>
       <ScrollView
         contentContainerStyle={styles.scrollViewContainer}
@@ -269,7 +281,14 @@ function Leads() {
           />
           {loading && !loadingMore ? (
             <LeadsSkeleton />
-          ) : (
+          ) : filteredLeads.length === 0 ? (  
+            <View style={styles.noDataFound}>
+              <Text>No Data Found</Text>  
+            </View>
+          ):
+          
+          
+          (
             filteredLeads.map((item, index) => {
               if (
                 selectedCard === 2 ||
@@ -317,7 +336,7 @@ function Leads() {
 
       <Modal
         visible={isVisible}
-        transparent={true}
+        transparent={false}
         animationType="slide"
         onRequestClose={() => setIsVisible(false)}
       >
@@ -329,6 +348,7 @@ function Leads() {
             visible={isVisible}
             onClose={() => setIsVisible(false)}
             onApplyFilters={handleApplyFilters} 
+            selectedStagesLocal={selectedStages}
           />
         </View>
       </Modal>
