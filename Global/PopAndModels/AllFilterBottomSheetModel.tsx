@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -19,53 +19,48 @@ import { getStage } from "../../Components/Screens/LeadInfoScreenService";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import { getAllForms } from "../../Components/Screens/DashboardService";
 import Feather from "react-native-vector-icons/Feather";
-import store from "../../utils/store";
-import { getAllUsersMyLead } from "../../Components/Screens/LeadsService";
-
+import { useDispatch } from "react-redux";
+import { setSelectedStagesAll } from "../../Redux/authSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../utils/store";
 const { height: screenHeight } = Dimensions.get("window");
 
 const FilterBottomSheet: React.FC<{
   visible: boolean;
-  selectedStagesLocal:any[]
+  selectedStagesLocal: any[];
   onClose: () => void;
   onApplyFilters: (filters: any) => void;
-}> = ({ visible, onClose,onApplyFilters,selectedStagesLocal  }) => {
+}> = ({ visible, onClose, onApplyFilters, selectedStagesLocal }) => {
   const translateY = useSharedValue(screenHeight);
   const [selectedCategory, setSelectedCategory] = useState("Stage");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [allData, setAllData] = useState<any[]>([]);
   const [allFormData, setAllFormData] = useState<any[]>([]);
   const [value, setValue] = useState<string>("");
-  const [filteredData, setFilteredData] = useState<any[]>();
-
-  const [selectedStages, setSelectedStages] = useState([]);
-  const [localSelectedStages, setLocalSelectedStages] = useState<any[]>([]);
-  const [paginationModel, setPaginationModel] = React.useState({
-    pageSize: 25,
-    page: 0,
-  });
-
-  // useEffect(() => {
-  //   if (selectedCategory === "form" && allFormData.length > 0) {
-  //     setSelectedFilters(allFormData.map((item) => item._id));
-  //   }
-  // }, [allFormData, selectedCategory]);
+  const [selectedStages, setSelectedStages] = useState<string[]>(selectedStagesLocal);
+  const dispatch = useDispatch();
+  const {selectedStagesAll} = useSelector((state: RootState) => state.auth)
+  useEffect(() => {
+    setSelectedStages(selectedStagesAll);
+  }, [selectedStagesAll]);
+  
+  useEffect(() => {
+    dispatch(setSelectedStagesAll(selectedStages));
+  }, [selectedStages, dispatch]);  
   useEffect(() => {
     translateY.value = withSpring(visible ? 0 : screenHeight, {
       damping: 15,
       stiffness: 100,
     });
   }, [visible]);
-
   useEffect(() => {
-    console.log("Updated Filters: ", selectedFilters);
-    console.log("Updated Stages: ", selectedStages);
-  }, [selectedFilters, selectedStages]);
-
-
-  useEffect(() => {
-    setLocalSelectedStages(selectedStagesLocal); 
+    setSelectedStages(selectedStagesLocal);
   }, [selectedStagesLocal]);
+
+  useEffect(() => {
+    dispatch(setSelectedStagesAll(selectedStages));
+  }, [selectedStagesAll, dispatch]);
+
 
   useEffect(() => {
     fetchData();
@@ -74,8 +69,8 @@ const FilterBottomSheet: React.FC<{
   const fetchData = async () => {
     try {
       const payload = {
-        pageNo: paginationModel.page,
-        pageSize: paginationModel.pageSize,
+        pageNo: 0,
+        pageSize: 25,
         search: selectedCategory === "form" ? value : "",
       };
 
@@ -92,37 +87,36 @@ const FilterBottomSheet: React.FC<{
   };
 
   const memoizedFilteredData = useMemo(() => {
-    switch (selectedCategory) {
-      case "Stage":
-        return allData.filter((item) => item.stage_Name);
-      case "form":
-        return allFormData.filter((item) => item.form_Name);
-      case "dateRange":
-        return allData.filter((item) => item.dateRange_Name);
-      default:
-        return [];
+    if (selectedCategory === "Stage") {
+      return allData.filter((item) => item.stage_Name);
     }
+    if (selectedCategory === "form") {
+      return allFormData.filter((item) => item.form_Name);
+    }
+    return [];
   }, [selectedCategory, allData, allFormData]);
 
-  const getAllIds = useMemo(() => {
-    return [
-      ...memoizedFilteredData.flatMap(
-        (item) => item.sub_Stage_name?.map((sub) => sub._id) || []
+  const getAllIds = useMemo(
+    () =>
+      memoizedFilteredData.flatMap((item) =>
+        selectedCategory === "form"
+          ? item._id
+          : item.sub_Stage_name?.map((sub) => sub._id) || []
       ),
-      ...(selectedCategory === "form"
-        ? allFormData.map((form) => form._id)
-        : []),
-    ];
-  }, [memoizedFilteredData, selectedCategory, allFormData]);
+    [memoizedFilteredData, selectedCategory]
+  );
+
+  const handleClearAll = () =>{
+    setSelectedFilters([])
+    setSelectedStages([])
+  }
 
   const handleSelectAll = () => {
-    const allIds = getAllIds; 
-    setSelectedFilters((prev) => 
-      prev.length === allIds.length ? [] : allIds
-    );
-    setSelectedStages((prev) => 
-      prev.length === allIds.length ? [] : allIds
-    );
+    const allIds = getAllIds;
+    const isAllSelected = selectedFilters.length === allIds.length;
+
+    setSelectedFilters(isAllSelected ? [] : allIds);
+    setSelectedStages(isAllSelected ? [] : allIds);
   };
 
   const isAllSelected =
@@ -142,317 +136,211 @@ const FilterBottomSheet: React.FC<{
 
   const handleSearch = (text: string) => {
     setValue(text);
-    let filteredItems = [];
-    if (selectedCategory === "Stage") {
-    } else if (selectedCategory === "form") {
+    if (selectedCategory === "form") {
       fetchData();
+    } else {
+      const filteredItems = allData.filter((item) =>
+        item.stage_Name.toLowerCase().includes(text.toLowerCase())
+      );
+      setAllData(filteredItems);
     }
-
-    setFilteredData(filteredItems.length > 0 ? filteredItems : []);
   };
 
-  const handleFilterSelectionStage = (subItem) => {
-    setSelectedFilters((prev) => {
-      const isSelected = prev.includes(subItem._id);
-      const updatedFilters = isSelected
-        ? prev.filter((id) => id !== subItem._id)
-        : [...prev, subItem._id];
-  
-      setSelectedStages((prevStages) => {
-        const updatedStages = isSelected
-          ? prevStages.filter((stageName) => stageName !== subItem.stage_Name)
-          : [...prevStages, subItem.stage_Name];
-        setLocalSelectedStages(updatedStages);
-        return updatedStages;
-      });
-  
-      return updatedFilters;
-    });
+  const handleFilterSelectionStage = (subItem: any) => {
+    const isSelected = selectedFilters.includes(subItem._id);
+    setSelectedFilters((prev) =>
+      isSelected ? prev.filter((id) => id !== subItem._id) : [...prev, subItem._id]
+    );
+    const updatedStages = isSelected
+      ? selectedStages.filter((stage) => stage !== subItem.stage_Name)
+      : [...selectedStages, subItem.stage_Name];
+    setSelectedStages(updatedStages);
+    dispatch(setSelectedStagesAll(updatedStages));
   };
- 
-
-  const handleFilterData = async () => {
-  setTimeout(() => { 
+  const handleFilterData = useCallback(() => {
     let formId;
     let stage = selectedStages.join(",");
-
     if (selectedCategory === "form") {
       formId = selectedFilters.length === getAllIds.length ? getAllIds : selectedFilters;
     } else if (selectedCategory === "Stage") {
-      stage = selectedStages.join(",");
+      
     }
-
-    const filters = {
-      formId,
-      stage,
-      selectedFilters,
-    };
-
-    console.log("Applying Filters: ", filters);
-    onApplyFilters(filters);
+  
+    onApplyFilters({ formId, stage, selectedFilters });
     onClose();
-  }, 0);
-};
+  }, [selectedStages, selectedFilters, selectedCategory, getAllIds]);
+
+
   return (
     <>
-      {visible && (
-        <BlurView intensity={100}  style={styles.blurView}>
-          <Animated.View style={[styles.container, animatedStyle]}>
-            <View style={styles.header}>
+    {visible && (
+  <BlurView intensity={100} style={styles.blurView}>
+    <Animated.View style={[styles.container, animatedStyle]}>
+      <View style={styles.header}>
+        <Text style={[globalStyles.h5, globalStyles.fs1, globalStyles.tc]} allowFontScaling={false}>
+          Filters
+        </Text>
+        <TouchableOpacity onPress={handleClearAll}>
+          <Text style={[globalStyles.h7, globalStyles.fs3, globalStyles.tc5]} allowFontScaling={false}>
+            Clear All
+          </Text>
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.rowContainer}>
+        {/* Left Section */}
+        <View style={styles.leftColumn}>
+          {filterOptions.map((option) => (
+            <TouchableOpacity
+              key={option.key}
+              style={[
+                styles.filterItem,
+                selectedCategory === option.key && styles.selectedCategory,
+              ]}
+              onPress={() => setSelectedCategory(option.key)}
+            >
               <Text
-                style={[globalStyles.h5, globalStyles.fs1, globalStyles.tc]}
+                style={[
+                  styles.filterText,
+                  globalStyles.h7,
+                  globalStyles.fs1,
+                  globalStyles.tc,
+                  selectedCategory === option.key && { color: "white" },
+                ]}
                 allowFontScaling={false}
               >
-                Filters
+                {option.label}
               </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedFilters([]);
-                }}
-              >
-                <Text
-                  style={[globalStyles.h7, globalStyles.fs3, globalStyles.tc5]}
-                  allowFontScaling={false}
-                >
-                  Clear All
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Right Section */}
+        <ScrollView style={styles.rightColumn}>
+          <View style={styles.searchContainer}>
+            <View style={styles.inputContainer}>
+              <Feather name="search" size={15} color="#888" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Search..."
+                placeholderTextColor="#888"
+                value={value}
+                onChangeText={handleSearch}
+              />
+            </View>
+          </View>
+
+          {/* Select All Checkbox */}
+          {(memoizedFilteredData.length > 0 || (selectedCategory === "form" && allFormData.length > 0)) && (
+            <View>
+              <TouchableOpacity onPress={handleSelectAll} style={styles.selectAllRow}>
+                <Checkbox
+                  status={isAllSelected ? "checked" : isPartialSelected ? "indeterminate" : "unchecked"}
+                  onPress={handleSelectAll}
+                  color={isAllSelected || isPartialSelected ? "#3F8CFF" : undefined}
+                  uncheckedColor="#A0A0A0"
+                />
+                <Text style={[globalStyles.h7, globalStyles.fs1, globalStyles.tc]} allowFontScaling={false}>
+                  Select All
                 </Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.rowContainer}>
-              {/* Left Section */}
-              <View style={styles.leftColumn}>
-                {filterOptions.map((option) => (
-                  <TouchableOpacity
-                    key={option.key}
-                    style={[
-                      styles.filterItem,
-                      selectedCategory === option.key &&
-                        styles.selectedCategory,
-                    ]}
-                    onPress={() => setSelectedCategory(option.key)}
-                  >
-                    <Text
-                      style={[
-                        styles.filterText,
-                        globalStyles.h7,
-                        globalStyles.fs1,
-                        globalStyles.tc,
-                        selectedCategory === option.key && { color: "white" },
-                      ]}
-                      allowFontScaling={false}
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+          )}
 
-              {/* Right Section */}
-              <ScrollView style={styles.rightColumn}>
-                <View style={styles.searchContainer}>
-                  <View style={styles.inputContainer}>
-                    <Feather
-                      name="search"
-                      size={15}
-                      color="#888"
-                      style={styles.icon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Search..."
-                      placeholderTextColor="#888"
-                      value={value}
-                      onChangeText={handleSearch}
-                    />
-                  </View>
-                </View>
+          {/* Main List Rendering */}
+          {memoizedFilteredData.length > 0 ? (
+            memoizedFilteredData.map((item) => (
+              <View key={item._id} style={{ marginTop: 10 }}>
+                <Text style={[globalStyles.h7, globalStyles.fs1, globalStyles.tc]} allowFontScaling={false}>
+                  {item.stage_Name || item.form_name || item.dateRange_Name}
+                </Text>
 
-                {/* Select All Checkbox */}
-                {(memoizedFilteredData.length > 0 ||
-                  (selectedCategory === "form" && allFormData.length > 0)) && (
+                {item.sub_Stage_name?.length > 0 && (
                   <View>
-                   <TouchableOpacity onPress={handleSelectAll}  style={styles.selectAllRow}>
-                    <Checkbox
-                      status={
-                        isAllSelected
-                          ? "checked"
-                          : isPartialSelected
-                          ? "indeterminate"
-                          : "unchecked"
-                      }
-                      onPress={handleSelectAll}
-                      color={
-                        isAllSelected || isPartialSelected
-                          ? "#3F8CFF"
-                          : undefined
-                      }
-                      uncheckedColor="#A0A0A0"
-                    />
-                    <Text
-                      style={[
-                        globalStyles.h7,
-                        globalStyles.fs1,
-                        globalStyles.tc,
-                      ]}
-                      allowFontScaling={false}
-                    >
-                      Select All
-                    </Text>
-                   </TouchableOpacity>
+                    {item.sub_Stage_name.map((subItem) => (
+                      <View key={subItem._id} style={styles.checkboxRow}>
+                        <View style={{ transform: [{ scale: 0.7 }] }}>
+                          <Checkbox
+                            status={(selectedFilters.includes(subItem._id) || selectedStagesAll.includes(subItem.stage_Name)) ? "checked" : "unchecked"}
+                            onPress={() => handleFilterSelectionStage(subItem)}
+                            color="#3F8CFF"
+                            uncheckedColor="#A0A0A0"
+                          />
+                        </View>
+                        <TouchableOpacity onPress={() => handleFilterSelectionStage(subItem)}>
+                          <Text style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc]} allowFontScaling={false}>
+                            {subItem.stage_Name}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                   </View>
                 )}
-
-                {/* Main List Rendering */}
-                {memoizedFilteredData.length > 0 &&
-                  memoizedFilteredData.map((item) => (
-                    <View key={item._id} style={{ marginTop: 10 }}>
-                      <Text
-                        style={[
-                          globalStyles.h7,
-                          globalStyles.fs1,
-                          globalStyles.tc,
-                        ]}
-                        allowFontScaling={false}
+              </View>
+            ))
+          ) : (
+            <View>
+              {selectedCategory === "dateRange" ? (
+                <Text>Date Picker</Text>
+              ) : selectedCategory === "form" ? (
+                allFormData.length > 0 ? (
+                  allFormData.map((item) => (
+                    <View key={item._id} style={styles.checkboxRow}>
+                      <View style={{ transform: [{ scale: 0.7 }] }}>
+                        <Checkbox
+                          status={selectedFilters.includes(item._id) ? "checked" : "unchecked"}
+                          onPress={() =>
+                            setSelectedFilters((prev) =>
+                              prev.includes(item._id) ? prev.filter((id) => id !== item._id) : [...prev, item._id]
+                            )
+                          }
+                          color="#3F8CFF"
+                          uncheckedColor="#A0A0A0"
+                        />
+                      </View>
+                      <TouchableOpacity
+                        onPress={() =>
+                          setSelectedFilters((prev) =>
+                            prev.includes(item._id) ? prev.filter((id) => id !== item._id) : [...prev, item._id]
+                          )
+                        }
                       >
-                        {item.stage_Name ||
-                          item.form_name ||
-                          item.dateRange_Name}
-                      </Text>
-
-                      {item.sub_Stage_name?.length > 0 && (
-                        <View>
-                          {item.sub_Stage_name.map((subItem) => (
-                            <View key={subItem._id} style={styles.checkboxRow}>
-                              <View style={{ transform: [{ scale: 0.7 }] }}>
-                              <Checkbox
-                                status={
-                                  (selectedFilters.includes(subItem._id) || localSelectedStages.includes(subItem.stage_Name))
-                                    ? "checked"
-                                    : "unchecked"
-                                }
-                                onPress={() =>
-                                  handleFilterSelectionStage(subItem)
-                                }
-                                // onPress={() =>
-                                //   setSelectedFilters((prev) =>
-                                //     prev.includes(subItem._id)
-                                //       ? prev.filter((id) => id !== subItem._id)
-                                //       : [...prev, subItem._id]
-                                //   )
-                                // }
-                                color="#3F8CFF"
-                                uncheckedColor="#A0A0A0"
-                              />
-                                 </View>
-                                 <TouchableOpacity   onPress={() =>
-                                  handleFilterSelectionStage(subItem)
-                                }>
-                              <Text
-                                style={[
-                                  globalStyles.h8,
-                                  globalStyles.fs3,
-                                  globalStyles.tc,
-                                ]}
-                                allowFontScaling={false}
-                              >
-                                {subItem.stage_Name}
-                              </Text>
+                        <Text style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc]} allowFontScaling={false}>
+                          {item.form_name}
+                        </Text>
                       </TouchableOpacity>
-                            </View>
-                          ))}
-                        </View>
-                      )}
                     </View>
-                  ))}
-
-                {memoizedFilteredData.length === 0 && (
-                  <View>
-                    {selectedCategory === "dateRange" ? (
-                      <Text>Date Picker</Text>
-                    ) : selectedCategory === "form" ? (
-                      allFormData.length > 0 ? (
-                        <View>
-                          {allFormData.map((item) => (
-                            <View key={item._id} style={styles.checkboxRow}>
-                              <View style={{ transform: [{ scale: 0.7 }]}}>
-                              <Checkbox
-                                status={
-                                  selectedFilters.includes(item._id)
-                                    ? "checked"
-                                    : "unchecked"
-                                }
-                                onPress={() =>
-                                  setSelectedFilters((prev) =>
-                                    prev.includes(item._id)
-                                      ? prev.filter((id) => id !== item._id)
-                                      : [...prev, item._id]
-                                  )
-                                }
-                                color="#3F8CFF"
-                                uncheckedColor="#A0A0A0"
-                              />
-                              </View>
-                              <TouchableOpacity     onPress={() =>
-                                  setSelectedFilters((prev) =>
-                                    prev.includes(item._id)
-                                      ? prev.filter((id) => id !== item._id)
-                                      : [...prev, item._id]
-                                  )
-                                }>
-
-                              <Text
-                                style={[
-                                  globalStyles.h8,
-                                  globalStyles.fs3,
-                                  globalStyles.tc,
-                                ]}
-                                allowFontScaling={false}
-                              >
-                                {item.form_name}
-                              </Text>
-                              </TouchableOpacity>
-                            </View>
-                          ))}
-                        </View>
-                      ) : (
-                        <Text>No Forms Available</Text>
-                      )
-                    ) : (
-                      <Text>No data available</Text>
-                    )}
-                  </View>
-                )}
-              </ScrollView>
+                  ))
+                ) : (
+                  <Text>No Forms Available</Text>
+                )
+              ) : (
+                <Text>No data available</Text>
+              )}
             </View>
-            <View style={styles.footer}>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <TouchableOpacity onPress={onClose}>
-                  <Text
-                    style={[globalStyles.h7, globalStyles.fs3, globalStyles.tc]}
-                    allowFontScaling={false}
-                  >
-                    Close
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <TouchableOpacity onPress={handleFilterData}>
-                  <Text
-                    style={[
-                      globalStyles.h7,
-                      globalStyles.fs3,
-                      globalStyles.tc5,
-                    ]}
-                    allowFontScaling={false}
-                  >
-                    Apply
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Animated.View>
-        </BlurView>
-      )}
+          )}
+        </ScrollView>
+      </View>
+
+      <View style={styles.footer}>
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <TouchableOpacity onPress={onClose}>
+            <Text style={[globalStyles.h7, globalStyles.fs3, globalStyles.tc]} allowFontScaling={false}>
+              Close
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <TouchableOpacity onPress={handleFilterData}>
+            <Text style={[globalStyles.h7, globalStyles.fs3, globalStyles.tc5]} allowFontScaling={false}>
+              Apply
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Animated.View>
+  </BlurView>
+)}
     </>
   );
 };

@@ -15,6 +15,7 @@ export interface AuthState {
   leadData:any,
   myLeadData:any
   allTeams:any
+  selectedStagesAll:any
 }
 
 const initialState: AuthState = {
@@ -30,7 +31,8 @@ const initialState: AuthState = {
   currLead:1,
   leadData:1,
   myLeadData:1,
-  allTeams:1
+  allTeams:1,
+  selectedStagesAll:""
 };
 
 export const authSlice = createSlice({
@@ -85,12 +87,15 @@ export const authSlice = createSlice({
 
     setAllTeams:(state, action: PayloadAction<any>) =>{
       state.allTeams = action.payload;
+    },
+    setSelectedStagesAll: (state, action: PayloadAction<any>) => {
+      state.selectedStagesAll = action.payload; 
     }
     
   },
 });
 
-export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad, setMyLeadData,setAllTeams } = authSlice.actions;
+export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad, setMyLeadData,setAllTeams,setSelectedStagesAll } = authSlice.actions;
 
 export const selectAuthenticated = (state: RootState) =>state.auth.authenticated;
 export const selectAccessToken = (state: RootState) => state.auth.accessToken;
@@ -102,5 +107,6 @@ export const hierarchyLevel =(state :RootState) =>state.auth.hierarchyLevel
 export const selectUserId = (state: RootState) => state.auth.userId;
 export const selectPrivileges = (state: RootState) => state.auth.privileges;
 export const selectCurrLead = (state: RootState) => state.auth.currLead;
+export const setStagesAll = (state: RootState) =>state.auth.selectedStagesAll
 
 export default authSlice.reducer;
