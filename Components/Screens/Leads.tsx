@@ -18,15 +18,19 @@ import {
 } from "react-native";
 import LeadStatus from "./LeadStatus";
 import { useSelector, useDispatch } from "react-redux";
-import { setLeadDatad, setMyLeadData } from "../../Redux/authSlice";
+import {
+  setLeadDatad,
+  setMyLeadData,
+  setTeamsLead,
+} from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
-import { getAllUsersMyLead } from "./LeadsService";
+import { getAllUsersMyLead, getLeadStageClosure, getLeadStageOpportunity, getLeadStageProspect } from "./LeadsService";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import LeadCard from "../../NewDesine/GlobalComponets/LeadCard";
 import Communications from "react-native-communications";
-import { getAllUsers } from "./DashboardService";
+import { getAllTeamLeads, getAllUsers } from "./DashboardService";
 import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
 import CustomSearchBar from "../../NewDesine/GlobalComponets/CustomSearchBar";
 import CustomFlipBar from "../../NewDesine/GlobalComponets/CustomFlipBar";
@@ -50,14 +54,18 @@ function Leads() {
     page: 0,
   });
   const [searchQuery, setSearchQuery] = useState<string>("");
-    const [isVisible, setIsVisible] = useState(false);
-    const [selectedStages, setSelectedStages] = useState([]);
-
+  const [isVisible, setIsVisible] = useState(false);
+  const [selectedStages, setSelectedStages] = useState([]);
+  const [teamLeadData, setTeamLeadData] = useState<any>([]);
+  const [myLeadProspect,setLeadProspect] = useState<any>([])
+const [myLeadStageOpportunity,setLeadStageOpportunity] = useState<any>([])
+const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
+console.log(myLeadStageClosure,'myLeadStageClosuremyLeadStageClosure');
 
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    getAllLeadsData(false, 1);
+    getAllLeadsData(false, 0);
   }, []);
   useEffect(() => {
     if (!isVisible) {
@@ -85,17 +93,18 @@ function Leads() {
 
   const handleApplyFilters = (filters: any) => {
     setFilters(filters);
-    setIsVisible(false); 
-    const selectedStages = filters.stage ? filters.stage.split(",").map(stage => stage.trim()) : [];
-    setSelectedStages(selectedStages); 
+    setIsVisible(false);
+    const selectedStages = filters.stage
+      ? filters.stage.split(",").map((stage) => stage.trim())
+      : [];
+    setSelectedStages(selectedStages);
     const fetchFilteredLeads = async () => {
       try {
-
         const payload = {
           userId: store.getState().auth.userId,
-          pageNo:0,
+          pageNo: 0,
           pageSize: paginationModel.pageSize,
-          ...filters
+          ...filters,
         };
         const res = await getAllUsersMyLead(payload);
         setFilteredLeads(res.data);
@@ -115,18 +124,32 @@ function Leads() {
       const payload = {
         userId: store.getState().auth.userId,
         pageNo,
+        start_date:"",
+        end_date: "",
         pageSize: paginationModel.pageSize,
-        ...filters
+        ...filters,
       };
 
-      const [response1, response2] = await Promise.all([
+      const [response1, response2, response3,response4,response5,response6] = await Promise.all([
         getAllUsers(payload),
         getAllUsersMyLead(payload),
-      ]);
+        getAllTeamLeads(payload),
+        getLeadStageProspect(payload),
+        getLeadStageOpportunity(payload),
+        getLeadStageClosure(payload)
 
+      ]);
+      setTeamLeadData(response3?.data || []);
+      setLeadProspect(response4?.data || [])
+      setLeadStageOpportunity(response5.data || [])
+      setLeadStageClosure(response6.data || [])
+    
       setLeadData((prev) => [...prev, ...response1.data]);
-      setDataMyLead((prev) => [...prev, ...response2.data]);
-      // setDataLoaded(true);
+      // setDataMyLead((prev) => [...prev, ...response2.data]);
+      setDataMyLead(response2?.data || []);
+      
+
+      setDataLoaded(false);
     } catch (error) {
       console.error("Error fetching leads data:", error);
     } finally {
@@ -149,13 +172,16 @@ function Leads() {
         leadsToFilter = dataMyLead;
         break;
       case 4:
-        leadsToFilter = defaultNoData;
+        leadsToFilter = myLeadProspect;
         break;
       case 5:
-        leadsToFilter = defaultNoData;
+        leadsToFilter = myLeadStageOpportunity;
         break;
       case 6:
-        leadsToFilter = [];
+        leadsToFilter = myLeadStageClosure;
+        break;
+      case 7:
+        leadsToFilter = teamLeadData;
         break;
       default:
         leadsToFilter = [{ id: 1, name: "NO DATA FOUND" }];
@@ -164,16 +190,14 @@ function Leads() {
     if (filters.stage) {
       const stageArray = filters.stage.split(",").map((stage) => stage.trim());
       leadsToFilter = leadsToFilter.filter((lead) => {
-        const isMatch = stageArray.includes(lead.stage); 
+        const isMatch = stageArray.includes(lead.stage);
         if (!isMatch && lead.stage) {
-          noStageMatch = true; 
+          noStageMatch = true;
         }
-        return isMatch; 
+        return isMatch;
       });
     }
-  
 
-  
     if (searchQuery) {
       const firstThreeChars = searchQuery.substring(0, 3).toLowerCase();
       return leadsToFilter.filter(
@@ -183,7 +207,7 @@ function Leads() {
       );
     }
     return leadsToFilter;
-  }, [selectedCard, leadData, dataMyLead, searchQuery,filters.stage]);
+  }, [selectedCard, leadData, dataMyLead, searchQuery, filters.stage]);
 
   const handleDialPress = useCallback(async (phoneNumber) => {
     const url = `tel:${phoneNumber}`;
@@ -200,23 +224,6 @@ function Leads() {
     }
   }, []);
 
-  // =========================================
-  // const handleDialPress = (phoneNumber) => {
-  //   const args = {
-  //     number: phoneNumber,
-  //     prompt: true,
-  //   };
-
-  //   call(args).catch((err) => {
-  //     console.error("Error opening dialer:", err);
-  //   });
-  // };
-  // ==================================================
-  //   const handleDialPress = useCallback((phoneNumber) => {
-  //     alert(phoneNumber)
-  //     Communications.phonecall(phoneNumber, false);
-  // }, []);
-
   const handleCardDataLeads = (item: any) => {
     switch (selectedCard) {
       case 1:
@@ -227,6 +234,18 @@ function Leads() {
         break;
       case 3:
         dispatch(setMyLeadData(item));
+        break;
+      case 4:
+        "";
+        break;
+      case 5:
+        "";
+        break;
+      case 6:
+        "";
+        break;
+      case 7:
+        dispatch(setTeamsLead(item));
         break;
       default:
         break;
@@ -245,10 +264,7 @@ function Leads() {
     }
   };
 
- 
-
   return (
-    
     <View style={styles.mainCont}>
       <ScrollView
         contentContainerStyle={styles.scrollViewContainer}
@@ -272,28 +288,31 @@ function Leads() {
             setSelectedCard={setSelectedCard}
             onSearchChange={(query) => setSearchQuery(query)}
           /> */}
-          <CustomFlipBar  selectedCard={selectedCard}
-            setSelectedCard={setSelectedCard}  leadData = {leadData}  dataMyLead ={dataMyLead}/>
+          <CustomFlipBar
+            selectedCard={selectedCard}
+            setSelectedCard={setSelectedCard}
+            leadData={leadData}
+            dataMyLead={dataMyLead}
+            teamLeadData={teamLeadData}
+            myLeadProspect={myLeadProspect}
+            myLeadStageOpportunity = {myLeadStageOpportunity}
+            myLeadStageClosure = {myLeadStageClosure}
+          />
           <CustomSearchBar
             value={searchQuery}
             onChangeText={(query) => setSearchQuery(query)}
-            onFilterPress={() =>  setIsVisible(true)}
+            onFilterPress={() => setIsVisible(true)}
           />
           {loading && !loadingMore ? (
             <LeadsSkeleton />
-          ) : filteredLeads.length === 0 ? (  
+          ) : filteredLeads.length === 0 ? (
             <View style={styles.noDataFound}>
-              <Text>No Data Found</Text>  
+              <Text>No Data Found</Text>
             </View>
-          ):
-          
-          
-          (
+          ) : (
             filteredLeads.map((item, index) => {
               if (
-                selectedCard === 2 ||
-                selectedCard === 4 ||
-                selectedCard === 5
+                selectedCard === 2
               ) {
                 return (
                   <View style={styles.noDataFound} key={`${item.id}-${index}`}>
@@ -317,6 +336,7 @@ function Leads() {
                       status={item?.stage}
                       form_name={item?.form_name}
                       dateTimeShow={item?.createdAt}
+                      priority={item?.priority}
                       onCallPress={() => handleDialPress(item.leadPhone)}
                       onMorePress={() => console.log("More Options Pressed")}
                       onTextPress={() => handleCardDataLeads(item)}
@@ -347,7 +367,7 @@ function Leads() {
           <AllFilterBottomSheetModel
             visible={isVisible}
             onClose={() => setIsVisible(false)}
-            onApplyFilters={handleApplyFilters} 
+            onApplyFilters={handleApplyFilters}
             selectedStagesLocal={selectedStages}
           />
         </View>

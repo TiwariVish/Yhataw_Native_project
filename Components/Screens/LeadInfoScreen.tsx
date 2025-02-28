@@ -47,6 +47,9 @@ interface Member {
 const LeadInfoScreen = () => {
   const { leadData } = useSelector((state: RootState) => state.auth);
   const { myLeadData } = useSelector((state: RootState) => state.auth);
+  const {teamLeadData} = useSelector((state: RootState) => state.auth);
+  console.log(teamLeadData,'teamLeadDatateamLeadData');
+  
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
   const [isVisible, setIsVisible] = useState(false);
   const [rminderisVisible, setRminderIsVisible] = useState(false);

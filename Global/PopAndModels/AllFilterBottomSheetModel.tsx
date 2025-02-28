@@ -112,9 +112,16 @@ const FilterBottomSheet: React.FC<{
   }
 
   const handleSelectAll = () => {
-    const allIds = getAllIds;
+    let allIds = [];
+    if (selectedCategory === "form") {
+      allIds = allFormData.map((item) => item._id); 
+    } else {
+      allIds = memoizedFilteredData.flatMap((item) =>
+        item.sub_Stage_name ? item.sub_Stage_name.map((subItem) => subItem._id) : []
+      ); 
+    }
+  
     const isAllSelected = selectedFilters.length === allIds.length;
-
     setSelectedFilters(isAllSelected ? [] : allIds);
     setSelectedStages(isAllSelected ? [] : allIds);
   };
@@ -433,12 +440,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
+    height:38
   },
 
   input: {
     flex: 1,
     fontSize: 16,
     color: "#000",
+    marginLeft:5
   },
 
   icon: {

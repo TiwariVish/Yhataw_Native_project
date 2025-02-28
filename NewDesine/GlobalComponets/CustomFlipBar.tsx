@@ -8,10 +8,14 @@ interface LeadStatusProps {
   selectedCard: number;
   setSelectedCard: (id: number) => void;
   leadData: any[];
-  dataMyLead:any[]
+  dataMyLead:any[];
+  teamLeadData:any[];
+  myLeadProspect:any[]
+  myLeadStageOpportunity :any[]
+  myLeadStageClosure :any[]
 }
 
-const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData,dataMyLead }) => {
+const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure }) => {
   const listRef = useRef<FlatList>(null);
   const itemWidths = useRef<{ [key: number]: number }>({});
   const { privileges } = useSelector((state: RootState) => state.auth);
@@ -21,9 +25,10 @@ const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCar
       { id: 1, title: "All Leads", count: leadData?.length || 0 },
       { id: 2, title: "Contact", count: 499 },
       { id: 3, title: "My Leads", count: dataMyLead?.length || 0 },
-      { id: 4, title: "Propspect", count: 568 },
-      { id: 5, title: "Opportunity", count: 499 },
-      { id: 6, title: "Closure", count: 251 },
+      {id:7,title:"Team Leads",count: teamLeadData?.length || 0},
+      { id: 4, title: "Prospect", count: myLeadProspect?.length || 0 },
+      { id: 5, title: "Opportunity", count: myLeadStageOpportunity?.length || 0 },
+      { id: 6, title: "Closure", count: myLeadStageClosure?.length || 0 },
     ],
     [leadData,dataMyLead]
   );

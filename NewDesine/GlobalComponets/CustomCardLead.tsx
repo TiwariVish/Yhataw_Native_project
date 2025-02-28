@@ -7,6 +7,7 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 interface CustomCardLeadProps {
   name: string;
   status: string;
+  priority 
   form_name :string;
   dateTimeShow:string
   onCallPress: () => void;
@@ -18,6 +19,7 @@ const CustomCardLead: React.FC<CustomCardLeadProps> = ({
   name,
   status,
   form_name,
+  priority,
   dateTimeShow,
   onCallPress,
   onMorePress,
@@ -61,9 +63,12 @@ const formattedDateTime = dateTimeShow ? formatDateTime(dateTimeShow) : "";
           {firstLetter}
         </Text>
       </View>
-      {/* <View style={styles.buzzCircle}>
-        <Text>R</Text>
-      </View> */}
+      {priority === 1 && (
+  <View style={styles.buzzCircle}>
+    <Text     style={[globalStyles.h8, globalStyles.fs3,globalStyles.tc4]}
+          allowFontScaling={false}>P</Text>
+  </View>
+)}
       <TouchableOpacity onPress={onTextPress} style={styles.details}>
         <View>
           <Text

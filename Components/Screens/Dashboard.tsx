@@ -9,12 +9,13 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   RefreshControl,
-  Image
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { LoginScreenNavigationProp } from "../type";
 import {
+  getAllTeamLeads,
   getAllUsers,
   getDataAllLead,
   getDataAttendance,
@@ -242,10 +243,15 @@ const Dashboard: React.FC<CustomProps> = () => {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([]);
+  console.log(dashboardDataMyLead,'dashboardDataMyLeaddashboardDataMyLeaddashboardDataMyLead');
+  
   const [dashboardDataProject, setDashboardDataProject] = useState<any>([]);
   const [dashboardDataAttendance, setDashboardDataAttendance] = useState<any>(
     []
   );
+  const [teamLeadData, setTeamLeadData] = useState<any>([]);
+ 
+  
   const [dashboardDataAllLead, setDashboardDataAllLead] = useState<any>([]);
   const [dashboardView, setDashboardView] = useState<any>([
     "HR",
@@ -258,7 +264,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teamWiseMember, setTeamWiseMember] = useState([]);
   const roleFromRedux = useSelector(selectRole);
-  const [userRole , setUserRole] = useState<any>()
+  const [userRole, setUserRole] = useState<any>();
   const [refreshing, setRefreshing] = useState(false);
   const userId = store.getState().auth;
   const { authenticated, role, privileges } = useSelector(
@@ -293,42 +299,34 @@ const Dashboard: React.FC<CustomProps> = () => {
     fetchData();
   }, [userId]);
 
-
-
-
-
-  useEffect(()=>{
-    getDataAllLeadData()
-    getMemberLeadStage()
-  },[])
-  const getDataAllLeadData = async() =>{
+  useEffect(() => {
+    getDataAllLeadData();
+    getMemberLeadStage();
+  }, []);
+  const getDataAllLeadData = async () => {
     try {
       const payload = {
-        startDate:  "",
+        startDate: "",
         endDate: "",
-        pageNumber:"",
-        pageSize:"",
+        pageNumber: "",
+        pageSize: "",
         teamId: "",
         search: "",
       };
 
-      const resLead = await getAllUsers (payload)
-      setDashboardAllLead(resLead.metadata[0])
-    } catch (error) {
-      
-    }
-  }
+      const resLead = await getAllUsers(payload);
+      setDashboardAllLead(resLead.metadata[0]);
+    } catch (error) {}
+  };
 
-    const getMemberLeadStage = async () => {
-      try {
-        const res = await getTeamList();
-        setMemberDropdownItems(res.data);
-        
-      } catch (error) {
-        console.error(error);
-      }
-    };
-  
+  const getMemberLeadStage = async () => {
+    try {
+      const res = await getTeamList();
+      setMemberDropdownItems(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const getPermissionForView = () => {
     const permissionObj: Record<string, boolean> = {};
@@ -380,19 +378,21 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   const fetchMyDashboardData = async () => {
     try {
-        const payload = {
-              userId: store.getState().auth.userId,
-              pageNo:"",
-              pageSize: paginationModel.pageSize,
-            };
-      const [myLeads, projects] = await Promise.all([
+      const payload = {
+        userId: store.getState().auth.userId,
+        pageNo: "",
+        pageSize: paginationModel.pageSize,
+      };
+      const [myLeads, projects, teamLead] = await Promise.all([
         // getDataMylead(),
-          getAllUsersMyLead(payload),
+        getAllUsersMyLead(payload),
         getDataProject(),
+        getAllTeamLeads(payload)
       ]);
       // setDashboardDataMyLead(myLeads?.data[0] || []);
-        setDashboardDataMyLead(myLeads?.metadata[0] || []);
+      setDashboardDataMyLead(myLeads?.data || []);
       setDashboardDataProject(projects?.data[0] || []);
+      setTeamLeadData(teamLead?.data || [])
     } catch (error) {
       console.error("Error fetching my dashboard data", error);
     }
@@ -409,11 +409,11 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   const fetchUserData = async () => {
     try {
-      const paylode = store.getState().auth?.userId
+      const paylode = store.getState().auth?.userId;
       const response = await getPerosnalDetails(paylode);
       setUserData(response.data);
-      const resRole = await getPerosnalOffice(paylode)
-      setUserRole(resRole.data)
+      const resRole = await getPerosnalOffice(paylode);
+      setUserRole(resRole.data);
     } catch (error: any) {
       console.error("Error fetching user details:", error);
     }
@@ -428,7 +428,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   };
 
   const navigateToSection = (id: number) => {
-    if (id > 6) return;
+    if (id > 8) return;
     dispatch(setLeadId(id));
     navigation.navigate("Leads");
     setModalVisible(false);
@@ -438,11 +438,10 @@ const Dashboard: React.FC<CustomProps> = () => {
     navigation.navigate("MyProfile");
   };
 
-  const navigateToTeams = (selectedTeam: any) =>{
+  const navigateToTeams = (selectedTeam: any) => {
     navigation.navigate("AllTeamList", { allTeams: selectedTeam });
     // navigation.navigate("AllTeamList");
-    
-  }
+  };
 
   const [isFooterVisible, setFooterVisible] = useState(true);
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -656,7 +655,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                       allowFontScaling={false}
                     >
                       {/* {dashboardDataMyLead.lead_my_total_count} */}
-                      {dashboardDataMyLead?.total}
+                      {dashboardDataMyLead?.length}
                     </Text>
                   </View>
                   {/* <View style={styles.iconFord}>
@@ -667,31 +666,28 @@ const Dashboard: React.FC<CustomProps> = () => {
                       onPress={() => navigateToSection(3)}
                     />
                   </View> */}
-
-                  {dashboardDataMyLead?.total > 0 && (
-                    <TouchableOpacity
-                      style={styles.viewAllContainer}
-                      onPress={() => navigateToSection(3)}
+                  <TouchableOpacity
+                    style={styles.viewAllContainer}
+                    onPress={() => navigateToSection(3)}
+                  >
+                    <Text
+                      style={[
+                        styles.viewAll,
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        globalStyles.tc3,
+                      ]}
+                      allowFontScaling={false}
                     >
-                      <Text
-                        style={[
-                          styles.viewAll,
-                          globalStyles.h7,
-                          globalStyles.fontfm,
-                          globalStyles.tc3,
-                        ]}
-                        allowFontScaling={false}
-                      >
-                        View all
-                      </Text>
-                      <Feather
-                        name="chevron-right"
-                        size={24}
-                        color="#007bff"
-                        style={styles.icon}
-                      />
-                    </TouchableOpacity>
-                  )}
+                      View all
+                    </Text>
+                    <Feather
+                      name="chevron-right"
+                      size={24}
+                      color="#007bff"
+                      style={styles.icon}
+                    />
+                  </TouchableOpacity>
                 </View>
                 <ScrollView
                   horizontal
@@ -715,6 +711,86 @@ const Dashboard: React.FC<CustomProps> = () => {
                           }`}
                         /> */}
 
+                        <CustomCardNew
+                          id={item.id}
+                          title={item.content}
+                          count={`${dashboardDataMyLead[item.myleadKey] || 0}`}
+                          iconName="calendar"
+                          iconBackgroundColor={item.calendarBackgroundColor}
+                          onCardPress={() => navigateToSection(Number(item.id))}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            ) : (
+              ""
+            )}
+
+            {permission["MY-Dashboard"] ? (
+              <>
+                <View style={styles.row}>
+                  <View style={styles.textContainerAll}>
+                    <Text
+                      style={[
+                        styles.leadData,
+                        globalStyles.fs1,
+                        globalStyles.h5,
+                        globalStyles.tc,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      Team Leads
+                    </Text>
+                    <Text
+                      style={[
+                        globalStyles.h8,
+                        globalStyles.fs3,
+                        globalStyles.tc2,
+                        styles.role,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      {teamLeadData?.length}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.viewAllContainer}
+                    onPress={() => navigateToSection(7)}
+                  >
+                    <Text
+                      style={[
+                        styles.viewAll,
+                        globalStyles.h7,
+                        globalStyles.fontfm,
+                        globalStyles.tc3,
+                      ]}
+                      allowFontScaling={false}
+                    >
+                      View all
+                    </Text>
+                    <Feather
+                      name="chevron-right"
+                      size={24}
+                      color="#007bff"
+                      style={styles.icon}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.horizontalScroll}
+                >
+                  {staticData.leads.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => {
+                        navigateToSection(Number(item.id));
+                      }}
+                    >
+                      <View style={styles.cardContainer}>
                         <CustomCardNew
                           id={item.id}
                           title={item.content}
@@ -788,7 +864,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                   style={styles.horizontalScroll}
                 >
                   {memberdropdownItems.map((item) => (
-                    <TouchableOpacity  key={item._id}>
+                    <TouchableOpacity key={item._id}>
                       <View style={styles.cardContainer}>
                         <CustomCardNew
                           id={item._id}

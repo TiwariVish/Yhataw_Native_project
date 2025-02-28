@@ -79,6 +79,11 @@ class UrlConstants extends StringConstants {
   CHECKPUNCHIN = `${this.url_prod}/checkPunchIn`;
   PUNCHOUT = `${this.url_prod}/punchOut`;
   UNMAPPEDPROJECT = `${this.url_prod}/getProjectUnMap`;
+  TEAMLEADDATA = `${this.url_prod}/getTeamLeadList`;
+  MYLEADSTAGEPROSPECT = `${this.url_prod}/getLeadStageProspect`;
+  MYLEADSTAGEPOPPORTUNITY = `${this.url_prod}/getLeadStageOpportunity`;
+  MYLEADSTAGECLOSURE = `${this.url_prod}/getLeadStageClosure`;
+
 
   // TEAMS
   GETALLUSERLEAVES = `${this.url_prod}/getUserApplyLeaveByIds`;
