@@ -63,7 +63,6 @@ function Leads() {
   const [myLeadProspect,setLeadProspect] = useState<any>([])
 const [myLeadStageOpportunity,setLeadStageOpportunity] = useState<any>([])
 const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
-console.log(myLeadStageClosure,'myLeadStageClosuremyLeadStageClosure');
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -166,28 +165,28 @@ console.log(myLeadStageClosure,'myLeadStageClosuremyLeadStageClosure');
     let noStageMatch = false;
     switch (selectedCard) {
       case 1:
-        leadsToFilter = leadData;
+        leadsToFilter = leadData ?? [];
         break;
       case 2:
         leadsToFilter = defaultNoData;
         break;
       case 3:
-        leadsToFilter = dataMyLead;
+        leadsToFilter = dataMyLead ?? [];
         break;
       case 4:
-        leadsToFilter = myLeadProspect;
+        leadsToFilter = myLeadProspect ?? [];
         break;
       case 5:
-        leadsToFilter = myLeadStageOpportunity;
+        leadsToFilter = myLeadStageOpportunity ?? [];
         break;
       case 6:
-        leadsToFilter = myLeadStageClosure;
+        leadsToFilter = myLeadStageClosure ?? [];
         break;
       case 7:
-        leadsToFilter = teamLeadData;
+        leadsToFilter = teamLeadData ?? [];
         break;
       default:
-        leadsToFilter = [{ id: 1, name: "NO DATA FOUND" }];
+        leadsToFilter = defaultNoData;
         break;
     }
     if (filters.stage) {
@@ -210,7 +209,7 @@ console.log(myLeadStageClosure,'myLeadStageClosuremyLeadStageClosure');
       );
     }
     return leadsToFilter;
-  }, [selectedCard, leadData, dataMyLead, searchQuery, filters.stage]);
+  }, [selectedCard, leadData, dataMyLead, searchQuery, filters.stage ,myLeadStageClosure,myLeadProspect,myLeadStageOpportunity,teamLeadData]);
 
   const handleDialPress = useCallback(async (phoneNumber) => {
     const url = `tel:${phoneNumber}`;
@@ -308,7 +307,7 @@ console.log(myLeadStageClosure,'myLeadStageClosuremyLeadStageClosure');
           />
           {loading && !loadingMore ? (
             <LeadsSkeleton />
-          ) : filteredLeads.length === 0 ? (
+          ) : !filteredLeads ||filteredLeads.length === 0 ? (
             <View style={styles.noDataFound}>
               <Text>No Data Found</Text>
             </View>
@@ -335,11 +334,11 @@ console.log(myLeadStageClosure,'myLeadStageClosuremyLeadStageClosure');
                     /> */}
 
                     <CustomCardLead
-                      name={item?.leadName}
-                      status={item?.stage}
-                      form_name={item?.form_name}
-                      dateTimeShow={item?.createdAt}
-                      priority={item?.priority}
+                      name={item?.leadName ?? ""}
+                      status={item?.stage ?? ""}
+                      form_name={item?.form_name ?? ""}
+                      dateTimeShow={item?.createdAt ?? ""}
+                      priority={item?.priority ?? ""}
                       onCallPress={() => handleDialPress(item.leadPhone)}
                       onMorePress={() => console.log("More Options Pressed")}
                       onTextPress={() => handleCardDataLeads(item)}

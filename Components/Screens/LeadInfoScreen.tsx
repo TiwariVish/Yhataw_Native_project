@@ -58,7 +58,6 @@ const LeadInfoScreen = () => {
     myLeadClosure,
   } = useSelector((state: RootState) => state.auth);
 
-
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
   const [isVisible, setIsVisible] = useState(false);
   const [rminderisVisible, setRminderIsVisible] = useState(false);
@@ -163,7 +162,7 @@ const LeadInfoScreen = () => {
     const selectedMembers = Array.isArray(member)
       ? member.map((m) => ({ id: m._id, name: m.name }))
       : [];
-  
+
     setAssignedToMembers((prevMembers) => {
       const selectedIds = selectedMembers.map((m) => m.id);
       const updatedMembers = prevMembers.filter((prevMember) =>
@@ -176,9 +175,9 @@ const LeadInfoScreen = () => {
             !updatedMembers.some((member) => member.id === newMember.id)
         ),
       ];
-  
-      console.log(uniqueMembers, 'Unique Members'); 
-      return uniqueMembers; 
+
+      console.log(uniqueMembers, "Unique Members");
+      return uniqueMembers;
     });
   };
 
@@ -205,21 +204,20 @@ const LeadInfoScreen = () => {
       let membersChanged = false;
       const waitCallApi = [];
       const selectedLeadData =
-      selectedCardDataShow === 1
-        ? leadData
-        : selectedCardDataShow === 3
-        ? myLeadData
-        : selectedCardDataShow === 4
-        ? myLeadOpportunity
-        : selectedCardDataShow === 5
-        ? myLeadOpportunity
-        : selectedCardDataShow === 6
-        ? myLeadClosure
-        : selectedCardDataShow === 7
-        ? teamLeadData
-        : null; 
-           
-        
+        selectedCardDataShow === 1
+          ? leadData
+          : selectedCardDataShow === 3
+          ? myLeadData
+          : selectedCardDataShow === 4
+          ? myLeadOpportunity
+          : selectedCardDataShow === 5
+          ? myLeadOpportunity
+          : selectedCardDataShow === 6
+          ? myLeadClosure
+          : selectedCardDataShow === 7
+          ? teamLeadData
+          : null;
+
       if (
         selectedLeadData?._id &&
         selectedStatus &&
@@ -237,10 +235,11 @@ const LeadInfoScreen = () => {
         // const newAssignedIds = userData.map((mem) =>mem.userId)
 
         const newAssignedIds = userData
-        .filter((mem) => assignedToMembers.some((assigned) => assigned.id === mem._id))
-        .map((mem) => mem.userId); 
+          .filter((mem) =>
+            assignedToMembers.some((assigned) => assigned.id === mem._id)
+          )
+          .map((mem) => mem.userId);
 
-        
         const membersAreSame =
           currentAssignedIds.length === newAssignedIds.length &&
           currentAssignedIds.every((id) => newAssignedIds.includes(id));
@@ -272,9 +271,9 @@ const LeadInfoScreen = () => {
         navigation.navigate("Leads");
       }
     } catch (error) {
-        console.error("Failed to process change or assign member:", error);
+      console.error("Failed to process change or assign member:", error);
     }
-};
+  };
 
   const handleDialPress = useCallback((phoneNumber) => {
     const url = `tel:${phoneNumber}`;
@@ -673,44 +672,45 @@ const LeadInfoScreen = () => {
               </View>
             </>
           ) : (
-            // <View style={styles.header}>
-            //   <View style={styles.headerLeft}>
-            //     <View style={styles.statusBadge}>
-            //       <Text
-            //         style={[globalStyles.h8, globalStyles.tc4]}
-            //         allowFontScaling={false}
-            //       >
-            //         {myLeadData.stage.charAt(0).toUpperCase() +
-            //           myLeadData.stage.slice(1)}
-            //       </Text>
-            //     </View>
-            //     <Text
-            //       style={[globalStyles.h2, globalStyles.fs1]}
-            //       allowFontScaling={false}
-            //     >
-            //       {myLeadData.leadName}
-            //     </Text>
-            //     <Text
-            //       style={[globalStyles.h7, globalStyles.fontfm]}
-            //       allowFontScaling={false}
-            //     >
-            //       {myLeadData.project_name}
-            //     </Text>
-            //     <Text
-            //       style={[globalStyles.h7, globalStyles.fontfm]}
-            //       allowFontScaling={false}
-            //     >
-            //       {myLeadData.projecttype_name}
-            //     </Text>
-            //   </View>
-            //   <TouchableOpacity
-            //     onPress={() => handleDialPress(myLeadData.leadPhone)}
-            //   >
-            //     <View style={styles.callIconCircle}>
-            //       <Feather name="phone-call" size={24} color="#00C853" />
-            //     </View>
-            //   </TouchableOpacity>
-            // </View>
+            //           <View style={styles.header}>
+            //             <View style={styles.headerLeft}>
+            //               <View style={styles.statusBadge}>
+            //                 <Text
+            //                   style={[globalStyles.h8, globalStyles.tc4]}
+            //                   allowFontScaling={false}
+            //                 >
+            //                 {myLeadData?.stage
+            // ? myLeadData.stage.charAt(0).toUpperCase() + myLeadData.stage.slice(1)
+            // : ""}
+            //                 </Text>
+            //               </View>
+            //               <Text
+            //                 style={[globalStyles.h2, globalStyles.fs1]}
+            //                 allowFontScaling={false}
+            //               >
+            //                 {myLeadData.leadName}
+            //               </Text>
+            //               <Text
+            //                 style={[globalStyles.h7, globalStyles.fontfm]}
+            //                 allowFontScaling={false}
+            //               >
+            //                 {myLeadData.project_name}
+            //               </Text>
+            //               <Text
+            //                 style={[globalStyles.h7, globalStyles.fontfm]}
+            //                 allowFontScaling={false}
+            //               >
+            //                 {myLeadData.projecttype_name}
+            //               </Text>
+            //             </View>
+            //             <TouchableOpacity
+            //               onPress={() => handleDialPress(myLeadData.leadPhone)}
+            //             >
+            //               <View style={styles.callIconCircle}>
+            //                 <Feather name="phone-call" size={24} color="#00C853" />
+            //               </View>
+            //             </TouchableOpacity>
+            //           </View>)}
 
             (() => {
               const selectedLeadData =
@@ -724,7 +724,7 @@ const LeadInfoScreen = () => {
                   ? myLeadClosure
                   : selectedCardDataShow === 7
                   ? teamLeadData
-                  : leadData; // Default case
+                  : leadData;
 
               return (
                 <View style={styles.header}>
@@ -734,27 +734,29 @@ const LeadInfoScreen = () => {
                         style={[globalStyles.h8, globalStyles.tc4]}
                         allowFontScaling={false}
                       >
-                        {selectedLeadData.stage.charAt(0).toUpperCase() +
-                          selectedLeadData.stage.slice(1)}
+                        {myLeadData?.stage
+                          ? myLeadData.stage.charAt(0).toUpperCase() +
+                            myLeadData.stage.slice(1)
+                          : ""}
                       </Text>
                     </View>
                     <Text
                       style={[globalStyles.h2, globalStyles.fs1]}
                       allowFontScaling={false}
                     >
-                      {selectedLeadData.leadName}
+                      {selectedLeadData?.leadName}
                     </Text>
                     <Text
                       style={[globalStyles.h7, globalStyles.fontfm]}
                       allowFontScaling={false}
                     >
-                      {selectedLeadData.project_name}
+                      {selectedLeadData?.project_name}
                     </Text>
                     <Text
                       style={[globalStyles.h7, globalStyles.fontfm]}
                       allowFontScaling={false}
                     >
-                      {selectedLeadData.projecttype_name}
+                      {selectedLeadData?.projecttype_name}
                     </Text>
                   </View>
                   <TouchableOpacity
