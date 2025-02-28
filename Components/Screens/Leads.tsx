@@ -20,7 +20,10 @@ import LeadStatus from "./LeadStatus";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setLeadDatad,
+  setMyLeadClosure,
   setMyLeadData,
+  setMyLeadOpportunity,
+  setMyLeadProspect,
   setTeamsLead,
 } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
@@ -236,13 +239,13 @@ console.log(myLeadStageClosure,'myLeadStageClosuremyLeadStageClosure');
         dispatch(setMyLeadData(item));
         break;
       case 4:
-        "";
+        dispatch(setMyLeadProspect(item));
         break;
       case 5:
-        "";
+        dispatch(setMyLeadOpportunity(item));
         break;
       case 6:
-        "";
+        dispatch(setMyLeadClosure(item));
         break;
       case 7:
         dispatch(setTeamsLead(item));
@@ -250,7 +253,7 @@ console.log(myLeadStageClosure,'myLeadStageClosuremyLeadStageClosure');
       default:
         break;
     }
-    navigation.navigate("LeadInfoScreen");
+    navigation.navigate("LeadInfoScreen", {selectedCard});
   };
 
   const handleLoadMore = () => {

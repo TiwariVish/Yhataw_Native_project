@@ -15,9 +15,11 @@ import Animated, {
 import { BlurView } from "expo-blur";
 import {
   getAllStage,
+  getOfficeDetails,
   getStage,
 } from "../../Components/Screens/LeadInfoScreenService";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
+import store from "../../utils/store";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -36,7 +38,10 @@ const StatusPop: React.FC<StatusPopProps> = ({
   const opacity = useSharedValue(visible ? 1 : 0);
 
   const [dropdownData, setDropdownData] = useState<any>([]);
+  console.log(dropdownData,'dropdownDatadropdownDatadropdownDatadropdownData');
+  
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [userType, setUserType] = useState<string>("0");
 
   useEffect(() => {
     scale.value = withSpring(visible ? 1 : 0.8, {
@@ -47,7 +52,7 @@ const StatusPop: React.FC<StatusPopProps> = ({
       damping: 20,
       stiffness: 150,
     });
-    getLeadStage();
+    getStageDataNew();
   }, [visible]);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -57,18 +62,62 @@ const StatusPop: React.FC<StatusPopProps> = ({
     };
   });
 
-  const getLeadStage = async () => {
-    try {
-      // const res = await getAllStage();
-      const resData = await getStage();
-      console.log(resData, "resDataresDataresDataresDataresData");
+  // const getLeadStage = async () => {
+  //   try {
+  //     // const res = await getAllStage();
+  //     const resData = await getStage();
+  //     setDropdownData(resData.data);
 
-      setDropdownData(resData.data);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
+  const filterStagesByIsSale = (stages: any[], isSale: number): any[] => {
+    return stages
+      .map((stage) => {
+        const subStages = filterStagesByIsSale(stage.sub_Stage_name || [], isSale);
+
+        if (stage.isSale === isSale || stage.isSale === -1 || subStages.length > 0) {
+          return {
+            ...stage,
+            sub_Stage_name: subStages,
+          };
+        }
+
+        return null;
+      })
+      .filter((stage) => stage !== null);
+  };
+
+
+
+  const getStageDataNew = async () => {
+    try {
+      const resData = await getStage();
+      const userData = store.getState().auth.userId;
+      const response = await getOfficeDetails(userData);
+      console.log(response, 'responseresponse');
+      const teamRoleName = response.data.teamRoleName.toLowerCase();
+      let filteredStageData;
+
+      if (teamRoleName.includes("presales")) {
+        filteredStageData = filterStagesByIsSale(resData.data, 0);
+        setUserType("0")
+      } else if (teamRoleName.includes("sales")) {
+        filteredStageData = filterStagesByIsSale(resData.data, 1);
+        setUserType("1")
+
+      } else {
+        filteredStageData = resData.data;
+      }
+
+      setDropdownData(filteredStageData);
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching data:', error);
     }
   };
-  console.log(dropdownData, "dropdownDatadropdownDatadropdownData");
+
 
   const handleDropdownItemPress = (statusName: string) => {
     onStatusSelect(statusName);
@@ -89,7 +138,7 @@ const StatusPop: React.FC<StatusPopProps> = ({
                     >
                       <Text
                         style={[
-                          globalStyles.h5,
+                          globalStyles.h7,
                           globalStyles.fontfm,
                           styles.dropdownItem,
                         ]}
@@ -107,7 +156,12 @@ const StatusPop: React.FC<StatusPopProps> = ({
                               handleDropdownItemPress(subItem.stage_Name)
                             }
                           >
-                            <Text style={styles.subDropdownItem}>
+                            <Text     style={[
+                          globalStyles.h8,
+                          globalStyles.fontfm,
+                          styles.dropdownItem,
+                        ]}
+                        allowFontScaling={false}>
                               {subItem.stage_Name}
                             </Text>
                           </TouchableOpacity>
@@ -153,16 +207,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   dropdownItem: {
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   subStageContainer: {
     paddingLeft: 20, 
   },
-  subDropdownItem: {
-    paddingVertical: 6,
-    fontSize: 14,
-    color: "black",
-  },
+ 
 });
 
 export default StatusPop;

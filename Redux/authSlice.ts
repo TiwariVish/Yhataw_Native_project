@@ -17,6 +17,9 @@ export interface AuthState {
   allTeams:any
   selectedStagesAll:any
   teamLeadData:any
+  myLeadProspectShow:any
+  myLeadOpportunity :any
+  myLeadClosure :any
 }
 
 const initialState: AuthState = {
@@ -34,7 +37,10 @@ const initialState: AuthState = {
   myLeadData:1,
   allTeams:1,
   teamLeadData:1,
-  selectedStagesAll:""
+  selectedStagesAll:"",
+  myLeadProspectShow : 1,
+  myLeadOpportunity : 1,
+  myLeadClosure : 1
 };
 
 export const authSlice = createSlice({
@@ -89,18 +95,26 @@ export const authSlice = createSlice({
     setTeamsLead :(state, action: PayloadAction<any>) =>{
       state.teamLeadData = action.payload;
     },
-
+    setMyLeadProspect :(state, action: PayloadAction<any>) =>{
+      state.myLeadProspectShow = action.payload;
+    },
     setAllTeams:(state, action: PayloadAction<any>) =>{
       state.allTeams = action.payload;
     },
     setSelectedStagesAll: (state, action: PayloadAction<any>) => {
       state.selectedStagesAll = action.payload; 
-    }
+    },
+    setMyLeadOpportunity :(state, action: PayloadAction<any>) =>{
+      state.myLeadOpportunity = action.payload;
+    },
+    setMyLeadClosure :(state, action: PayloadAction<any>) =>{
+      state.myLeadClosure = action.payload;
+    },
     
   },
 });
 
-export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad, setMyLeadData,setAllTeams,setSelectedStagesAll,setTeamsLead } = authSlice.actions;
+export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad, setMyLeadData,setAllTeams,setSelectedStagesAll,setTeamsLead,setMyLeadProspect,setMyLeadOpportunity,setMyLeadClosure } = authSlice.actions;
 
 export const selectAuthenticated = (state: RootState) =>state.auth.authenticated;
 export const selectAccessToken = (state: RootState) => state.auth.accessToken;

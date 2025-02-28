@@ -5,7 +5,7 @@ export type RootStackParamList = {
   Dashboard: undefined;
   Leads: undefined;
   MyProfile :undefined
-  LeadInfoScreen:undefined
+  LeadInfoScreen:{selectedCard:any}
   CustomerFeedback:undefined
   ErrorPage:undefined
   ForgotPassword :undefined
@@ -19,7 +19,7 @@ export type RootStackParamList1 = {
   Dashboard: undefined; 
   Leads: { param1: string; param2: string }; 
   MyProfile: undefined; 
-  LeadInfoScreen:undefined
+  LeadInfoScreen:{selectedCard:any}
   CustomerFeedback:undefined
   ErrorPage:undefined
   ForgotPassword :undefined

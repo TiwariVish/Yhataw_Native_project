@@ -25,8 +25,8 @@ import MemberPopOver from "../../Global/PopAndModels/MemberPopOver";
 import AssignedMemberPop from "../../Global/PopAndModels/AssignedMemberPop";
 import { getReminder } from "./DashboardService";
 import RemarkPop from "../../Global/PopAndModels/RemarkPop";
-import { useNavigation } from "@react-navigation/native";
-import { LoginScreenNavigationProp } from "../type";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { LoginScreenNavigationProp, RootStackParamList } from "../type";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import FlipButtonBar from "../../Global/Components/FlipButtonBar";
 import { Feather, FontAwesome } from "@expo/vector-icons";
@@ -45,11 +45,19 @@ interface Member {
 }
 
 const LeadInfoScreen = () => {
-  const { leadData } = useSelector((state: RootState) => state.auth);
-  const { myLeadData } = useSelector((state: RootState) => state.auth);
-  const {teamLeadData} = useSelector((state: RootState) => state.auth);
-  console.log(teamLeadData,'teamLeadDatateamLeadData');
-  
+  type RouteProps = RouteProp<RootStackParamList, "LeadInfoScreen">;
+  const route = useRoute<RouteProps>();
+  const selectedCardDataShow = route.params?.selectedCard || null;
+  const {
+    leadData,
+    myLeadData,
+    teamLeadData,
+    myLeadProspectShow,
+    myLeadOpportunity,
+    myLeadClosure,
+  } = useSelector((state: RootState) => state.auth);
+
+
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
   const [isVisible, setIsVisible] = useState(false);
   const [rminderisVisible, setRminderIsVisible] = useState(false);
@@ -60,14 +68,14 @@ const LeadInfoScreen = () => {
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [dropdownItems, setDropdownItems] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [isAllAssinetoMember ,setAllAssineTomember] =useState([])
- 
-  const check = isAllAssinetoMember.map((item) => 
-    item.sub_teams.flatMap((sub) => 
-      sub.team_members.map((mem) => mem.userId)
+  const [isAllAssinetoMember, setAllAssineTomember] = useState([]);
+
+  const check = isAllAssinetoMember
+    .map((item) =>
+      item.sub_teams.flatMap((sub) => sub.team_members.map((mem) => mem.userId))
     )
-  ).flat();
-  
+    .flat();
+
   const [isMemberModalVisible, setMemberModalVisible] = useState(false);
   const [isassineMemberModalVisible, setisassineMemberModalVisible] =
     useState(false);
@@ -75,46 +83,45 @@ const LeadInfoScreen = () => {
   const [dashboardView] = useState<any>(["HR", "CRM", "MY-Dashboard", "ADMIN"]);
   const [allReminder, setAllRemider] = useState<any>([]);
   const [newRemarks, setNewRemarks] = useState([]);
-   const [userData, setUserData] = useState<any[]>([]);
+  const [userData, setUserData] = useState<any[]>([]);
   const [reminderLeads, setRemiderLeads] = useState([]);
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const assignToIds = leadData.AssignTo.map((item) => item._id);
 
-
   useEffect(() => {
     getLeadStage();
-    getAllTeamDataMember()
-    fetchMemberLeadStage(assignToIds,leadData._id)
-    
+    getAllTeamDataMember();
+    fetchMemberLeadStage(assignToIds, leadData._id);
   }, []);
 
-
-   const fetchMemberLeadStage = async (ids: string[], id: string) => {
-      try {
-        const payload = {
-          team_id: ids,
-          lead_id: id,
-        };
-        const res = await getAllTeamMembersData(payload);
-        if (!res.data || !Array.isArray(res.data)) {
-          console.error("Invalid data structure returned from the API");
-          return;
-        }
-        const members = res.data.map((team) =>
+  const fetchMemberLeadStage = async (ids: string[], id: string) => {
+    try {
+      const payload = {
+        team_id: ids,
+        lead_id: id,
+      };
+      const res = await getAllTeamMembersData(payload);
+      if (!res.data || !Array.isArray(res.data)) {
+        console.error("Invalid data structure returned from the API");
+        return;
+      }
+      const members = res.data
+        .map((team) =>
           team.team_members.map((member) => ({
             ...member,
-            name : member.users[0].name,
-            checked: member.is_available === 1, 
+            name: member.users[0].name,
+            checked: member.is_available === 1,
           }))
-        ).flat(); 
-  
-        console.log(members, 'flattened members:', members);
-  
-        setUserData(members);
-      } catch (error) {
-        console.error("API Error:", error);
-      }
-    };
+        )
+        .flat();
+
+      console.log(members, "flattened members:", members);
+
+      setUserData(members);
+    } catch (error) {
+      console.error("API Error:", error);
+    }
+  };
 
   const getPermissionForView = () => {
     const permissionObj: Record<string, boolean> = {};
@@ -183,18 +190,13 @@ const LeadInfoScreen = () => {
     console.log("Remark Submitted: ", newRemark);
   };
 
-  const getAllTeamDataMember =async() =>{
+  const getAllTeamDataMember = async () => {
     try {
-      const res =await getAllTeamData (leadData._id)
-     
-      setAllAssineTomember(res.data)
+      const res = await getAllTeamData(leadData._id);
 
-      
-    } catch (error) {
-      
-    }
-    
-  }
+      setAllAssineTomember(res.data);
+    } catch (error) {}
+  };
 
   const handleChangeStage = async () => {
     try {
@@ -207,7 +209,7 @@ const LeadInfoScreen = () => {
         selectedStatus !== leadData.stage
       ) {
         const bodyForStageChange = {
-          id: leadData._id,
+          id: leadData._id ,
           stage: selectedStatus,
         };
         waitCallApi.push(changeStage(bodyForStageChange));
@@ -654,44 +656,100 @@ const LeadInfoScreen = () => {
               </View>
             </>
           ) : (
-            <View style={styles.header}>
-              <View style={styles.headerLeft}>
-                <View style={styles.statusBadge}>
-                  <Text
-                    style={[globalStyles.h8, globalStyles.tc4]}
-                    allowFontScaling={false}
+            // <View style={styles.header}>
+            //   <View style={styles.headerLeft}>
+            //     <View style={styles.statusBadge}>
+            //       <Text
+            //         style={[globalStyles.h8, globalStyles.tc4]}
+            //         allowFontScaling={false}
+            //       >
+            //         {myLeadData.stage.charAt(0).toUpperCase() +
+            //           myLeadData.stage.slice(1)}
+            //       </Text>
+            //     </View>
+            //     <Text
+            //       style={[globalStyles.h2, globalStyles.fs1]}
+            //       allowFontScaling={false}
+            //     >
+            //       {myLeadData.leadName}
+            //     </Text>
+            //     <Text
+            //       style={[globalStyles.h7, globalStyles.fontfm]}
+            //       allowFontScaling={false}
+            //     >
+            //       {myLeadData.project_name}
+            //     </Text>
+            //     <Text
+            //       style={[globalStyles.h7, globalStyles.fontfm]}
+            //       allowFontScaling={false}
+            //     >
+            //       {myLeadData.projecttype_name}
+            //     </Text>
+            //   </View>
+            //   <TouchableOpacity
+            //     onPress={() => handleDialPress(myLeadData.leadPhone)}
+            //   >
+            //     <View style={styles.callIconCircle}>
+            //       <Feather name="phone-call" size={24} color="#00C853" />
+            //     </View>
+            //   </TouchableOpacity>
+            // </View>
+
+            (() => {
+              const selectedLeadData =
+                selectedCardDataShow === 3
+                  ? myLeadData
+                  : selectedCardDataShow === 4
+                  ? myLeadProspectShow
+                  : selectedCardDataShow === 5
+                  ? myLeadOpportunity
+                  : selectedCardDataShow === 6
+                  ? myLeadClosure
+                  : selectedCardDataShow === 7
+                  ? teamLeadData
+                  : leadData; // Default case
+
+              return (
+                <View style={styles.header}>
+                  <View style={styles.headerLeft}>
+                    <View style={styles.statusBadge}>
+                      <Text
+                        style={[globalStyles.h8, globalStyles.tc4]}
+                        allowFontScaling={false}
+                      >
+                        {selectedLeadData.stage.charAt(0).toUpperCase() +
+                          selectedLeadData.stage.slice(1)}
+                      </Text>
+                    </View>
+                    <Text
+                      style={[globalStyles.h2, globalStyles.fs1]}
+                      allowFontScaling={false}
+                    >
+                      {selectedLeadData.leadName}
+                    </Text>
+                    <Text
+                      style={[globalStyles.h7, globalStyles.fontfm]}
+                      allowFontScaling={false}
+                    >
+                      {selectedLeadData.project_name}
+                    </Text>
+                    <Text
+                      style={[globalStyles.h7, globalStyles.fontfm]}
+                      allowFontScaling={false}
+                    >
+                      {selectedLeadData.projecttype_name}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleDialPress(selectedLeadData.leadPhone)}
                   >
-                    {myLeadData.stage.charAt(0).toUpperCase() +
-                      myLeadData.stage.slice(1)}
-                  </Text>
+                    <View style={styles.callIconCircle}>
+                      <Feather name="phone-call" size={24} color="#00C853" />
+                    </View>
+                  </TouchableOpacity>
                 </View>
-                <Text
-                  style={[globalStyles.h2, globalStyles.fs1]}
-                  allowFontScaling={false}
-                >
-                  {myLeadData.leadName}
-                </Text>
-                <Text
-                  style={[globalStyles.h7, globalStyles.fontfm]}
-                  allowFontScaling={false}
-                >
-                  {myLeadData.project_name}
-                </Text>
-                <Text
-                  style={[globalStyles.h7, globalStyles.fontfm]}
-                  allowFontScaling={false}
-                >
-                  {myLeadData.projecttype_name}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => handleDialPress(myLeadData.leadPhone)}
-              >
-                <View style={styles.callIconCircle}>
-                  <Feather name="phone-call" size={24} color="#00C853" />
-                </View>
-              </TouchableOpacity>
-            </View>
+              );
+            })()
           )}
 
           <FlipButtonBar

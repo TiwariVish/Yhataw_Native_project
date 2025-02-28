@@ -84,3 +84,17 @@ export async function getAllStage() {
       throw error;
     }
   }
+
+
+  export async function getOfficeDetails(userId: String) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(
+        urls.GETEMPLOYEEOFFICEDETAILBYID + userId,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
