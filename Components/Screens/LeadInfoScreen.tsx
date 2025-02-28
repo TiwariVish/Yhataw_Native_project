@@ -48,6 +48,7 @@ const LeadInfoScreen = () => {
   type RouteProps = RouteProp<RootStackParamList, "LeadInfoScreen">;
   const route = useRoute<RouteProps>();
   const selectedCardDataShow = route.params?.selectedCard || null;
+
   const {
     leadData,
     myLeadData,
@@ -203,13 +204,29 @@ const LeadInfoScreen = () => {
       let statusChanged = false;
       let membersChanged = false;
       const waitCallApi = [];
+      const selectedLeadData =
+      selectedCardDataShow === 1
+        ? leadData
+        : selectedCardDataShow === 3
+        ? myLeadData
+        : selectedCardDataShow === 4
+        ? myLeadOpportunity
+        : selectedCardDataShow === 5
+        ? myLeadOpportunity
+        : selectedCardDataShow === 6
+        ? myLeadClosure
+        : selectedCardDataShow === 7
+        ? teamLeadData
+        : null; 
+           
+        
       if (
-        leadData?._id &&
+        selectedLeadData?._id &&
         selectedStatus &&
-        selectedStatus !== leadData.stage
+        selectedStatus !== selectedLeadData?.stage
       ) {
         const bodyForStageChange = {
-          id: leadData._id ,
+          id: selectedLeadData?._id,
           stage: selectedStatus,
         };
         waitCallApi.push(changeStage(bodyForStageChange));
