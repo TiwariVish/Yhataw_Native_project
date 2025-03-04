@@ -102,3 +102,14 @@ export async function getAllTeamData(id: any) {
       throw error;
     }
   }
+
+  export async function getReminderCall(id: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(`${urls.GETREMINDER}${id}`, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+  

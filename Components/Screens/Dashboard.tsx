@@ -243,8 +243,6 @@ const Dashboard: React.FC<CustomProps> = () => {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [dashboardDataMyLead, setDashboardDataMyLead] = useState<any>([]);
-  console.log(dashboardDataMyLead,'dashboardDataMyLeaddashboardDataMyLeaddashboardDataMyLead');
-  
   const [dashboardDataProject, setDashboardDataProject] = useState<any>([]);
   const [dashboardDataAttendance, setDashboardDataAttendance] = useState<any>(
     []
@@ -270,7 +268,6 @@ const Dashboard: React.FC<CustomProps> = () => {
   const { authenticated, role, privileges } = useSelector(
     (state: RootState) => state.auth
   );
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -306,10 +303,11 @@ const Dashboard: React.FC<CustomProps> = () => {
   const getDataAllLeadData = async () => {
     try {
       const payload = {
+        userId: store.getState().auth.userId,
         startDate: "",
         endDate: "",
-        pageNumber: "",
-        pageSize: "",
+        page : paginationModel.pageSize,
+        pageSize: paginationModel.pageSize,
         teamId: "",
         search: "",
       };
@@ -342,7 +340,6 @@ const Dashboard: React.FC<CustomProps> = () => {
   //   privileges
   // );
   const permission = getPermissionForView();
-
   const getValuepermission = async () => {
     setLoading(true);
     try {
@@ -728,7 +725,7 @@ const Dashboard: React.FC<CustomProps> = () => {
               ""
             )}
 
-            {permission["MY-Dashboard"] ? (
+            {permission["MY-Dashboard"] && privileges["Team Leads"].length > 0 ? (
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>

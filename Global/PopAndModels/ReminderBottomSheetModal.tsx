@@ -28,6 +28,7 @@ interface ReminderBottomSheetModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (newReminder: any) => void;
+  selectedCardDataShow: any;
 }
 
 const { height: screenHeight } = Dimensions.get("window");
@@ -36,9 +37,10 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
   visible,
   onClose,
   onSubmit,
+  selectedCardDataShow,
 }) => {
   const translateY = useSharedValue(visible ? 0 : screenHeight);
-  const { leadData } = useSelector((state: RootState) => state.auth);
+  const { leadData,myLeadData,teamLeadData ,myLeadProspectShow,myLeadOpportunity,myLeadClosure} = useSelector((state: RootState) => state.auth);
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date());
@@ -58,23 +60,50 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
 
   const submitReminder = async () => {
     const formattedDate = date.toLocaleString("en-GB", {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
       hour12: false,
     });
+    let leadIdDynamic = "";
+    switch (selectedCardDataShow) {
+      case 1:
+        leadIdDynamic = leadData?._id;
+        break;
+      case 3:
+        leadIdDynamic = myLeadData?._id;
+        break;
+      case 4:
+        leadIdDynamic = myLeadProspectShow?._id;
+        break;
+      case 5:
+        leadIdDynamic = myLeadOpportunity?._id;
+        break;
+      case 6:
+        leadIdDynamic = myLeadClosure?._id;
+      case 7:
+        leadIdDynamic = teamLeadData?._id;
+        break;
+      default:
+        console.warn(
+          "Invalid selectedCardDataShow value:",
+          selectedCardDataShow
+        );
+        return;
+    }
+
     const body = {
-      leadId: leadData._id,
+      leadId: leadIdDynamic,
       userId,
       title,
       note,
       date: formattedDate,
-    }; 
+    };
     try {
       const newReminder = await saveReminder(body);
-      const response = await getReminder(leadData._id);
+      const response = await getReminder(myLeadData._id);
       setNewReminder(response.data);
       onSubmit(newReminder);
       onClose();
@@ -119,13 +148,23 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                   <View style={styles.containerdiv}>
                     <Text
-                      style={[globalStyles.h5, globalStyles.fs1, styles.header ,globalStyles.tc]}
+                      style={[
+                        globalStyles.h5,
+                        globalStyles.fs1,
+                        styles.header,
+                        globalStyles.tc,
+                      ]}
                       allowFontScaling={false}
                     >
                       Add Reminder
                     </Text>
                     <Text
-                      style={[globalStyles.h7, globalStyles.fs2, styles.header ,globalStyles.textColor]}
+                      style={[
+                        globalStyles.h7,
+                        globalStyles.fs2,
+                        styles.header,
+                        globalStyles.textColor,
+                      ]}
                       allowFontScaling={false}
                     >
                       Add new reminder for the lead
@@ -134,7 +173,9 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                     <View style={styles.inputContainer}>
                       <Text
                         style={[
-                          globalStyles.h7, globalStyles.fs2,globalStyles.textColor,
+                          globalStyles.h7,
+                          globalStyles.fs2,
+                          globalStyles.textColor,
                           styles.header,
                         ]}
                         allowFontScaling={false}
@@ -147,7 +188,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                           style={styles.iconInsideInput}
                         /> */}
                         <TextInput
-                          style={[styles.inputValue,globalStyles.h7]}
+                          style={[styles.inputValue, globalStyles.h7]}
                           value={title}
                           placeholder="Enter Title"
                           onChangeText={setTitle}
@@ -158,7 +199,9 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                     <View style={styles.inputContainer}>
                       <Text
                         style={[
-                          globalStyles.h7, globalStyles.fs2,globalStyles.textColor,
+                          globalStyles.h7,
+                          globalStyles.fs2,
+                          globalStyles.textColor,
                           styles.header,
                         ]}
                         allowFontScaling={false}
@@ -168,7 +211,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                       <TouchableOpacity onPress={showDatePicker}>
                         <View style={styles.inputWithIconContainer}>
                           <TextInput
-                            style={[styles.inputValueWithIcon,globalStyles.h7]}
+                            style={[styles.inputValueWithIcon, globalStyles.h7]}
                             value={formattedDate}
                             placeholder="Enter Date and Time "
                             editable={false}
@@ -186,13 +229,15 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                       mode="datetime"
                       onConfirm={handleConfirm}
                       onCancel={hideDatePicker}
-                      textColor={Platform.OS === 'ios' ? 'red' : undefined} 
+                      textColor={Platform.OS === "ios" ? "red" : undefined}
                     />
 
                     <View style={styles.inputContainer}>
                       <Text
                         style={[
-                          globalStyles.h7, globalStyles.fs2,globalStyles.textColor,
+                          globalStyles.h7,
+                          globalStyles.fs2,
+                          globalStyles.textColor,
                           styles.header,
                         ]}
                         allowFontScaling={false}
@@ -205,7 +250,11 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                           style={styles.iconInsideInput}
                         /> */}
                         <TextInput
-                          style={[styles.inputValue, globalStyles.h7, { height: 80 ,textAlignVertical: "top" }]}
+                          style={[
+                            styles.inputValue,
+                            globalStyles.h7,
+                            { height: 80, textAlignVertical: "top" },
+                          ]}
                           multiline={true}
                           value={note}
                           placeholder="Enter Notes"
@@ -218,7 +267,15 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                     style={styles.submitButton}
                     onPress={submitReminder}
                   >
-                    <Text style={[styles.submitButtonText,globalStyles.fs1 ,globalStyles.h6]}>Submit</Text>
+                    <Text
+                      style={[
+                        styles.submitButtonText,
+                        globalStyles.fs1,
+                        globalStyles.h6,
+                      ]}
+                    >
+                      Submit
+                    </Text>
                   </TouchableOpacity>
                 </ScrollView>
               </TouchableOpacity>
@@ -287,8 +344,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 0,
     height: 35,
-    textAlignVertical: 'center', 
-    textAlign: 'left',
+    textAlignVertical: "center",
+    textAlign: "left",
   },
   iconInsideInput: {
     position: "absolute",
@@ -303,8 +360,8 @@ const styles = StyleSheet.create({
   inputValue: {
     flex: 1,
     height: 35,
-    textAlign: 'left',
-    textAlignVertical: "center"
+    textAlign: "left",
+    textAlignVertical: "center",
   },
   submitButton: {
     backgroundColor: "#4A6EF5",

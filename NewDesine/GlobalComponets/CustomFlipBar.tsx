@@ -19,6 +19,8 @@ const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCar
   const listRef = useRef<FlatList>(null);
   const itemWidths = useRef<{ [key: number]: number }>({});
   const { privileges } = useSelector((state: RootState) => state.auth);
+  console.log(privileges,'privilegesprivilegesprivilegesprivileges');
+  
   const defaultWidth = 80;
   const data = useMemo(
     () => [
@@ -30,13 +32,19 @@ const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCar
       { id: 5, title: "Opportunity", count: myLeadStageOpportunity?.length || 0 },
       { id: 6, title: "Closure", count: myLeadStageClosure?.length || 0 },
     ],
-    [leadData,dataMyLead]
+    [leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure]
   );
 
   const filteredLeadStatus = useMemo(
-    () => data.filter((item) => item.id !== 1 || privileges["All Lead"]?.length > 0),
+    () =>
+      data.filter(
+        (item) =>
+          (item.id !== 1 || privileges["All Lead"]?.length > 0) &&
+          (item.id !== 7 || privileges["Team Leads"]?.length > 0 || privileges["Team List"]?.length > 10)
+      ),
     [data, privileges]
   );
+  
 
   const scrollToSelectedCard = (selectedCardId: number) => {
     if (selectedCardId === 1 || !listRef.current) return;

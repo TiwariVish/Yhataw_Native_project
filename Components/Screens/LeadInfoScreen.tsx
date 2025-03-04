@@ -48,7 +48,6 @@ const LeadInfoScreen = () => {
   type RouteProps = RouteProp<RootStackParamList, "LeadInfoScreen">;
   const route = useRoute<RouteProps>();
   const selectedCardDataShow = route.params?.selectedCard || null;
-
   const {
     leadData,
     myLeadData,
@@ -114,9 +113,6 @@ const LeadInfoScreen = () => {
           }))
         )
         .flat();
-
-      console.log(members, "flattened members:", members);
-
       setUserData(members);
     } catch (error) {
       console.error("API Error:", error);
@@ -158,7 +154,6 @@ const LeadInfoScreen = () => {
   };
 
   const onSelectMember = (member: any[]) => {
-    console.log(member, "Selected Members");
     const selectedMembers = Array.isArray(member)
       ? member.map((m) => ({ id: m._id, name: m.name }))
       : [];
@@ -175,8 +170,6 @@ const LeadInfoScreen = () => {
             !updatedMembers.some((member) => member.id === newMember.id)
         ),
       ];
-
-      console.log(uniqueMembers, "Unique Members");
       return uniqueMembers;
     });
   };
@@ -187,7 +180,6 @@ const LeadInfoScreen = () => {
 
   const handleCare_addRemark = async (newRemark: any) => {
     setNewRemarks((prevRemarks) => [...prevRemarks, newRemark]);
-    console.log("Remark Submitted: ", newRemark);
   };
 
   const getAllTeamDataMember = async () => {
@@ -723,8 +715,8 @@ const LeadInfoScreen = () => {
                   : selectedCardDataShow === 6
                   ? myLeadClosure
                   : selectedCardDataShow === 7
-                  ? teamLeadData
-                  : leadData;
+                  ? teamLeadData : ""
+                  
 
               return (
                 <View style={styles.header}>
@@ -735,8 +727,8 @@ const LeadInfoScreen = () => {
                         allowFontScaling={false}
                       >
                         {myLeadData?.stage
-                          ? myLeadData.stage.charAt(0).toUpperCase() +
-                            myLeadData.stage.slice(1)
+                          ? myLeadData?.stage.charAt(0).toUpperCase() +
+                            myLeadData?.stage.slice(1)
                           : ""}
                       </Text>
                     </View>
@@ -744,23 +736,29 @@ const LeadInfoScreen = () => {
                       style={[globalStyles.h2, globalStyles.fs1]}
                       allowFontScaling={false}
                     >
-                      {selectedLeadData?.leadName}
+                     {selectedLeadData?.leadName ?? ""}
                     </Text>
                     <Text
                       style={[globalStyles.h7, globalStyles.fontfm]}
                       allowFontScaling={false}
                     >
-                      {selectedLeadData?.project_name}
+                        {selectedLeadData?.project_name ?? ""}
                     </Text>
                     <Text
                       style={[globalStyles.h7, globalStyles.fontfm]}
                       allowFontScaling={false}
                     >
-                      {selectedLeadData?.projecttype_name}
+                      {selectedLeadData?.projecttype_name ?? ""}
                     </Text>
                   </View>
                   <TouchableOpacity
-                    onPress={() => handleDialPress(selectedLeadData.leadPhone)}
+                        onPress={() => {
+                          if (selectedLeadData?.leadPhone) {
+                            handleDialPress(selectedLeadData.leadPhone);
+                          } else {
+                            console.warn("Lead phone number is missing");
+                          }
+                        }}
                   >
                     <View style={styles.callIconCircle}>
                       <Feather name="phone-call" size={24} color="#00C853" />
@@ -843,6 +841,7 @@ const LeadInfoScreen = () => {
         visible={rminderisVisible}
         onClose={() => setRminderIsVisible(false)}
         onSubmit={handleNewReminder}
+        selectedCardDataShow = {selectedCardDataShow}
       />
 
       <RemarkPop

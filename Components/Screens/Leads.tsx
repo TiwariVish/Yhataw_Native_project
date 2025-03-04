@@ -27,13 +27,19 @@ import {
   setTeamsLead,
 } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
-import { getAllUsersMyLead, getLeadStageClosure, getLeadStageOpportunity, getLeadStageProspect } from "./LeadsService";
+import {
+  getAllUsersMyLead,
+  getLeadStageClosure,
+  getLeadStageOpportunity,
+  getLeadStageProspect,
+  getReminderCall,
+} from "./LeadsService";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import LeadCard from "../../NewDesine/GlobalComponets/LeadCard";
 import Communications from "react-native-communications";
-import { getAllTeamLeads, getAllUsers } from "./DashboardService";
+import { getAllTeamLeads, getAllUsers, getReminder } from "./DashboardService";
 import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
 import CustomSearchBar from "../../NewDesine/GlobalComponets/CustomSearchBar";
 import CustomFlipBar from "../../NewDesine/GlobalComponets/CustomFlipBar";
@@ -60,15 +66,12 @@ function Leads() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedStages, setSelectedStages] = useState([]);
   const [teamLeadData, setTeamLeadData] = useState<any>([]);
-  const [myLeadProspect,setLeadProspect] = useState<any>([])
-const [myLeadStageOpportunity,setLeadStageOpportunity] = useState<any>([])
-const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
+  const [myLeadProspect, setLeadProspect] = useState<any>([]);
+  const [myLeadStageOpportunity, setLeadStageOpportunity] = useState<any>([]);
+  const [myLeadStageClosure, setLeadStageClosure] = useState<any>([]);
+  const [remider, setRemider] = useState<{ [key: string]: any }>({});
 
   const scrollViewRef = useRef<ScrollView>(null);
-
-  useEffect(() => {
-    getAllLeadsData(false, 0);
-  }, []);
   useEffect(() => {
     if (!isVisible) {
       onRefresh();
@@ -80,6 +83,25 @@ const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
       onRefresh();
     }, [])
   );
+  useEffect(() => {
+    getAllLeadsData(false, 0);
+    handleReminder();
+  }, []);
+
+  useEffect(() => {
+    if (
+      dataMyLead.length > 0 ||
+      leadData.length > 0 ||
+      teamLeadData.length > 0
+    ) {
+      handleReminder();
+    }
+  }, [dataMyLead, leadData, teamLeadData]);
+
+  useEffect(() => {
+    getAllLeadsData(false, 0);
+    handleReminder();
+  }, [selectedCard]);
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -118,40 +140,128 @@ const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
     fetchFilteredLeads();
   };
 
+  const handleReminder = async () => {
+    let leads = [];
+
+    if (selectedCard === 1) {
+      leads = leadData;
+    } else if (selectedCard === 3) {
+      leads = dataMyLead;
+    } else if (selectedCard === 7) {
+      leads = teamLeadData;
+    }
+
+    if (Array.isArray(leads) && leads.length > 0) {
+      const reminderData: { [key: string]: any } = {};
+
+      for (const lead of leads) {
+        console.log(lead, "Processing lead for reminder");
+
+        if (lead._id) {
+          try {
+            const response = await getReminderCall(lead._id);
+            reminderData[lead._id] = response.data;
+            console.log(response, `Reminder for ID: ${lead._id}`);
+          } catch (error) {
+            console.error(
+              `Failed to fetch reminder for lead ${lead._id}`,
+              error
+            );
+          }
+        } else {
+          console.error("Lead is missing _id", lead);
+        }
+      }
+
+      setRemider(reminderData);
+    } else {
+      console.error("No leads available for selectedCard:", selectedCard);
+    }
+  };
+
   const getAllLeadsData = async (isLoadMore = false, pageNo: number) => {
+    console.log(`Fetching page ${pageNo}`);
+  
+    if (isLoadMore && loadingMore) return; 
+    if (!isLoadMore && loading) return; 
+  
     try {
       if (isLoadMore) setLoadingMore(true);
       else setLoading(true);
-      if (dataLoaded) return;
+  
+      if (dataLoaded) return; 
+  
       const payload = {
         userId: store.getState().auth.userId,
         pageNo,
-        start_date:"",
+        start_date: "",
         end_date: "",
         pageSize: paginationModel.pageSize,
         ...filters,
       };
-
-      const [response1, response2, response3,response4,response5,response6] = await Promise.all([
-        getAllUsers(payload),
-        getAllUsersMyLead(payload),
-        getAllTeamLeads(payload),
-        getLeadStageProspect(payload),
-        getLeadStageOpportunity(payload),
-        getLeadStageClosure(payload)
-
-      ]);
-      setTeamLeadData(response3?.data || []);
-      setLeadProspect(response4?.data || [])
-      setLeadStageOpportunity(response5.data || [])
-      setLeadStageClosure(response6.data || [])
-    
-      setLeadData((prev) => [...prev, ...response1.data]);
-      // setDataMyLead((prev) => [...prev, ...response2.data]);
-      setDataMyLead(response2?.data || []);
-      
-
-      setDataLoaded(false);
+      const [response1, response2, response3, response4, response5, response6] =
+        await Promise.all([
+          getAllUsers(payload),
+          getAllUsersMyLead(payload),
+          getAllTeamLeads(payload),
+          getLeadStageProspect(payload),
+          getLeadStageOpportunity(payload),
+          getLeadStageClosure(payload),
+        ]);
+  
+      // Check if any API returned < 25 items (Last Page)
+      // const isLastPage = [response1, response2, response3, response4, response5, response6].some(
+      //   (res) => (res?.data?.length || 0) < 25
+      // );
+  
+      // if (isLastPage) {
+      //   console.log("No more pages to load.");
+      //   setDataLoaded(true); // Stop pagination
+      // }
+  
+      // Append New Data While Avoiding Duplicates
+      setLeadData((prevData) => {
+        const newData = [...prevData, ...(response1?.data || [])];
+        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
+          JSON.parse(item)
+        );
+      });
+  
+      setDataMyLead((prevData) => {
+        const newData = [...prevData, ...(response2?.data || [])];
+        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
+          JSON.parse(item)
+        );
+      });
+  
+      setTeamLeadData((prevData) => {
+        const newData = [...prevData, ...(response3?.data || [])];
+        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
+          JSON.parse(item)
+        );
+      });
+  
+      setLeadProspect((prevData) => {
+        const newData = [...prevData, ...(response4?.data || [])];
+        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
+          JSON.parse(item)
+        );
+      });
+  
+      setLeadStageOpportunity((prevData) => {
+        const newData = [...prevData, ...(response5?.data || [])];
+        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
+          JSON.parse(item)
+        );
+      });
+  
+      setLeadStageClosure((prevData) => {
+        const newData = [...prevData, ...(response6?.data || [])];
+        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
+          JSON.parse(item)
+        );
+      });
+  
     } catch (error) {
       console.error("Error fetching leads data:", error);
     } finally {
@@ -159,6 +269,7 @@ const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
       setLoadingMore(false);
     }
   };
+  
   const filteredLeads = useMemo(() => {
     const defaultNoData = [{ id: 1, name: "NO DATA FOUND" }];
     let leadsToFilter: any[] = [];
@@ -209,7 +320,17 @@ const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
       );
     }
     return leadsToFilter;
-  }, [selectedCard, leadData, dataMyLead, searchQuery, filters.stage ,myLeadStageClosure,myLeadProspect,myLeadStageOpportunity,teamLeadData]);
+  }, [
+    selectedCard,
+    leadData,
+    dataMyLead,
+    searchQuery,
+    filters.stage,
+    myLeadStageClosure,
+    myLeadProspect,
+    myLeadStageOpportunity,
+    teamLeadData,
+  ]);
 
   const handleDialPress = useCallback(async (phoneNumber) => {
     const url = `tel:${phoneNumber}`;
@@ -252,38 +373,36 @@ const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
       default:
         break;
     }
-    navigation.navigate("LeadInfoScreen", {selectedCard});
+    navigation.navigate("LeadInfoScreen", { selectedCard });
   };
 
   const handleLoadMore = () => {
-    const totalDataLength = leadData.length + dataMyLead.length;
-    if (!loadingMore && totalDataLength >= 25) {
-      setPaginationModel((prevModel) => ({
-        ...prevModel,
-        page: prevModel.page + 1,
-      }));
-      getAllLeadsData(true, paginationModel.page + 1);
+    if (!loadingMore) {
+      setPaginationModel((prevModel) => {
+        const newPage = prevModel.page + 1;
+        getAllLeadsData(true, newPage);
+        return { ...prevModel, page: newPage }; 
+      });
     }
   };
 
   return (
     <View style={styles.mainCont}>
-      <ScrollView
-        contentContainerStyle={styles.scrollViewContainer}
-        onScroll={({ nativeEvent }) => {
-          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          if (
-            layoutMeasurement.height + contentOffset.y >=
-            contentSize.height - 20
-          ) {
-            handleLoadMore();
-          }
-        }}
-        scrollEventThrottle={16}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+   <ScrollView
+  contentContainerStyle={{ flexGrow: 1 }} 
+  onScroll={({ nativeEvent }) => {
+    if (dataLoaded) return;
+    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+    if (
+      layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - 20
+    ) {
+      handleLoadMore();
+    }
+  }}
+  scrollEventThrottle={16}
+  refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+>
         <View style={styles.content}>
           {/* <LeadStatus
             selectedCard={selectedCard}
@@ -297,8 +416,8 @@ const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
             dataMyLead={dataMyLead}
             teamLeadData={teamLeadData}
             myLeadProspect={myLeadProspect}
-            myLeadStageOpportunity = {myLeadStageOpportunity}
-            myLeadStageClosure = {myLeadStageClosure}
+            myLeadStageOpportunity={myLeadStageOpportunity}
+            myLeadStageClosure={myLeadStageClosure}
           />
           <CustomSearchBar
             value={searchQuery}
@@ -307,15 +426,13 @@ const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
           />
           {loading && !loadingMore ? (
             <LeadsSkeleton />
-          ) : !filteredLeads ||filteredLeads.length === 0 ? (
+          ) : !filteredLeads || filteredLeads.length === 0 ? (
             <View style={styles.noDataFound}>
               <Text>No Data Found</Text>
             </View>
           ) : (
             filteredLeads.map((item, index) => {
-              if (
-                selectedCard === 2
-              ) {
+              if (selectedCard === 2) {
                 return (
                   <View style={styles.noDataFound} key={`${item.id}-${index}`}>
                     <Text>{item.name}</Text>
@@ -339,6 +456,7 @@ const [myLeadStageClosure,setLeadStageClosure] = useState<any>([])
                       form_name={item?.form_name ?? ""}
                       dateTimeShow={item?.createdAt ?? ""}
                       priority={item?.priority ?? ""}
+                      reminder={remider[item._id] ?? "No Reminder"}
                       onCallPress={() => handleDialPress(item.leadPhone)}
                       onMorePress={() => console.log("More Options Pressed")}
                       onTextPress={() => handleCardDataLeads(item)}
