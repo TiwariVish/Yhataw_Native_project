@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   Linking,
+  FlatList,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
@@ -15,6 +16,7 @@ import ReminderBottomSheetModal from "../../Global/PopAndModels/ReminderBottomSh
 import {
   assignToMembers,
   changeStage,
+  getAllLeadHistory,
   getAllStage,
   getAllTeamData,
   getAllTeamMembersData,
@@ -30,13 +32,13 @@ import { LoginScreenNavigationProp, RootStackParamList } from "../type";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import FlipButtonBar from "../../Global/Components/FlipButtonBar";
 import { Feather, FontAwesome } from "@expo/vector-icons";
+import { getRemark, getReminderCall } from "./LeadsService";
 
 const leadInfoStatus = [
   { id: 1, content: "Lead Info" },
-  { id: 2, content: "Contact" },
+  { id: 2, content: "Activities" },
   { id: 3, content: "Reminder" },
-  { id: 4, content: "Site Visit" },
-  { id: 5, content: "Remark" },
+  { id: 4, content: "Notes" },
 ];
 
 interface Member {
@@ -55,6 +57,7 @@ const LeadInfoScreen = () => {
     myLeadProspectShow,
     myLeadOpportunity,
     myLeadClosure,
+    allContectMy,
   } = useSelector((state: RootState) => state.auth);
 
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
@@ -68,6 +71,9 @@ const LeadInfoScreen = () => {
   const [dropdownItems, setDropdownItems] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isAllAssinetoMember, setAllAssineTomember] = useState([]);
+  const [leadHistory, setLeadHistory] = useState<any>([]);
+  const [allRemiderSet, setAllRemiderSet] = useState<any>([]);
+  const [allNoteSet, setAllNoteSet] = useState<any>([]);
 
   const check = isAllAssinetoMember
     .map((item) =>
@@ -91,6 +97,11 @@ const LeadInfoScreen = () => {
     getLeadStage();
     getAllTeamDataMember();
     fetchMemberLeadStage(assignToIds, leadData._id);
+    historyResponse();
+  }, []);
+
+  useEffect(() => {
+    handleReminder();
   }, []);
 
   const fetchMemberLeadStage = async (ids: string[], id: string) => {
@@ -129,6 +140,7 @@ const LeadInfoScreen = () => {
   };
 
   const permission = getPermissionForView();
+  const privilegesData = getPermissionForView();
 
   const getLeadStage = async () => {
     try {
@@ -146,6 +158,9 @@ const LeadInfoScreen = () => {
   const handleStatusSelect = (status: string) => {
     setSelectedStatus(status);
     setModalVisible(true);
+  };
+  const truncateText = (text: string, limit: number) => {
+    return text.length > limit ? text.substring(0, limit) + "..." : text;
   };
 
   const handleSelectedTeamsChange = (teams: string[]) => {
@@ -190,6 +205,64 @@ const LeadInfoScreen = () => {
     } catch (error) {}
   };
 
+  const handleReminder = async () => {
+    let selectedData;
+
+    if (selectedCardDataShow === 1) {
+      selectedData = leadData;
+    } else if (allContectMy === 2) {
+      selectedData = allContectMy;
+    } else if (selectedCardDataShow === 3) {
+      selectedData = myLeadData;
+    } else if (selectedCardDataShow === 4 || selectedCardDataShow === 5) {
+      selectedData = myLeadOpportunity;
+    } else if (selectedCardDataShow === 6) {
+      selectedData = myLeadClosure;
+    } else {
+      selectedData = teamLeadData;
+    }
+
+    try {
+      if (selectedData?._id) {
+        const response = await getReminderCall(selectedData._id);
+        setAllRemiderSet(response.data);
+        const res = await getRemark(selectedData._id);
+        setAllNoteSet(res.data);
+      } else {
+        console.warn("Invalid data: _id is missing");
+      }
+    } catch (error) {
+      console.error("Error fetching reminder:", error);
+    }
+  };
+
+  const historyResponse = async () => {
+    const selectedData =
+      selectedCardDataShow === 1
+        ? leadData
+        : selectedCardDataShow === 3
+        ? myLeadData
+        : selectedCardDataShow === 4
+        ? myLeadOpportunity
+        : selectedCardDataShow === 5
+        ? myLeadOpportunity
+        : selectedCardDataShow === 6
+        ? myLeadClosure
+        : teamLeadData;
+
+    if (selectedData && selectedData._id) {
+      try {
+        const res = await getAllLeadHistory(selectedData._id);
+        setLeadHistory(res.data);
+        console.log(res, "Lead History Response");
+      } catch (error) {
+        console.error("Error fetching lead history:", error);
+      }
+    } else {
+      console.error("Invalid lead data: Missing _id");
+    }
+  };
+
   const handleChangeStage = async () => {
     try {
       let statusChanged = false;
@@ -198,6 +271,8 @@ const LeadInfoScreen = () => {
       const selectedLeadData =
         selectedCardDataShow === 1
           ? leadData
+          : selectedCardDataShow === 2
+          ? allContectMy
           : selectedCardDataShow === 3
           ? myLeadData
           : selectedCardDataShow === 4
@@ -206,9 +281,7 @@ const LeadInfoScreen = () => {
           ? myLeadOpportunity
           : selectedCardDataShow === 6
           ? myLeadClosure
-          : selectedCardDataShow === 7
-          ? teamLeadData
-          : null;
+          : teamLeadData;
 
       if (
         selectedLeadData?._id &&
@@ -260,7 +333,13 @@ const LeadInfoScreen = () => {
         alert("No changes detected.");
       }
       if (statusChanged || membersChanged) {
-        navigation.navigate("Leads");
+        if (selectedCardDataShow === 1) {
+          navigation.navigate("AllLeadScreen");
+        } else if (![3, 4, 5, 6].includes(selectedCardDataShow)) {
+          navigation.navigate("TeamLead");
+        } else {
+          navigation.navigate("Leads");
+        }
       }
     } catch (error) {
       console.error("Failed to process change or assign member:", error);
@@ -286,67 +365,72 @@ const LeadInfoScreen = () => {
   const renderContent = () => {
     const renderLeadInfo = (data) => (
       <>
-        <View>
-          <Text
-            style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]}
-            allowFontScaling={false}
-          >
-            Lead ID
-          </Text>
-          <Text
-            style={[
-              globalStyles.h6,
-              globalStyles.fs1,
-              globalStyles.tc,
-              styles.value,
-            ]}
-            allowFontScaling={false}
-          >
-            {data.uid}
-          </Text>
-        </View>
-        <View>
-          <Text
-            style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]}
-            allowFontScaling={false}
-          >
-            Project
-          </Text>
-          <Text
-            style={[
-              globalStyles.h6,
-              globalStyles.fs1,
-              globalStyles.tc,
-              styles.value,
-            ]}
-            allowFontScaling={false}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {data.form_name.split(" ").length < 2
-              ? data.form_name
-              : data.form_name.split(" ").slice(0, 2).join(" ") + "..."}
-          </Text>
-        </View>
-        <View>
-          <Text
-            style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]}
-            allowFontScaling={false}
-          >
-            Source
-          </Text>
-          <Text
-            style={[
-              globalStyles.h6,
-              globalStyles.fs1,
-              globalStyles.tc,
-              styles.value,
-            ]}
-            allowFontScaling={false}
-          >
-            {data.source}
-          </Text>
-        </View>
+        <View style={styles.container}>
+  {/* First Row */}
+  <View style={styles.row}>
+    <View style={styles.item}>
+      <Text style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]} allowFontScaling={false}>
+        Lead ID
+      </Text>
+      <Text style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc, styles.value]} allowFontScaling={false}>
+        {data.uid}
+      </Text>
+    </View>
+
+    <View style={styles.item}>
+      <Text style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]} allowFontScaling={false}>
+        Project
+      </Text>
+      <Text
+        style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc, styles.value]}
+        allowFontScaling={false}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        {data.form_name.split(" ").length < 2
+          ? data.form_name
+          : data.form_name.split(" ").slice(0, 2).join(" ") + "..."}
+      </Text>
+    </View>
+
+    <View style={[styles.item, { justifyContent: "flex-end",alignItems: "flex-end" }]}>
+      <Text style={[globalStyles.h7, globalStyles.fontfm, globalStyles.tc2]} allowFontScaling={false}>
+        Source
+      </Text>
+      <Text style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc, styles.value]} allowFontScaling={false}>
+        {data.source}
+      </Text>
+    </View>
+  </View>
+
+  {/* Second Row - Contact Us Section */}
+  <View style={styles.contactContainer}>
+    <Text style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]} allowFontScaling={false}>
+      Contact Us
+    </Text>
+    <View style={styles.contactInfo}>
+      <View style={styles.infoRow}>
+        <FontAwesome name="phone" size={16} color="#0078FF" />
+        <Text
+          style={[globalStyles.h7, globalStyles.fs2, styles.valueContent, globalStyles.tc]}
+          allowFontScaling={false}
+        >
+          {(selectedCards.includes(2) && permission.ADMIN) || permission.CRM ? leadData.leadPhone : myLeadData.leadPhone}
+        </Text>
+      </View>
+      <View style={styles.infoRow}>
+        <FontAwesome name="envelope" size={16} color="#0078FF" />
+        <Text
+          style={[globalStyles.h7, globalStyles.fs2, styles.valueContent, globalStyles.tc]}
+          allowFontScaling={false}
+        >
+          {(selectedCards.includes(2) && permission.ADMIN) || permission.CRM ? leadData.leadEmail : myLeadData.leadEmail}
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+
       </>
     );
     return (
@@ -359,7 +443,9 @@ const LeadInfoScreen = () => {
               <View style={styles.row}>{renderLeadInfo(myLeadData)}</View>
             )}
 
-            {permission?.ADMIN || permission.CRM ? (
+            {permission?.ADMIN ||
+            permission.CRM ||
+            selectedCardDataShow === null ? (
               <>
                 <View>
                   <Text
@@ -438,92 +524,77 @@ const LeadInfoScreen = () => {
                 </View>
               </>
             ) : null}
-            <View>
-              <Text
-                style={[
-                  globalStyles.h7,
-                  globalStyles.fontfm,
-                  styles.dropdownText,
-                ]}
-                allowFontScaling={false}
-              >
-                Status
-              </Text>
-              <TouchableOpacity
-                style={[styles.dropdown]}
-                onPress={() => handleStatusSelect("")}
-              >
+            {selectedCardDataShow === 2 || selectedCardDataShow === 3 || selectedCardDataShow === 1 ? (
+              <View>
                 <Text
                   style={[
                     globalStyles.h7,
                     globalStyles.fontfm,
-                    globalStyles.tc,
+                    styles.dropdownText,
                   ]}
                   allowFontScaling={false}
                 >
-                  {selectedStatus || "Select Status"}
+                  Status
                 </Text>
-                <Icon
-                  name="chevron-down-outline"
-                  size={24}
-                  style={[
-                    styles.dropdownIcon,
-                    openDropdown === 3 && styles.dropdownIconOpen,
-                  ]}
-                />
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  style={[styles.dropdown]}
+                  onPress={() => handleStatusSelect("")}
+                >
+                  <Text
+                    style={[
+                      globalStyles.h7,
+                      globalStyles.fontfm,
+                      globalStyles.tc,
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    {selectedStatus || "Select Status"}
+                  </Text>
+                  <Icon
+                    name="chevron-down-outline"
+                    size={24}
+                    style={[
+                      styles.dropdownIcon,
+                      openDropdown === 3 && styles.dropdownIconOpen,
+                    ]}
+                  />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              ""
+            )}
           </View>
         )}
 
-        {selectedCards.includes(2) && (
-          <View style={styles.contactContainer}>
-            <Text
-              style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]}
-              allowFontScaling={false}
-            >
-              Contact Us
-            </Text>
-            <View style={styles.contactInfo}>
-              <View style={styles.infoRow}>
-                <FontAwesome name="phone" size={16} color="#0078FF" />
-                <Text
-                  style={[
-                    globalStyles.h7,
-                    globalStyles.fs2,
-                    styles.valueContent,
-                    globalStyles.tc,
-                  ]}
-                  allowFontScaling={false}
-                >
-                  {(selectedCards.includes(2) && permission.ADMIN) ||
-                  permission.CRM
-                    ? leadData.leadPhone
-                    : myLeadData.leadPhone}
-                </Text>
+        {selectedCards.includes(2) && leadHistory.length > 0
+          ? leadHistory.map((item: any, index: number) => (
+              <View key={index} style={styles.itemContainer}>
+                {/* Timeline Indicator */}
+                <View style={styles.timeline}>
+                  <Feather name="circle" size={10} color="#007bff" />
+                  {index !== leadHistory.length - 1 && (
+                    <View style={styles.line} />
+                  )}
+                </View>
+
+                {/* Content */}
+                <View style={styles.content}>
+                  <Text style={styles.title}>{item.new_value}</Text>
+                  <Text style={styles.description}>
+                    Lead status changed by {item?.users[0]?.name}
+                  </Text>
+                  <Text style={styles.time}>
+                    {" "}
+                    {new Date(item.updatedAt).toLocaleString()}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.infoRow}>
-                <FontAwesome name="envelope" size={16} color="#0078FF" />
-                <Text
-                  style={[
-                    globalStyles.h7,
-                    globalStyles.fs2,
-                    styles.valueContent,
-                    globalStyles.tc,
-                  ]}
-                  allowFontScaling={false}
-                >
-                  {(selectedCards.includes(2) && permission.ADMIN) ||
-                  permission.CRM
-                    ? leadData.leadEmail
-                    : myLeadData.leadEmail}
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
+            ))
+          : ""}
+
         {selectedCards.includes(3) && (
-          <View style={styles.containerRem}>
+          <View style={[styles.containerRem, { width: "100%" }]}>
+            {/* Header Section */}
             <View style={styles.headerRem}>
               <Text
                 style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]}
@@ -544,40 +615,114 @@ const LeadInfoScreen = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <ScrollView style={styles.remindersList}>
-              {reminderLeads.map((reminder, index) => (
-                <View key={index} style={styles.reminderItem}>
+
+            <ScrollView horizontal contentContainerStyle={{ flexGrow: 1 }}>
+              <View
+                style={{
+                  minWidth: "100%",
+                  alignItems: "center",
+                  marginTop: 20,
+                }}
+              >
+                <View style={[styles.row, styles.mytableHeade]}>
                   <Text
-                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    style={[globalStyles.h7, globalStyles.fs1, { flex: 1 }]}
                     allowFontScaling={false}
                   >
-                    {reminder.data.date}
+                    Title
                   </Text>
                   <Text
-                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    style={[
+                      globalStyles.h7,
+                      globalStyles.fs1,
+                      { flex: 1, textAlign: "center" },
+                    ]}
                     allowFontScaling={false}
                   >
-                    {reminder.data.title}
+                    User Name
+                  </Text>
+                  <Text
+                    style={[
+                      globalStyles.h7,
+                      globalStyles.fs1,
+                      { flex: 1, textAlign: "right" },
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    Date
                   </Text>
                 </View>
-              ))}
+
+                {allRemiderSet.map((item) => (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.row,
+                      { justifyContent: "space-between", width: "100%" },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        globalStyles.h8,
+                        globalStyles.fs1,
+                        { width: 110 },
+                      ]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      allowFontScaling={false}
+                    >
+                      {truncateText(item.title, 15)}
+                    </Text>
+
+                    <View
+                      style={{
+                        flex: 1,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text
+                        style={[
+                          globalStyles.h8,
+                          globalStyles.fs1,
+                          { textAlign: "center" },
+                        ]}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        allowFontScaling={false}
+                      >
+                        {item.user_name}
+                      </Text>
+                    </View>
+
+                    <Text
+                      style={[
+                        globalStyles.h8,
+                        globalStyles.fs1,
+                        { flex: 1, textAlign: "right" },
+                      ]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      allowFontScaling={false}
+                    >
+                      {item.date}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </ScrollView>
           </View>
         )}
 
         {selectedCards.includes(4) && (
-          <View>
-            <Text>NO DATA FOUND</Text>
-          </View>
-        )}
-        {selectedCards.includes(5) && (
-          <View style={styles.containerRem}>
+          <View style={[styles.containerRem, { width: "100%" }]}>
+            {/* Header Section */}
             <View style={styles.headerRem}>
               <Text
                 style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]}
                 allowFontScaling={false}
               >
-                Remark
+                Note
               </Text>
               <TouchableOpacity onPress={() => setIsVisible(true)}>
                 <Text
@@ -588,21 +733,105 @@ const LeadInfoScreen = () => {
                   ]}
                   allowFontScaling={false}
                 >
-                  Add Remark
+                  Add Note
                 </Text>
               </TouchableOpacity>
             </View>
-            <ScrollView style={styles.remindersList}>
-              {newRemarks.map((reminder, index) => (
-                <View key={index} style={styles.reminderItem}>
+
+            <ScrollView horizontal contentContainerStyle={{ flexGrow: 1 }}>
+              <View
+                style={{
+                  minWidth: "100%",
+                  alignItems: "center",
+                  marginTop: 20,
+                }}
+              >
+                <View style={[styles.row, styles.mytableHeade]}>
                   <Text
-                    style={[globalStyles.h7, globalStyles.fontfm]}
+                    style={[globalStyles.h7, globalStyles.fs1, { flex: 1 }]}
                     allowFontScaling={false}
                   >
-                    {reminder.data.notes}
+                    Note
+                  </Text>
+                  <Text
+                    style={[
+                      globalStyles.h7,
+                      globalStyles.fs1,
+                      { flex: 1, textAlign: "center" },
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    User Name
+                  </Text>
+                  <Text
+                    style={[
+                      globalStyles.h7,
+                      globalStyles.fs1,
+                      { flex: 1, textAlign: "right" },
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    Date
                   </Text>
                 </View>
-              ))}
+
+                {allNoteSet.map((item) => (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.row,
+                      { justifyContent: "space-between", width: "100%" },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        globalStyles.h8,
+                        globalStyles.fs1,
+                        { width: 110 },
+                      ]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      allowFontScaling={false}
+                    >
+                      {truncateText(item.notes, 15)}
+                    </Text>
+
+                    <View
+                      style={{
+                        flex: 1,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text
+                        style={[
+                          globalStyles.h8,
+                          globalStyles.fs1,
+                          { textAlign: "center" },
+                        ]}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        allowFontScaling={false}
+                      >
+                        {item.user_name}
+                      </Text>
+                    </View>
+
+                    <Text
+                      style={[
+                        globalStyles.h8,
+                        globalStyles.fs1,
+                        { flex: 1, textAlign: "right" },
+                      ]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      allowFontScaling={false}
+                    >
+                      {item.date}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </ScrollView>
           </View>
         )}
@@ -706,7 +935,9 @@ const LeadInfoScreen = () => {
 
             (() => {
               const selectedLeadData =
-                selectedCardDataShow === 3
+                selectedCardDataShow === 2
+                  ? allContectMy
+                  : selectedCardDataShow === 3
                   ? myLeadData
                   : selectedCardDataShow === 4
                   ? myLeadProspectShow
@@ -714,9 +945,9 @@ const LeadInfoScreen = () => {
                   ? myLeadOpportunity
                   : selectedCardDataShow === 6
                   ? myLeadClosure
-                  : selectedCardDataShow === 7
-                  ? teamLeadData : ""
-                  
+                  : selectedCardDataShow === null
+                  ? teamLeadData
+                  : "";
 
               return (
                 <View style={styles.header}>
@@ -726,9 +957,9 @@ const LeadInfoScreen = () => {
                         style={[globalStyles.h8, globalStyles.tc4]}
                         allowFontScaling={false}
                       >
-                        {myLeadData?.stage
-                          ? myLeadData?.stage.charAt(0).toUpperCase() +
-                            myLeadData?.stage.slice(1)
+                        {selectedLeadData?.stage
+                          ? selectedLeadData?.stage.charAt(0).toUpperCase() +
+                            selectedLeadData?.stage.slice(1)
                           : ""}
                       </Text>
                     </View>
@@ -736,13 +967,13 @@ const LeadInfoScreen = () => {
                       style={[globalStyles.h2, globalStyles.fs1]}
                       allowFontScaling={false}
                     >
-                     {selectedLeadData?.leadName ?? ""}
+                      {selectedLeadData?.leadName ?? ""}
                     </Text>
                     <Text
                       style={[globalStyles.h7, globalStyles.fontfm]}
                       allowFontScaling={false}
                     >
-                        {selectedLeadData?.project_name ?? ""}
+                      {selectedLeadData?.project_name ?? ""}
                     </Text>
                     <Text
                       style={[globalStyles.h7, globalStyles.fontfm]}
@@ -752,13 +983,13 @@ const LeadInfoScreen = () => {
                     </Text>
                   </View>
                   <TouchableOpacity
-                        onPress={() => {
-                          if (selectedLeadData?.leadPhone) {
-                            handleDialPress(selectedLeadData.leadPhone);
-                          } else {
-                            console.warn("Lead phone number is missing");
-                          }
-                        }}
+                    onPress={() => {
+                      if (selectedLeadData?.leadPhone) {
+                        handleDialPress(selectedLeadData.leadPhone);
+                      } else {
+                        console.warn("Lead phone number is missing");
+                      }
+                    }}
                   >
                     <View style={styles.callIconCircle}>
                       <Feather name="phone-call" size={24} color="#00C853" />
@@ -840,14 +1071,22 @@ const LeadInfoScreen = () => {
       <ReminderBottomSheetModal
         visible={rminderisVisible}
         onClose={() => setRminderIsVisible(false)}
-        onSubmit={handleNewReminder}
-        selectedCardDataShow = {selectedCardDataShow}
+        onSubmit={(newReminder) => {
+          handleNewReminder(newReminder);
+          handleReminder(); 
+        }}
+
+        selectedCardDataShow={selectedCardDataShow}
       />
 
       <RemarkPop
         visible={isVisible}
         onClose={() => setIsVisible(false)}
-        onSubmit={handleCare_addRemark}
+        onSubmit={(newRemark) => {
+          handleCare_addRemark(newRemark);
+          handleReminder(); 
+        }}
+        selectedCardDataShow={selectedCardDataShow}
       />
     </>
   );
@@ -859,7 +1098,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   scrollView: {
-    padding: 20,
+    padding: 10,
   },
   header: {
     flexDirection: "row",
@@ -904,6 +1143,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 10,
   },
+
   dropdown: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -933,7 +1173,6 @@ const styles = StyleSheet.create({
   },
   contactContainer: {
     backgroundColor: "#FFFFFF",
-    padding: 10,
     borderRadius: 15,
     shadowColor: "transparent",
   },
@@ -999,6 +1238,54 @@ const styles = StyleSheet.create({
   dropdownText: {
     padding: 5,
   },
+  itemContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    // marginBottom: 20,
+  },
+  timeline: {
+    alignItems: "center",
+    width: 20,
+    marginTop :20
+  },
+  line: {
+    height: 40,
+    width: 2,
+    backgroundColor: "#007bff",
+    marginTop: 5,
+  },
+  content: {
+    flex: 1,
+    paddingLeft: 10,
+    marginTop:20
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  description: {
+    fontSize: 14,
+    color: "#555",
+    marginTop: 2,
+  },
+  time: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 2,
+  },
+
+  mytableHeade: {
+    justifyContent: "space-between",
+    width: "100%",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    paddingBottom: 5,
+  },
+  item: {
+    width: "33%", // Adjust width so three items fit in one row
+  },
+
 });
 
 export default LeadInfoScreen;

@@ -98,3 +98,14 @@ export async function getAllStage() {
       throw error;
     }
   }
+
+
+  export async function getAllLeadHistory(id: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(urls.GETLEADHISTORY + id, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

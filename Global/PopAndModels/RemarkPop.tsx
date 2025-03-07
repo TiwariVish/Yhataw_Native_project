@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   StyleSheet,
@@ -27,58 +27,95 @@ import { globalStyles } from "../../GlobalCss/GlobalStyles";
 interface RemarkPop {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (newRemark: any) => void; 
+  onSubmit: (newRemark: any) => void;
+  selectedCardDataShow: any;
 }
 
 const { height: screenHeight } = Dimensions.get("window");
 
-const RemarkPop: React.FC<RemarkPop> = ({
-  visible,
-  onClose,
-  onSubmit
-}) => {
+const RemarkPop: React.FC<RemarkPop> = ({ visible, onClose, onSubmit,selectedCardDataShow }) => {
   const translateY = useSharedValue(visible ? 0 : screenHeight);
-  const { leadData } = useSelector((state: RootState) => state.auth);
+  const { leadData,myLeadData,myLeadProspectShow,myLeadOpportunity ,myLeadClosure,teamLeadData} = useSelector((state: RootState) => state.auth);
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [formattedDate, setFormattedDate] = useState("");
-  const [newRemark, setNewRemak] = useState([])
-
+  const [newRemark, setNewRemak] = useState([]);
+  const inputRef = useRef<TextInput>(null);
   const userId = store.getState().auth.userId;
 
   useEffect(() => {
     if (visible) {
-        setTitle("");  
-        setNote("");  
-        setDate(new Date());  
-      }
-    translateY.value = withSpring(visible ? 0 : screenHeight, {
-      damping: 15,
-      stiffness: 100,
-    });
+      setTitle("");
+      setNote("");
+      setDate(new Date());
+
+      translateY.value = withSpring(0, {
+        damping: 15,
+        stiffness: 100,
+      });
+
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 300);
+    } else {
+      translateY.value = withSpring(screenHeight);
+    }
   }, [visible]);
 
   const submitRemark = async () => {
+    let leadIdDynamic = "";
+  
+    switch (selectedCardDataShow) {
+      case 1:
+        leadIdDynamic = leadData?._id;
+        break;
+      case 3:
+        leadIdDynamic = myLeadData?._id;
+        break;
+      case 4:
+        leadIdDynamic = myLeadProspectShow?._id;
+        break;
+      case 5:
+        leadIdDynamic = myLeadOpportunity?._id;
+        break;
+      case 6:
+        leadIdDynamic = myLeadClosure?._id;
+        break; 
+      case 7:
+        leadIdDynamic = teamLeadData?._id;
+        break;
+      default:
+        console.warn("Invalid selectedCardDataShow value:", selectedCardDataShow);
+        return;
+    }
+  
+    if (!leadIdDynamic) {
+      console.warn("Lead ID not found for selectedCardDataShow:", selectedCardDataShow);
+      return;
+    }
+  
     const body = {
-      leadId: leadData._id,
+      leadId: leadIdDynamic, 
       userId,
       title,
-      notes:note,
+      notes: note,
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
     };
+  
     try {
       const newRemark = await saveRemark(body);
-      const response = await getRemark(leadData._id);
-      setNewRemak(response.data)
+      const response = await getRemark(leadIdDynamic); 
+      setNewRemak(response.data);
       onSubmit(newRemark);
       onClose();
     } catch (error) {
-      console.error("Error saving reminder:", error);
+      console.error("Error saving remark:", error);
     }
   };
+  
 
   const onChange = (date: Date) => {
     setDate(date);
@@ -90,11 +127,11 @@ const RemarkPop: React.FC<RemarkPop> = ({
         minute: "2-digit",
       });
     setFormattedDate(formatted);
-    setShow(false); 
+    setShow(false);
   };
 
   const showDatePicker = () => {
-    setShow(!show); 
+    setShow(!show);
   };
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -112,28 +149,50 @@ const RemarkPop: React.FC<RemarkPop> = ({
               <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                   <View style={styles.containerdiv}>
-                    <Text   style={[globalStyles.h4, globalStyles.fs1, styles.header]}
-                      allowFontScaling={false}>Add Remark</Text>
-                    <Text    style={[globalStyles.h8, globalStyles.fs1, styles.header]}
-                      allowFontScaling={false}>
-                    Note : Notes help you remember important details about your leads
+                    <Text
+                      style={[globalStyles.h4, globalStyles.fs1, styles.header]}
+                      allowFontScaling={false}
+                    >
+                      Add Note
+                    </Text>
+                    <Text
+                      style={[globalStyles.h8, globalStyles.fs1, styles.header]}
+                      allowFontScaling={false}
+                    >
+                      Note : Notes help you remember important details about
+                      your leads
                     </Text>
                     <View style={styles.inputContainer}>
-                      <Text     style={[
+                      <Text
+                        style={[
                           globalStyles.h7,
                           globalStyles.fs1,
                           styles.header,
                         ]}
-                        allowFontScaling={false}>Remark</Text>
-                      <View style={styles.inputWithIconContainer}>
-                        <TextInput
-                          style={[styles.inputValue, globalStyles.h7,{ height: 80,}]}
-                          multiline={true}
-                          placeholder="Enter Remark"
-                          value={note}
-                          onChangeText={setNote}
-                        />
-                      </View>
+                        allowFontScaling={false}
+                      >
+                        Note
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.inputWithIconContainer}
+                        activeOpacity={0.8}
+                        onPress={() => inputRef.current?.focus()}
+                      >
+                        <View style={styles.inputWithIconContainer}>
+                          <TextInput
+                            ref={inputRef}
+                            style={[
+                              styles.inputValue,
+                              globalStyles.h7,
+                              { height: 80 },
+                            ]}
+                            multiline={true}
+                            placeholder="Enter Note"
+                            value={note}
+                            onChangeText={setNote}
+                          />
+                        </View>
+                      </TouchableOpacity>
                     </View>
                   </View>
                   <TouchableOpacity
@@ -194,7 +253,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   inputContainer: {
-    paddingTop:15
+    paddingTop: 15,
   },
   inputWithIconContainer: {
     flexDirection: "row",
@@ -234,11 +293,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignSelf: "center",
     width: "100%",
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.3,
-    // shadowRadius: 4,
-    // elevation: 5,
   },
   submitButtonText: {
     color: "#fff",

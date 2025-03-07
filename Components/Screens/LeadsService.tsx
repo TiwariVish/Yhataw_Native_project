@@ -49,7 +49,7 @@ export async function getAllTeamData(id: any) {
       console.log(callParams, "callParams");
       const response = await makeCall(
         urls.MYLEAD +
-          `?start_date=&end_date=&id=${payload.userId}&page=${payload.pageNo}&limit=${payload.pageSize}&formId=${payload.formId || ""}&stage=${payload.stage || ""}`,
+          `?start_date=&end_date=&id=${payload.userId}&page=${payload.pageNo}&limit=${payload.pageSize}&formId=${payload.formId || ""}&stage=${payload.stage || ""}&search=${payload.search || ""}`,
         callParams
       );
       return response;
@@ -113,3 +113,28 @@ export async function getAllTeamData(id: any) {
     }
   }
   
+
+  export async function getAllMyLeadContactStage(payload: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      console.log(callParams, "callParams");
+      const response = await makeCall(
+        urls.MYLEADCONTACT +
+          `?start_date=${payload.start_date}&end_date=${payload.end_date}&id=${payload.userId}&page=${payload.pageNo}&limit=${payload.pageSize}&search=${payload.search || ""}&formId=${payload.formId|| ""}&stage=${payload.stage|| ""}`,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  export async function getRemark(id: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(`${urls.GETREMARK}${id}`, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

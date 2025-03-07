@@ -19,6 +19,7 @@ import {
 import LeadStatus from "./LeadStatus";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  setAllContectMy,
   setLeadDatad,
   setMyLeadClosure,
   setMyLeadData,
@@ -28,6 +29,7 @@ import {
 } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
 import {
+  getAllMyLeadContactStage,
   getAllUsersMyLead,
   getLeadStageClosure,
   getLeadStageOpportunity,
@@ -39,7 +41,7 @@ import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import LeadCard from "../../NewDesine/GlobalComponets/LeadCard";
 import Communications from "react-native-communications";
-import { getAllTeamLeads, getAllUsers, getReminder } from "./DashboardService";
+import { getAllTeamLeads, getAllUsers, getPerosnalOffice, getReminder } from "./DashboardService";
 import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
 import CustomSearchBar from "../../NewDesine/GlobalComponets/CustomSearchBar";
 import CustomFlipBar from "../../NewDesine/GlobalComponets/CustomFlipBar";
@@ -69,8 +71,10 @@ function Leads() {
   const [myLeadProspect, setLeadProspect] = useState<any>([]);
   const [myLeadStageOpportunity, setLeadStageOpportunity] = useState<any>([]);
   const [myLeadStageClosure, setLeadStageClosure] = useState<any>([]);
+  const [allContect ,setAllContectData] = useState<any>([])
   const [remider, setRemider] = useState<{ [key: string]: any }>({});
-
+  const [userType,setUserType] = useState<string>("0")
+  console.log(userType,"userTypeuserTypeuserType")
   const scrollViewRef = useRef<ScrollView>(null);
   useEffect(() => {
     if (!isVisible) {
@@ -83,10 +87,19 @@ function Leads() {
       onRefresh();
     }, [])
   );
-  useEffect(() => {
-    getAllLeadsData(false, 0);
-    handleReminder();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      (async () => {
+        if (isActive) await   getAllLeadsData(false, 0);
+      })();
+
+      return () => {
+        isActive = false;
+      };
+    }, [searchQuery])
+  );
+
 
   useEffect(() => {
     if (
@@ -97,6 +110,10 @@ function Leads() {
       handleReminder();
     }
   }, [dataMyLead, leadData, teamLeadData]);
+
+  useEffect(()=>{
+    getUserMatch()
+  },[])
 
   useEffect(() => {
     getAllLeadsData(false, 0);
@@ -115,7 +132,26 @@ function Leads() {
     }
   };
 
+    const getUserMatch = async() =>{
+      try {
+           const paylode = store.getState().auth?.userId;
+        const resRole = await getPerosnalOffice(paylode);
+        console.log(resRole.data.teamRoleName,"roleeeeeeeeeeee")
+        if(resRole.data.teamRoleName.toLowerCase()?.includes('presales')){
+          setUserType("0")
+        }
+        else{
+          setUserType("1")
+        }
+        
+      } catch (error) {
+        
+      }
+    }
+
   const handleApplyFilters = (filters: any) => {
+    console.log(filters,'filtersfiltersfiltersfiltersfilters');
+    
     setFilters(filters);
     setIsVisible(false);
     const selectedStages = filters.stage
@@ -181,7 +217,6 @@ function Leads() {
 
   const getAllLeadsData = async (isLoadMore = false, pageNo: number) => {
     console.log(`Fetching page ${pageNo}`);
-  
     if (isLoadMore && loadingMore) return; 
     if (!isLoadMore && loading) return; 
   
@@ -196,10 +231,12 @@ function Leads() {
         pageNo,
         start_date: "",
         end_date: "",
+        search: searchQuery,
         pageSize: paginationModel.pageSize,
         ...filters,
+        
       };
-      const [response1, response2, response3, response4, response5, response6] =
+      const [response1, response2, response3, response4, response5, response6,response7] =
         await Promise.all([
           getAllUsers(payload),
           getAllUsersMyLead(payload),
@@ -207,9 +244,11 @@ function Leads() {
           getLeadStageProspect(payload),
           getLeadStageOpportunity(payload),
           getLeadStageClosure(payload),
+          getAllMyLeadContactStage(payload)
+
         ]);
   
-      // Check if any API returned < 25 items (Last Page)
+     
       // const isLastPage = [response1, response2, response3, response4, response5, response6].some(
       //   (res) => (res?.data?.length || 0) < 25
       // );
@@ -218,8 +257,6 @@ function Leads() {
       //   console.log("No more pages to load.");
       //   setDataLoaded(true); // Stop pagination
       // }
-  
-      // Append New Data While Avoiding Duplicates
       setLeadData((prevData) => {
         const newData = [...prevData, ...(response1?.data || [])];
         return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
@@ -234,12 +271,13 @@ function Leads() {
         );
       });
   
-      setTeamLeadData((prevData) => {
-        const newData = [...prevData, ...(response3?.data || [])];
-        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
-          JSON.parse(item)
-        );
+      setTeamLeadData((prevData: any) => {
+        const newData = isLoadMore 
+          ? [...prevData, ...(response3?.data || [])] 
+          : [...(response3?.data || [])]; 
+        return [...new Set(newData.map(item => JSON.stringify(item)))].map(item => JSON.parse(item)); 
       });
+      
   
       setLeadProspect((prevData) => {
         const newData = [...prevData, ...(response4?.data || [])];
@@ -261,6 +299,13 @@ function Leads() {
           JSON.parse(item)
         );
       });
+
+      setAllContectData((prevData) =>{
+        const newData = [...prevData, ...(response7?.data || [])];
+        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
+          JSON.parse(item)
+        );
+      })
   
     } catch (error) {
       console.error("Error fetching leads data:", error);
@@ -279,7 +324,7 @@ function Leads() {
         leadsToFilter = leadData ?? [];
         break;
       case 2:
-        leadsToFilter = defaultNoData;
+        leadsToFilter = allContect ?? [];
         break;
       case 3:
         leadsToFilter = dataMyLead ?? [];
@@ -330,6 +375,7 @@ function Leads() {
     myLeadProspect,
     myLeadStageOpportunity,
     teamLeadData,
+    allContect
   ]);
 
   const handleDialPress = useCallback(async (phoneNumber) => {
@@ -353,7 +399,7 @@ function Leads() {
         dispatch(setLeadDatad(item));
         break;
       case 2:
-        "";
+        dispatch(setAllContectMy(item)); ;
         break;
       case 3:
         dispatch(setMyLeadData(item));
@@ -418,6 +464,8 @@ function Leads() {
             myLeadProspect={myLeadProspect}
             myLeadStageOpportunity={myLeadStageOpportunity}
             myLeadStageClosure={myLeadStageClosure}
+            allContect ={allContect}
+            userType ={userType}
           />
           <CustomSearchBar
             value={searchQuery}
@@ -432,7 +480,7 @@ function Leads() {
             </View>
           ) : (
             filteredLeads.map((item, index) => {
-              if (selectedCard === 2) {
+              if (selectedCard === 0) {
                 return (
                   <View style={styles.noDataFound} key={`${item.id}-${index}`}>
                     <Text>{item.name}</Text>
@@ -489,6 +537,7 @@ function Leads() {
             onClose={() => setIsVisible(false)}
             onApplyFilters={handleApplyFilters}
             selectedStagesLocal={selectedStages}
+            selectViewData
           />
         </View>
       </Modal>

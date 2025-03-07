@@ -13,24 +13,27 @@ interface LeadStatusProps {
   myLeadProspect:any[]
   myLeadStageOpportunity :any[]
   myLeadStageClosure :any[]
+  allContect :any[]
+  userType :string
 }
 
-const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure }) => {
+const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure,allContect,userType }) => {
   const listRef = useRef<FlatList>(null);
   const itemWidths = useRef<{ [key: number]: number }>({});
   const { privileges } = useSelector((state: RootState) => state.auth);
-  console.log(privileges,'privilegesprivilegesprivilegesprivileges');
+console.log(userType,'userTypeuserTypeuserTypeuserTypeuserType::::::::::');
+
   
   const defaultWidth = 80;
   const data = useMemo(
     () => [
       { id: 1, title: "All Leads", count: leadData?.length || 0 },
-      { id: 2, title: "Contact", count: 499 },
-      { id: 3, title: "My Leads", count: dataMyLead?.length || 0 },
-      {id:7,title:"Team Leads",count: teamLeadData?.length || 0},
+      { id: 3, title: "All", count: dataMyLead?.length || 0 },
+      { id: 2, title: "Contact", count: allContect?.length || 0 },
       { id: 4, title: "Prospect", count: myLeadProspect?.length || 0 },
       { id: 5, title: "Opportunity", count: myLeadStageOpportunity?.length || 0 },
       { id: 6, title: "Closure", count: myLeadStageClosure?.length || 0 },
+     
     ],
     [leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure]
   );
@@ -39,10 +42,11 @@ const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCar
     () =>
       data.filter(
         (item) =>
-          (item.id !== 1 || privileges["All Lead"]?.length > 0) &&
-          (item.id !== 7 || privileges["Team Leads"]?.length > 0 || privileges["Team List"]?.length > 10)
+          (item.id !== 1 || privileges["All Lead"]?.length > 0) && 
+          (userType !== "1" || item.id !== 2) && 
+          (userType !== "0" || (item.id !== 5 && item.id !== 6)) 
       ),
-    [data, privileges]
+    [data, privileges, userType]
   );
   
 
@@ -50,7 +54,7 @@ const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCar
     if (selectedCardId === 1 || !listRef.current) return;
     const index = filteredLeadStatus.findIndex((item) => item.id === selectedCardId);
     if (index !== -1) {
-      listRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
+      listRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.1 });
     }
   };
 

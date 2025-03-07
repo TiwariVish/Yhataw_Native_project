@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   StyleSheet,
@@ -40,22 +40,43 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
   selectedCardDataShow,
 }) => {
   const translateY = useSharedValue(visible ? 0 : screenHeight);
-  const { leadData,myLeadData,teamLeadData ,myLeadProspectShow,myLeadOpportunity,myLeadClosure} = useSelector((state: RootState) => state.auth);
+  const {
+    leadData,
+    myLeadData,
+    teamLeadData,
+    myLeadProspectShow,
+    myLeadOpportunity,
+    myLeadClosure,
+  } = useSelector((state: RootState) => state.auth);
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date());
   const [formattedDate, setFormattedDate] = useState("");
   const [newReminder, setNewReminder] = useState([]);
+  const inputRef = useRef<TextInput>(null);
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   const userId = store.getState().auth.userId;
 
   useEffect(() => {
-    translateY.value = withSpring(visible ? 0 : screenHeight, {
-      damping: 15,
-      stiffness: 100,
-    });
+    if (visible) {
+      setTitle("");
+      setNote("");
+      setDate(new Date());
+  
+      translateY.value = withSpring(0, {
+        damping: 15,
+        stiffness: 100,
+      });
+  
+      // Add a delay to focus on the input
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 300);
+    } else {
+      translateY.value = withSpring(screenHeight);
+    }
   }, [visible]);
 
   const submitReminder = async () => {
@@ -182,18 +203,24 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                       >
                         Title
                       </Text>
-                      <View style={styles.inputWithIconContainer}>
-                        {/* <Image
-                          source={require("../../assets/type_cursor_icon.png")}
-                          style={styles.iconInsideInput}
-                        /> */}
-                        <TextInput
-                          style={[styles.inputValue, globalStyles.h7]}
-                          value={title}
-                          placeholder="Enter Title"
-                          onChangeText={setTitle}
-                        />
-                      </View>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => inputRef.current?.focus()}
+                      >
+                        <View style={styles.inputWithIconContainer}>
+                          {/* <Image
+      source={require("../../assets/type_cursor_icon.png")}
+      style={styles.iconInsideInput}
+    /> */}
+                          <TextInput
+                            ref={inputRef} // Use ref to programmatically focus input
+                            style={[styles.inputValue, globalStyles.h7]}
+                            value={title}
+                            placeholder="Enter Title"
+                            onChangeText={setTitle}
+                          />
+                        </View>
+                      </TouchableOpacity>
                     </View>
 
                     <View style={styles.inputContainer}>
@@ -208,7 +235,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
                       >
                         Date and Time
                       </Text>
-                      <TouchableOpacity onPress={showDatePicker}>
+                      <TouchableOpacity onPress={showDatePicker} activeOpacity={0.8}>
                         <View style={styles.inputWithIconContainer}>
                           <TextInput
                             style={[styles.inputValueWithIcon, globalStyles.h7]}

@@ -77,7 +77,7 @@ const staticData = {
   leads: [
     {
       id: 2,
-      content: "Initial",
+      content: "Contact",
       cardColor: "#E8B86D",
       calendarBackgroundColor: "#E8B86D",
       leadDataKey: "lead_total_new_count",
@@ -86,7 +86,7 @@ const staticData = {
     },
     {
       id: 4,
-      content: "Site Visit",
+      content: "Prospect",
       cardColor: "#99e6ff",
       calendarBackgroundColor: "#91DDCF",
       leadDataKey: "",
@@ -95,57 +95,57 @@ const staticData = {
     },
     {
       id: 5,
-      content: "Pipeline",
+      content: "Opportunity",
       cardColor: "#FFF3DF",
       calendarBackgroundColor: "#F19ED2",
       leadDataKey: "lead_total_pipeline_count",
       myleadKey: "lead_my_pipeline_count",
     },
-    {
-      id: 3,
-      content: "Visit Cancelled",
-      cardColor: "#D4FFEA",
-      calendarBackgroundColor: "#EF9C66",
-      leadDataKey: "",
-      myleadKey: "",
-      lead_my_pipeline_count: "lead_my_pipeline_count",
-    },
-    {
-      id: 1,
-      content: "Visit Done",
-      cardColor: "#D4FFEA",
-      calendarBackgroundColor: "#AFD198",
-      leadDataKey: "lead_total_visit_done_count",
-      myleadKey: "",
-      visit_done_count: "lead_total_visit_done_count",
-    },
+    // {
+    //   id: 3,
+    //   content: "Closure",
+    //   cardColor: "#D4FFEA",
+    //   calendarBackgroundColor: "#EF9C66",
+    //   leadDataKey: "",
+    //   myleadKey: "",
+    //   lead_my_pipeline_count: "lead_my_pipeline_count",
+    // },
+    // {
+    //   id: 1,
+    //   content: "Visit Done",
+    //   cardColor: "#D4FFEA",
+    //   calendarBackgroundColor: "#AFD198",
+    //   leadDataKey: "lead_total_visit_done_count",
+    //   myleadKey: "",
+    //   visit_done_count: "lead_total_visit_done_count",
+    // },
     {
       id: 6,
-      content: "Not Answered",
+      content: "Closure",
       cardColor: "#FFEFEC",
       calendarBackgroundColor: "#F6B0B0",
       leadDataKey: "lead_my_not_answered_count",
       myleadKey: "lead_my_not_answered_count",
       visit_done_count: "lead_total_visit_done_count",
     },
-    {
-      id: 7,
-      content: "Not Intrested",
-      cardColor: "#FFEFEC",
-      calendarBackgroundColor: "#FFCCA7",
-      leadDataKey: "lead_my_not_intrested_count",
-      myleadKey: "lead_my_not_intrested_count",
-      visit_done_count: "lead_total_visit_done_count",
-    },
-    {
-      id: 8,
-      content: "Call Back",
-      cardColor: "#FFF3DF",
-      calendarBackgroundColor: "#C5E0A3",
-      leadDataKey: "lead_total_call_back_count",
-      myleadKey: "lead_my_call_back_count",
-      visit_done_count: "lead_total_visit_done_count",
-    },
+    // {
+    //   id: 7,
+    //   content: "Not Intrested",
+    //   cardColor: "#FFEFEC",
+    //   calendarBackgroundColor: "#FFCCA7",
+    //   leadDataKey: "lead_my_not_intrested_count",
+    //   myleadKey: "lead_my_not_intrested_count",
+    //   visit_done_count: "lead_total_visit_done_count",
+    // },
+    // {
+    //   id: 8,
+    //   content: "Call Back",
+    //   cardColor: "#FFF3DF",
+    //   calendarBackgroundColor: "#C5E0A3",
+    //   leadDataKey: "lead_total_call_back_count",
+    //   myleadKey: "lead_my_call_back_count",
+    //   visit_done_count: "lead_total_visit_done_count",
+    // },
   ],
   attendance: [
     {
@@ -425,11 +425,20 @@ const Dashboard: React.FC<CustomProps> = () => {
   };
 
   const navigateToSection = (id: number) => {
+    console.log(id," flexGrow:1 flexGrow:1 flexGrow:1 flexGrow:1 flexGrow:1 flexGrow:1");
+    
     if (id > 8) return;
     dispatch(setLeadId(id));
     navigation.navigate("Leads");
     setModalVisible(false);
   };
+
+ const navigationTeamLead = () =>{
+  navigation.navigate("TeamLead", { selectedView : 2});
+ }
+ const allLeadNavigations = () => {
+  navigation.navigate("AllLeadScreen" , { selectedView : 1});
+ }
 
   const handleProfile = () => {
     navigation.navigate("MyProfile");
@@ -566,7 +575,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                   </View> */}
                   <TouchableOpacity
                     style={styles.viewAllContainer}
-                    onPress={() => navigateToSection(1)}
+                    onPress={() => allLeadNavigations()}
                   >
                     <Text
                       style={[
@@ -725,7 +734,7 @@ const Dashboard: React.FC<CustomProps> = () => {
               ""
             )}
 
-            {permission["MY-Dashboard"] && privileges["Team Leads"].length > 0 ? (
+            {permission["MY-Dashboard"] && privileges["Team Leads"]?.length > 0 ? (
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
@@ -754,7 +763,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                   </View>
                   <TouchableOpacity
                     style={styles.viewAllContainer}
-                    onPress={() => navigateToSection(7)}
+                    // onPress={() => navigateToSection(7)}
+                    onPress={()=>navigationTeamLead()}
                   >
                     <Text
                       style={[

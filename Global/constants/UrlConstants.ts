@@ -1,8 +1,8 @@
 import { StringConstants } from "./StringConstants";
 const ip1 = "http://13.200.251.4:5000"
 // const ip2 = "http://15.206.57.57:5000"
-// const ip2 = "https://api.yhataw.com:5000"
-const ip2 = "https://qa-api.yhataw.com:5000"
+const ip2 = "https://api.yhataw.com:5000"
+// const ip2 = "https://qa-api.yhataw.com:5000"
 // const ip2 = "http://localhost:5000"
 class UrlConstants extends StringConstants {
   url_prod = ip2;
@@ -83,6 +83,7 @@ class UrlConstants extends StringConstants {
   MYLEADSTAGEPROSPECT = `${this.url_prod}/getLeadStageProspect`;
   MYLEADSTAGEPOPPORTUNITY = `${this.url_prod}/getLeadStageOpportunity`;
   MYLEADSTAGECLOSURE = `${this.url_prod}/getLeadStageClosure`;
+  MYLEADCONTACT = `${this.url_prod}/getLeadContactStage`;
 
 
   // TEAMS
@@ -208,6 +209,8 @@ class UrlConstants extends StringConstants {
   UPDATEROLE = `${this.url_prod}/updateRole`;
   GETROLEBYID = `${this.url_prod}/getRole/`;
   GETROLE = `${this.url_prod}/getRole`;
+
+  GETLEADHISTORY = `${this.url_prod}/getLeadHistory/`
 
   //role
   ADDTEAMMETA = `${this.url_prod}/addTeam`;

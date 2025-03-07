@@ -60,18 +60,6 @@ const StatusPop: React.FC<StatusPopProps> = ({
       opacity: opacity.value,
     };
   });
-
-  // const getLeadStage = async () => {
-  //   try {
-  //     // const res = await getAllStage();
-  //     const resData = await getStage();
-  //     setDropdownData(resData.data);
-
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
   const filterStagesByIsSale = (stages: any[], isSale: number): any[] => {
     return stages
       .map((stage) => {
@@ -119,7 +107,6 @@ const StatusPop: React.FC<StatusPopProps> = ({
 
 
   const handleDropdownItemPress = (statusName: string) => {
-    console.log(statusName,'statusNamestatusNamestatusNamestatusNamestatusNamestatusNamestatusNamestatusName')
     onStatusSelect(statusName);
     onClose();
   };
@@ -127,60 +114,58 @@ const StatusPop: React.FC<StatusPopProps> = ({
   return (
     <>
     {visible && (
-      <View style={styles.overlay}>
-        <BlurView style={styles.blurView} intensity={200}>
-          <TouchableWithoutFeedback onPress={onClose}>
-            <View >
-              <Animated.View style={[styles.modal, animatedStyle]}>
-                <ScrollView 
-                  contentContainerStyle={styles.dropdownMenu}
-                  keyboardShouldPersistTaps="handled"  
-                >
-                  {dropdownData.map((item) => (
-                    <View key={item._id}>
-                      <TouchableOpacity
-                        onPress={() => handleDropdownItemPress(item.stage_Name)} 
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.overlay}>
+          <BlurView style={styles.blurView} intensity={200}>
+            <Animated.View style={[styles.modal, animatedStyle]}>
+              <ScrollView 
+                contentContainerStyle={styles.dropdownMenu}
+                keyboardShouldPersistTaps="handled"  
+              >
+                {dropdownData.map((item) => (
+                  <View key={item._id}>
+                    <TouchableOpacity
+                      onPress={() => handleDropdownItemPress(item.stage_Name)} 
+                    >
+                      <Text
+                        style={[
+                          globalStyles.h7,
+                          globalStyles.fontfm,
+                          styles.dropdownItem,
+                        ]}
+                        allowFontScaling={false}
                       >
-                        <Text
-                          style={[
-                            globalStyles.h7,
-                            globalStyles.fontfm,
-                            styles.dropdownItem,
-                          ]}
-                          allowFontScaling={false}
-                        >
-                          {item.stage_Name}
-                        </Text>
-                      </TouchableOpacity>
-                      {item.sub_Stage_name.length > 0 && (
-                        <View style={styles.subStageContainer}>
-                          {item.sub_Stage_name.map((subItem) => (
-                            <TouchableOpacity
-                              key={subItem._id}
-                              onPress={() => handleDropdownItemPress(subItem.stage_Name)}
+                        {item.stage_Name}
+                      </Text>
+                    </TouchableOpacity>
+                    {item.sub_Stage_name.length > 0 && (
+                      <View style={styles.subStageContainer}>
+                        {item.sub_Stage_name.map((subItem) => (
+                          <TouchableOpacity
+                            key={subItem._id}
+                            onPress={() => handleDropdownItemPress(subItem.stage_Name)}
+                          >
+                            <Text
+                              style={[
+                                globalStyles.h8,
+                                globalStyles.fontfm,
+                                styles.dropdownItem,
+                              ]}
+                              allowFontScaling={false}
                             >
-                              <Text
-                                style={[
-                                  globalStyles.h8,
-                                  globalStyles.fontfm,
-                                  styles.dropdownItem,
-                                ]}
-                                allowFontScaling={false}
-                              >
-                                {subItem.stage_Name}
-                              </Text>
-                            </TouchableOpacity>
-                          ))}
-                        </View>
-                      )}
-                    </View>
-                  ))}
-                </ScrollView>
-              </Animated.View>
-            </View>
-          </TouchableWithoutFeedback>
-        </BlurView>
-      </View>
+                              {subItem.stage_Name}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </ScrollView>
+            </Animated.View>
+          </BlurView>
+        </View>
+      </TouchableWithoutFeedback>
     )}
   </>
   

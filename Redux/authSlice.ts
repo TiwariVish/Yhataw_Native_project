@@ -20,6 +20,8 @@ export interface AuthState {
   myLeadProspectShow:any
   myLeadOpportunity :any
   myLeadClosure :any
+  allContectMy:any
+  allFormShowFiter :any
 }
 
 const initialState: AuthState = {
@@ -38,9 +40,11 @@ const initialState: AuthState = {
   allTeams:1,
   teamLeadData:1,
   selectedStagesAll:"",
+  allFormShowFiter:"",
   myLeadProspectShow : 1,
   myLeadOpportunity : 1,
-  myLeadClosure : 1
+  myLeadClosure : 1,
+  allContectMy :1
 };
 
 export const authSlice = createSlice({
@@ -110,11 +114,17 @@ export const authSlice = createSlice({
     setMyLeadClosure :(state, action: PayloadAction<any>) =>{
       state.myLeadClosure = action.payload;
     },
+    setAllContectMy :(state, action: PayloadAction<any>) =>{
+      state.allContectMy = action.payload;
+    },
+    setSelectedAllFormData: (state, action: PayloadAction<any>) => {
+      state.allFormShowFiter = action.payload; 
+    },
     
   },
 });
 
-export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad, setMyLeadData,setAllTeams,setSelectedStagesAll,setTeamsLead,setMyLeadProspect,setMyLeadOpportunity,setMyLeadClosure } = authSlice.actions;
+export const { loginAction, logOutAction, addLoading,setLeadId,setLeadDatad, setMyLeadData,setAllTeams,setSelectedStagesAll,setTeamsLead,setMyLeadProspect,setMyLeadOpportunity,setMyLeadClosure,setAllContectMy,setSelectedAllFormData } = authSlice.actions;
 
 export const selectAuthenticated = (state: RootState) =>state.auth.authenticated;
 export const selectAccessToken = (state: RootState) => state.auth.accessToken;

@@ -11,6 +11,8 @@ import CustomSearchBar from "../../NewDesine/GlobalComponets/CustomSearchBar";
 const AllTeamList = () => {
   const [leadStatus, setLeadStatus] = useState<string[]>([]);
   const [selectedSegment, setSelectedSegment] = useState<string>("All");
+  console.log(selectedSegment,'selectedSegmentselectedSegmentselectedSegment');
+  
   const [allTeams, setAllTeams] = useState<any[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<any>(null);
   const [selectedSubSegment, setSelectedSubSegment] = useState<string>("");
@@ -89,6 +91,7 @@ const AllTeamList = () => {
         fetchUserDetails();
       } else {
         const team = allTeams.find((t) => t.team_name === segment);
+        console.log(team,'teamteamteamteam');
         if (team) {
           setSelectedSegment(segment);
           setSelectedTeam(team);
@@ -110,9 +113,13 @@ const AllTeamList = () => {
   );
 
   const subTeams = selectedTeam?.sub_teams?.map((t: any) => t.team_name) || [];
+  console.log(subTeams,'subTeamssubTeamssubTeamssubTeamssubTeamssubTeams');
+  
   const filteredUsers = allUserTeamWise.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  console.log(filteredUsers,'filteredUsersfilteredUsersfilteredUsersfilteredUsersfilteredUsersfilteredUsers');
+  
 
   return (
     <View style={styles.container}>
@@ -156,11 +163,11 @@ const AllTeamList = () => {
             filteredUsers.map((item, index) => (
               <CustomCardLead
                 key={item._id || index}
-                name={item.name}
-                status=""
-                form_name=""
+                name={item?.name ?? ""}
+                status={item?.userOffices?.length ? item?.userOffices[0]?.teamRoleName : item?.userOffices?.teamRoleName}
+                form_name={item?.email ?? ""}
                 dateTimeShow=""
-                onCallPress={() => console.log("Call Pressed", item.user_name)}
+                onCallPress={() => console.log("Call Pressed", item?.user_name)}
                 onMorePress={() =>
                   console.log("More Options Pressed", item.user_name)
                 }
@@ -186,8 +193,6 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    // paddingBottom: 5,
-    // marginTop: 10,
   },
   tab: {
     alignItems: "center",
@@ -206,12 +211,10 @@ const styles = StyleSheet.create({
     width: "75%",
     height: 3,
     backgroundColor: "#007AFF",
-    // marginTop: 5,
   },
   contentContainer: {
     flex: 1,
-    // marginTop: 10,
-    // padding: 5,
+    
   },
   noDataContainer: {
     alignItems: "center",

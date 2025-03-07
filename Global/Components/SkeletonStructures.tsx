@@ -125,14 +125,13 @@ export const MyProfileSkeleton = () => {
 
 
 export const LeadsSkeleton = () =>{
-  const rows = Array.from({ length: 6 }); // Number of rows
-
+  const rows = Array.from({ length: 10 }); 
   return (
     <View style={styles.wrapper}>
       {rows.map((_, index) => (
         <View key={index} style={styles.skeletonContainer}>
-          <View style={[styles.skeletonButton, { width: 250 }]} />
           <View style={styles.circleLoader} />
+          <View style={[styles.skeletonButton, { width: 250 }]} />
         </View>
       ))}
     </View>
@@ -183,7 +182,7 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     justifyContent: 'space-between',
-    // backgroundColor: '#fff',
+    backgroundColor: '#fff',
   },
   profileContainer: {
     alignItems: 'center',
@@ -214,9 +213,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   skeletonButton: {
-    height: 35,
+    height: 50,
     backgroundColor: "#e0e0e0",
     borderRadius: 5,
+    marginLeft :10
   },
   container: {
     padding: 20,
@@ -224,15 +224,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   skeletonContainer: {
-    margin:15,
+    margin:10,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
   circleLoader: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5, // Half of width/height to make it a circle
+    width: 70,
+    height: 70,
+    borderRadius: 50, 
     backgroundColor: '#e0e0e0',
   },
 });

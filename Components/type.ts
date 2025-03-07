@@ -11,6 +11,8 @@ export type RootStackParamList = {
   ForgotPassword :undefined
   DashboardNew:undefined
   AllTeamList :{ allTeams: any }
+  TeamLead :{ selectedView: any }
+  AllLeadScreen :{ selectedView: any }
 };
 
 // types.ts
@@ -25,6 +27,8 @@ export type RootStackParamList1 = {
   ForgotPassword :undefined
   DashboardNew:undefined
   AllTeamList :{ allTeams: any }
+  TeamLead : { selectedView: any }
+  AllLeadScreen : { selectedView: any }
 };
 
 export type LoginScreenNavigationProp = StackNavigationProp<

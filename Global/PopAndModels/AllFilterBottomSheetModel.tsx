@@ -30,10 +30,11 @@ const { height: screenHeight } = Dimensions.get("window");
 
 const FilterBottomSheet: React.FC<{
   visible: boolean;
+  selectViewData
   selectedStagesLocal: any[];
   onClose: () => void;
   onApplyFilters: (filters: any) => void;
-}> = ({ visible, onClose, onApplyFilters, selectedStagesLocal }) => {
+}> = ({ visible, onClose, onApplyFilters, selectedStagesLocal ,selectViewData }) => {
   const translateY = useSharedValue(screenHeight);
   const [selectedCategory, setSelectedCategory] = useState("Stage");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
@@ -44,7 +45,9 @@ const FilterBottomSheet: React.FC<{
     useState<string[]>(selectedStagesLocal);
   const dispatch = useDispatch();
   const [userType, setUserType] = useState<string>("0");
-  const { selectedStagesAll } = useSelector((state: RootState) => state.auth);
+  const { selectedStagesAll ,allFormShowFiter } = useSelector((state: RootState) => state.auth);
+  console.log(allFormShowFiter,'allFormShowFiterallFormShowFiterallFormShowFiter');
+  
   useEffect(() => {
     setSelectedStages(selectedStagesAll);
   }, [selectedStagesAll]);
@@ -69,6 +72,7 @@ const FilterBottomSheet: React.FC<{
   useEffect(() => {
     fetchData();
   }, [selectedCategory]);
+
 
   const filterStagesByIsSale = (stages: any[], isSale: number): any[] => {
     return stages
@@ -185,10 +189,16 @@ const FilterBottomSheet: React.FC<{
         );
 
   const filterOptions = [
-    { label: "Stage", key: "Stage" },
+    ...(selectViewData === 1 ||selectViewData === 2 ? []: [{ label: "Stage", key: "Stage" }]), 
     { label: "Form", key: "form" },
     { label: "Date Range", key: "dateRange" },
   ];
+
+  useEffect(() => {
+    if (!filterOptions.find(option => option.key === selectedCategory)) {
+      setSelectedCategory("form"); 
+    }
+  }, [filterOptions]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],

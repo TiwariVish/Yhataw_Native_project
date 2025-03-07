@@ -16,6 +16,8 @@ import NetInfo from "@react-native-community/netinfo";
 import ForgotPassword from "./Screens/ForgotPassword";
 import AllTeamList from "./Screens/AllTeamList";
 import DashboardNew from "../NewDesine/Dashboard/DashboardNew";
+import TeamLead from "./Screens/TeamLead";
+import AllLeadScreen from "./Screens/AllLeadScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -68,7 +70,54 @@ const Navigation: React.FC = () => {
                     }}
                     allowFontScaling={false}
                   >
-                    Leads
+                   My Lead
+                  </Text>
+                ),
+                headerStyle: {
+                  backgroundColor: "#FFFFFF",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
+            />
+
+<Stack.Screen
+              name="TeamLead"
+              component={TeamLead}
+              options={{
+                headerTitle: () => (
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
+                   Team Lead
+                  </Text>
+                ),
+                headerStyle: {
+                  backgroundColor: "#FFFFFF",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="AllLeadScreen"
+              component={AllLeadScreen}
+              options={{
+                headerTitle: () => (
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
+                 All Lead
                   </Text>
                 ),
                 headerStyle: {
