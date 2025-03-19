@@ -42,3 +42,14 @@ export async function getPreSalesDetails(payload:any) {
       throw error;
     }
   }
+
+
+  export async function registerEmployee(body: any) {
+    try {
+      const callParams = await getCallParams("POST", body);
+      const response = await makeCall(urls.REGISTERLEAD, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -27,31 +27,11 @@ interface BottomSheetModalProps {
 const data = [
   {
     id: 1,
-    name: "My\nLeads",
+    name: "Add Leads",
     image: require("../../assets/myLeads.png"),
     color: { backgroundColor: "#FFF3DF" },
   },
-  {
-    id: 2,
-    name: "Planned\nSite Visit",
-    color: { backgroundColor: "#D4F5FF" },
-    image: require("../../assets/plannedSiteVisit.png"),
-  },
-  {
-    id: 3,
-    name: "Walk-in\nSite Visit",
-    color: { backgroundColor: "#FFEFEC" },
-    image: require("../../assets/customericon.png"),
-  },
-  {
-    id: 4,
-    name: "Customer\nFeedback",
-    color: { backgroundColor: "#D4FFEA" },
-    image: require("../../assets/customericon.png"),
-  },
 ];
-
-
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -61,75 +41,58 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 }) => {
   const translateY = useSharedValue(visible ? 0 : screenHeight);
 
-  React.useEffect(() => {
+  useEffect(() => {
     translateY.value = withSpring(visible ? 0 : screenHeight, {
-      damping: 15, 
-      stiffness: 100, 
+      damping: 15,
+      stiffness: 100,
     });
   }, [visible]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: translateY.value }],
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const handleCardPress = (id: number) => {
-    if (id === 4) { 
-      navigation.navigate("CustomerFeedback");
+    if (id === 1) {
+      navigation.navigate("AddLeadManual");
     }
   };
-  return (
-    <>
-      {visible && (
-        <TouchableWithoutFeedback onPress={onClose}>
-          <BlurView intensity={100}  tint="dark"  style={styles.blurView}>
-            <TouchableWithoutFeedback onPress={() => {}}>
-              <Animated.View style={[styles.container, animatedStyle]}>
-                <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                  <Text
-                    style={[
-                      globalStyles.h1,
-                      globalStyles.fs1,
-                      globalStyles.fontfm,
-                      styles.title,
-                    ]}
-                  >
-                    Browse Category
-                  </Text>
-                  {data.map((item) => (
-                    <TouchableOpacity   onPress={() => handleCardPress(item.id)}
-                      key={item.id}
-                      style={[styles.card, item.color]}
+
+  return visible ? (
+    <TouchableWithoutFeedback onPress={onClose}>
+      <BlurView intensity={100} tint="dark" style={styles.blurView}>
+        <TouchableWithoutFeedback>
+          <Animated.View style={[styles.container, animatedStyle]}>
+            <View style={styles.header} />
+            <ScrollView contentContainerStyle={styles.scrollViewContent}>
+              {data.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[styles.card, item.color]}
+                  onPress={() => handleCardPress(item.id)}
+                  activeOpacity={0.7}
+                >
+                  <Image source={item.image} style={styles.image} />
+                  <View style={styles.textContainer}>
+                    <Text
+                      style={[globalStyles.h3, globalStyles.fs1, globalStyles.fontfm]}
                     >
-                      <Image source={item.image} style={styles.image} />
-                      <View style={styles.textContainer}>
-                        <Text
-                          style={[
-                            globalStyles.h3,
-                            globalStyles.fs1,
-                            globalStyles.fontfm,
-                          ]}
-                        >
-                          {item.name}
-                        </Text>
-                      </View>
-                      <View style={styles.forwardaline}>
-                        <Image
-                          source={require("../../assets/forword_icon.png")}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </Animated.View>
-            </TouchableWithoutFeedback>
-          </BlurView>
+                      {item.name}
+                    </Text>
+                  </View>
+                  <View style={styles.forwardIcon}>
+                    <Image source={require("../../assets/forword_icon.png")} />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </Animated.View>
         </TouchableWithoutFeedback>
-      )}
-    </>
-  );
+      </BlurView>
+    </TouchableWithoutFeedback>
+  ) : null;
 };
 
 const styles = StyleSheet.create({
@@ -145,48 +108,47 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "100%",
-    height: "75%",
+    height: "30%",
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    elevation: 5,
+    elevation: 10,
+    paddingTop: 15,
+  },
+  header: {
+    width: 50,
+    height: 5,
+    backgroundColor: "#ccc",
+    borderRadius: 10,
+    alignSelf: "center",
+    marginBottom: 10,
   },
   scrollViewContent: {
-    padding: 20,
-  },
-  title: {
-    marginBottom: 20,
+    paddingHorizontal: 20,
   },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-    borderRadius: 8,
-    height: 125,
+    padding: 15,
+    borderRadius: 12,
+    height: 120,
     marginBottom: 15,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   image: {
-    width: 100,
-    height: 95,
+    width: 80,
+    height: 80,
     borderRadius: 10,
-    marginLeft: 5,
   },
   textContainer: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 15,
   },
-  closeButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: "lightgray",
-    borderRadius: 5,
-    alignSelf: "center",
-  },
-  closeText: {
-    fontSize: 16,
-  },
-  forwardaline: {
-    marginRight: 30,
+  forwardIcon: {
+    marginRight: 15,
   },
 });
 

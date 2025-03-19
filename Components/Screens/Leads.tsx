@@ -25,11 +25,13 @@ import {
   setMyLeadData,
   setMyLeadOpportunity,
   setMyLeadProspect,
+  setMySatgeDataRedux,
   setTeamsLead,
 } from "../../Redux/authSlice";
 import store, { RootState } from "../../utils/store";
 import {
   getAllMyLeadContactStage,
+  getAllMyLeadStageLead,
   getAllUsersMyLead,
   getLeadStageClosure,
   getLeadStageOpportunity,
@@ -71,10 +73,12 @@ function Leads() {
   const [myLeadProspect, setLeadProspect] = useState<any>([]);
   const [myLeadStageOpportunity, setLeadStageOpportunity] = useState<any>([]);
   const [myLeadStageClosure, setLeadStageClosure] = useState<any>([]);
+  const [myleadSatgeShow ,setMyLeadSatge] = useState<any>([])
   const [allContect ,setAllContectData] = useState<any>([])
   const [remider, setRemider] = useState<{ [key: string]: any }>({});
   const [userType,setUserType] = useState<string>("0")
-  console.log(userType,"userTypeuserTypeuserType")
+  console.log(userType,'userTypeuserTypeuserType');
+  
   const scrollViewRef = useRef<ScrollView>(null);
   useEffect(() => {
     if (!isVisible) {
@@ -136,7 +140,6 @@ function Leads() {
       try {
            const paylode = store.getState().auth?.userId;
         const resRole = await getPerosnalOffice(paylode);
-        console.log(resRole.data.teamRoleName,"roleeeeeeeeeeee")
         if(resRole.data.teamRoleName.toLowerCase()?.includes('presales')){
           setUserType("0")
         }
@@ -150,8 +153,6 @@ function Leads() {
     }
 
   const handleApplyFilters = (filters: any) => {
-    console.log(filters,'filtersfiltersfiltersfiltersfilters');
-    
     setFilters(filters);
     setIsVisible(false);
     const selectedStages = filters.stage
@@ -181,10 +182,14 @@ function Leads() {
 
     if (selectedCard === 1) {
       leads = leadData;
-    } else if (selectedCard === 3) {
+    }else if(selectedCard === 2){
+      leads = allContect
+    }
+    
+    else if (selectedCard === 3) {
       leads = dataMyLead;
     } else if (selectedCard === 7) {
-      leads = teamLeadData;
+      leads = myleadSatgeShow;
     }
 
     if (Array.isArray(leads) && leads.length > 0) {
@@ -217,14 +222,14 @@ function Leads() {
 
   const getAllLeadsData = async (isLoadMore = false, pageNo: number) => {
     console.log(`Fetching page ${pageNo}`);
-    if (isLoadMore && loadingMore) return; 
-    if (!isLoadMore && loading) return; 
+    if (isLoadMore && loadingMore) return;
+    if (!isLoadMore && loading) return;
   
     try {
       if (isLoadMore) setLoadingMore(true);
       else setLoading(true);
   
-      if (dataLoaded) return; 
+      if (dataLoaded) return;
   
       const payload = {
         userId: store.getState().auth.userId,
@@ -234,79 +239,118 @@ function Leads() {
         search: searchQuery,
         pageSize: paginationModel.pageSize,
         ...filters,
-        
       };
-      const [response1, response2, response3, response4, response5, response6,response7] =
-        await Promise.all([
+  
+      let responses;
+  
+      if (userType === "0") { 
+        responses = await Promise.all([
+          getAllUsersMyLead(payload),
+          getLeadStageProspect(payload),
+          getAllMyLeadContactStage(payload),
+          getAllMyLeadStageLead(payload)
+        ]);
+      } else {
+        responses = await Promise.all([
           getAllUsers(payload),
           getAllUsersMyLead(payload),
           getAllTeamLeads(payload),
           getLeadStageProspect(payload),
           getLeadStageOpportunity(payload),
           getLeadStageClosure(payload),
-          getAllMyLeadContactStage(payload)
-
+          getAllMyLeadContactStage(payload),
+          getAllMyLeadStageLead(payload)
         ]);
+      }
   
-     
-      // const isLastPage = [response1, response2, response3, response4, response5, response6].some(
-      //   (res) => (res?.data?.length || 0) < 25
-      // );
+      if (userType === "0") {
+        const [response2, response4,response7,response8] = responses;
+        setDataMyLead((prevData) => {
+          const newData = [...prevData, ...(response2?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
   
-      // if (isLastPage) {
-      //   console.log("No more pages to load.");
-      //   setDataLoaded(true); // Stop pagination
-      // }
-      setLeadData((prevData) => {
-        const newData = [...prevData, ...(response1?.data || [])];
-        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
-          JSON.parse(item)
-        );
-      });
-  
-      setDataMyLead((prevData) => {
-        const newData = [...prevData, ...(response2?.data || [])];
-        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
-          JSON.parse(item)
-        );
-      });
-  
-      setTeamLeadData((prevData: any) => {
-        const newData = isLoadMore 
-          ? [...prevData, ...(response3?.data || [])] 
-          : [...(response3?.data || [])]; 
-        return [...new Set(newData.map(item => JSON.stringify(item)))].map(item => JSON.parse(item)); 
-      });
-      
-  
-      setLeadProspect((prevData) => {
-        const newData = [...prevData, ...(response4?.data || [])];
-        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
-          JSON.parse(item)
-        );
-      });
-  
-      setLeadStageOpportunity((prevData) => {
-        const newData = [...prevData, ...(response5?.data || [])];
-        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
-          JSON.parse(item)
-        );
-      });
-  
-      setLeadStageClosure((prevData) => {
-        const newData = [...prevData, ...(response6?.data || [])];
-        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
-          JSON.parse(item)
-        );
-      });
+        setLeadProspect((prevData) => {
+          const newData = [...prevData, ...(response4?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
 
-      setAllContectData((prevData) =>{
-        const newData = [...prevData, ...(response7?.data || [])];
-        return Array.from(new Set(newData.map((item) => JSON.stringify(item)))).map((item) =>
-          JSON.parse(item)
-        );
-      })
+        setMyLeadSatge((prevData) => {
+          const newData = [...prevData, ...(response8?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+        setAllContectData((prevData) => {
+          const newData = [...prevData, ...(response7?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+      } else {
+        const [response1, response2, response3, response4, response5, response6, response7 ,response8] = responses;
   
+        setLeadData((prevData) => {
+          const newData = [...prevData, ...(response1?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+  
+        setDataMyLead((prevData) => {
+          const newData = [...prevData, ...(response2?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+  
+        setTeamLeadData((prevData: any) => {
+          const newData = isLoadMore
+            ? [...prevData, ...(response3?.data || [])]
+            : [...(response3?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+  
+        setLeadProspect((prevData) => {
+          const newData = [...prevData, ...(response4?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+  
+        setLeadStageOpportunity((prevData) => {
+          const newData = [...prevData, ...(response5?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+  
+        setLeadStageClosure((prevData) => {
+          const newData = [...prevData, ...(response6?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+  
+        setAllContectData((prevData) => {
+          const newData = [...prevData, ...(response7?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+        setMyLeadSatge((prevData) => {
+          const newData = [...prevData, ...(response8?.data || [])];
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
+            JSON.parse(item)
+          );
+        });
+      }
     } catch (error) {
       console.error("Error fetching leads data:", error);
     } finally {
@@ -339,7 +383,7 @@ function Leads() {
         leadsToFilter = myLeadStageClosure ?? [];
         break;
       case 7:
-        leadsToFilter = teamLeadData ?? [];
+        leadsToFilter = myleadSatgeShow ?? [];
         break;
       default:
         leadsToFilter = defaultNoData;
@@ -375,7 +419,7 @@ function Leads() {
     myLeadProspect,
     myLeadStageOpportunity,
     teamLeadData,
-    allContect
+    allContect,myleadSatgeShow
   ]);
 
   const handleDialPress = useCallback(async (phoneNumber) => {
@@ -414,7 +458,7 @@ function Leads() {
         dispatch(setMyLeadClosure(item));
         break;
       case 7:
-        dispatch(setTeamsLead(item));
+        dispatch(setMySatgeDataRedux(item));
         break;
       default:
         break;
@@ -466,6 +510,7 @@ function Leads() {
             myLeadStageClosure={myLeadStageClosure}
             allContect ={allContect}
             userType ={userType}
+            myleadSatgeShow ={myleadSatgeShow}
           />
           <CustomSearchBar
             value={searchQuery}
@@ -505,7 +550,7 @@ function Leads() {
                       dateTimeShow={item?.createdAt ?? ""}
                       priority={item?.priority ?? ""}
                       reminder={remider[item._id] ?? "No Reminder"}
-                      onCallPress={() => handleDialPress(item.leadPhone)}
+                      onCallPress={() => handleDialPress(item?.leadPhone)}
                       onMorePress={() => console.log("More Options Pressed")}
                       onTextPress={() => handleCardDataLeads(item)}
                     />

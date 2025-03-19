@@ -18,6 +18,7 @@ import AllTeamList from "./Screens/AllTeamList";
 import DashboardNew from "../NewDesine/Dashboard/DashboardNew";
 import TeamLead from "./Screens/TeamLead";
 import AllLeadScreen from "./Screens/AllLeadScreen";
+import AddLeadManual from "./Screens/AddLeadManual";
 
 const Stack = createNativeStackNavigator();
 
@@ -118,6 +119,30 @@ const Navigation: React.FC = () => {
                     allowFontScaling={false}
                   >
                  All Lead
+                  </Text>
+                ),
+                headerStyle: {
+                  backgroundColor: "#FFFFFF",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
+            />
+
+<Stack.Screen
+              name="AddLeadManual"
+              component={AddLeadManual}
+              options={{
+                headerTitle: () => (
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
+                 Add Leads
                   </Text>
                 ),
                 headerStyle: {

@@ -138,3 +138,18 @@ export async function getAllTeamData(id: any) {
       throw error;
     }
   }
+
+  export async function getAllMyLeadStageLead(payload: any) {
+    try {
+      const callParams = await getCallParams("GET");
+      console.log(callParams, "callParams");
+      const response = await makeCall(
+        urls.MYLEADSTAGELEAD +
+          `?start_date=${payload.start_date}&end_date=${payload.end_date}&id=${payload.userId}&page=${payload.pageNo}&limit=${payload.pageSize}&search=${payload.search || ""}&formId=${payload.formId|| ""}&stage=${payload.stage|| ""}`,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

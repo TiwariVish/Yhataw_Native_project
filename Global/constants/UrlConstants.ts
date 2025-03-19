@@ -84,6 +84,7 @@ class UrlConstants extends StringConstants {
   MYLEADSTAGEPOPPORTUNITY = `${this.url_prod}/getLeadStageOpportunity`;
   MYLEADSTAGECLOSURE = `${this.url_prod}/getLeadStageClosure`;
   MYLEADCONTACT = `${this.url_prod}/getLeadContactStage`;
+  MYLEADSTAGELEAD = `${this.url_prod}/getLeadStageLead`;
 
 
   // TEAMS

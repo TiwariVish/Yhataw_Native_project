@@ -109,3 +109,16 @@ export async function getAllStage() {
       throw error;
     }
   }
+
+  export async function getAllTeamDataProject() {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(
+        `${urls.GETTEAMDROPPROJECT}`,
+        callParams
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

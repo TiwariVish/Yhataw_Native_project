@@ -40,6 +40,7 @@ import FotterDseine from "../../NewDesine/GlobalComponets/FotterDseine";
 import CustomBigCard from "../../NewDesine/GlobalComponets/CustomBigCard";
 import Footer from "../../Global/Components/Footer";
 import { getAllUsersMyLead } from "./LeadsService";
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 const projectData = [
   {
@@ -248,8 +249,6 @@ const Dashboard: React.FC<CustomProps> = () => {
     []
   );
   const [teamLeadData, setTeamLeadData] = useState<any>([]);
- 
-  
   const [dashboardDataAllLead, setDashboardDataAllLead] = useState<any>([]);
   const [dashboardView, setDashboardView] = useState<any>([
     "HR",
@@ -737,7 +736,7 @@ const Dashboard: React.FC<CustomProps> = () => {
             {permission["MY-Dashboard"] && privileges["Team Leads"]?.length > 0 ? (
               <>
                 <View style={styles.row}>
-                  <View style={styles.textContainerAll}>
+                  {/* <View style={styles.textContainerAll}>
                     <Text
                       style={[
                         styles.leadData,
@@ -760,8 +759,8 @@ const Dashboard: React.FC<CustomProps> = () => {
                     >
                       {teamLeadData?.length}
                     </Text>
-                  </View>
-                  <TouchableOpacity
+                  </View> */}
+                  {/* <TouchableOpacity
                     style={styles.viewAllContainer}
                     // onPress={() => navigateToSection(7)}
                     onPress={()=>navigationTeamLead()}
@@ -783,14 +782,14 @@ const Dashboard: React.FC<CustomProps> = () => {
                       color="#007bff"
                       style={styles.icon}
                     />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
-                <ScrollView
+                {/* <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   style={styles.horizontalScroll}
-                >
-                  {staticData.leads.map((item) => (
+                > */}
+                  {/* {staticData.leads.map((item) => (
                     <TouchableOpacity
                       key={item.id}
                       onPress={() => {
@@ -808,8 +807,43 @@ const Dashboard: React.FC<CustomProps> = () => {
                         />
                       </View>
                     </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                  ))} */}
+  <TouchableOpacity    onPress={()=>navigationTeamLead()}>
+  <View style={styles.container}>
+      <View style={styles.newCard}>
+        {/* Text and Count Section */}
+        <View style={styles.textContainer}>
+          <Text 
+            style={[
+              globalStyles.fs1,
+              globalStyles.h7,
+              globalStyles.tc,
+            ]}
+            allowFontScaling={false}
+          >
+            Team Leads
+          </Text>
+          <Text
+            style={[
+              globalStyles.fs1,
+              globalStyles.h7,
+              globalStyles.tc,
+              styles.role,
+            ]}
+            allowFontScaling={false}
+          >
+            {teamLeadData?.length}
+          </Text>
+        </View>
+
+        {/* Circular Icon */}
+        <View style={styles.iconCircle}>
+          <FontAwesome5 name="user-alt" size={24} color="#8080ff" />
+        </View>
+      </View>
+    </View>
+  </TouchableOpacity>
+                {/* </ScrollView> */}
               </>
             ) : (
               ""
@@ -1341,6 +1375,35 @@ const styles = StyleSheet.create({
   },
   cardSpacing: {
     marginHorizontal: 8,
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  newCard: {
+    width: '95%',
+    minHeight: 154,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    flexDirection: 'row', 
+    alignItems: 'center',
+    justifyContent: 'space-between', // ✅ Creates space between text and icon
+    paddingHorizontal: 20,
+    shadowColor: '#000000',
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 2,
+  },
+  iconCircle: {
+    width: 50, 
+    height: 50, 
+    borderRadius: 25, 
+    backgroundColor: '#f0f4ff', 
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

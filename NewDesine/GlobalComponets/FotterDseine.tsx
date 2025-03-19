@@ -11,8 +11,11 @@ import { Avatar } from "react-native-paper";
 import { getPerosnalDetails } from "../../Components/Screens/MyProfileService";
 import store from "../../utils/store";
 import BottomSheetModal from "../../Global/PopAndModels/BottomSheetModal";
+import { useNavigation } from "@react-navigation/native";
+import { LoginScreenNavigationProp } from "../../Components/type";
 
 const FotterDseine = ({ navigate, onHomePress }) => {
+    const navigation = useNavigation<LoginScreenNavigationProp>();
   const [userData, setUserData] = useState<any>(null);
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -39,7 +42,8 @@ const FotterDseine = ({ navigate, onHomePress }) => {
       navigate("UserProfile");
     }
     if (iconName === "pluscircle") {
-      setIsVisible(true);
+      // setIsVisible(true);
+      navigation.navigate("AddLeadManual");
     }
   };
 

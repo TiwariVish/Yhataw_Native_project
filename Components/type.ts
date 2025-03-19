@@ -13,6 +13,7 @@ export type RootStackParamList = {
   AllTeamList :{ allTeams: any }
   TeamLead :{ selectedView: any }
   AllLeadScreen :{ selectedView: any }
+  AddLeadManual:any
 };
 
 // types.ts
@@ -29,6 +30,7 @@ export type RootStackParamList1 = {
   AllTeamList :{ allTeams: any }
   TeamLead : { selectedView: any }
   AllLeadScreen : { selectedView: any }
+  AddLeadManual:any
 };
 
 export type LoginScreenNavigationProp = StackNavigationProp<

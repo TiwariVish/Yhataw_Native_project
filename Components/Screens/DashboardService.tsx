@@ -178,3 +178,13 @@ export async function getDataAllLead(roleId?: any) {
     }
   }
   
+
+  export async function getAllSource() {
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(urls.GETALLSOURSE, callParams);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }

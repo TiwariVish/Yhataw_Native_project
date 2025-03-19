@@ -15,13 +15,14 @@ interface LeadStatusProps {
   myLeadStageClosure :any[]
   allContect :any[]
   userType :string
+  myleadSatgeShow :[]
 }
 
-const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure,allContect,userType }) => {
+const CustomFlipBar: React.FC<LeadStatusProps> = ({ selectedCard, setSelectedCard, leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure,allContect,userType,myleadSatgeShow }) => {
   const listRef = useRef<FlatList>(null);
   const itemWidths = useRef<{ [key: number]: number }>({});
   const { privileges } = useSelector((state: RootState) => state.auth);
-console.log(userType,'userTypeuserTypeuserTypeuserTypeuserType::::::::::');
+console.log(myleadSatgeShow,'myleadSatgeShowmyleadSatgeShow::::::::::::::::');
 
   
   const defaultWidth = 80;
@@ -29,13 +30,15 @@ console.log(userType,'userTypeuserTypeuserTypeuserTypeuserType::::::::::');
     () => [
       { id: 1, title: "All Leads", count: leadData?.length || 0 },
       { id: 3, title: "All", count: dataMyLead?.length || 0 },
+      {id:7, title: "Leads", count: myleadSatgeShow?.length || 0 },
       { id: 2, title: "Contact", count: allContect?.length || 0 },
       { id: 4, title: "Prospect", count: myLeadProspect?.length || 0 },
       { id: 5, title: "Opportunity", count: myLeadStageOpportunity?.length || 0 },
       { id: 6, title: "Closure", count: myLeadStageClosure?.length || 0 },
+   
      
     ],
-    [leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure]
+    [leadData,dataMyLead,teamLeadData,myLeadProspect,myLeadStageOpportunity,myLeadStageClosure,myleadSatgeShow]
   );
 
   const filteredLeadStatus = useMemo(

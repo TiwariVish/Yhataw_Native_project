@@ -50,6 +50,8 @@ const LeadInfoScreen = () => {
   type RouteProps = RouteProp<RootStackParamList, "LeadInfoScreen">;
   const route = useRoute<RouteProps>();
   const selectedCardDataShow = route.params?.selectedCard || null;
+  console.log(selectedCardDataShow,'selectedCardDataShowselectedCardDataShow');
+  
   const {
     leadData,
     myLeadData,
@@ -58,6 +60,7 @@ const LeadInfoScreen = () => {
     myLeadOpportunity,
     myLeadClosure,
     allContectMy,
+    mySatgeDataRedux
   } = useSelector((state: RootState) => state.auth);
 
   const [selectedCards, setSelectedCards] = useState<number[]>([1]);
@@ -415,7 +418,7 @@ const LeadInfoScreen = () => {
           style={[globalStyles.h7, globalStyles.fs2, styles.valueContent, globalStyles.tc]}
           allowFontScaling={false}
         >
-          {(selectedCards.includes(2) && permission.ADMIN) || permission.CRM ? leadData.leadPhone : myLeadData.leadPhone}
+          {(selectedCards.includes(2) && permission.ADMIN) || permission.CRM ? leadData?.leadPhone : myLeadData?.leadPhone ?? ""}
         </Text>
       </View>
       <View style={styles.infoRow}>
@@ -424,7 +427,7 @@ const LeadInfoScreen = () => {
           style={[globalStyles.h7, globalStyles.fs2, styles.valueContent, globalStyles.tc]}
           allowFontScaling={false}
         >
-          {(selectedCards.includes(2) && permission.ADMIN) || permission.CRM ? leadData.leadEmail : myLeadData.leadEmail}
+          {(selectedCards.includes(2) && permission.ADMIN) || permission.CRM ? leadData?.leadEmail : myLeadData?.leadEmail ?? ""}
         </Text>
       </View>
     </View>
@@ -440,7 +443,7 @@ const LeadInfoScreen = () => {
             {permission?.ADMIN || permission.CRM ? (
               <View style={styles.row}>{renderLeadInfo(leadData)}</View>
             ) : (
-              <View style={styles.row}>{renderLeadInfo(myLeadData)}</View>
+              <View style={styles.row}>{renderLeadInfo(myLeadData ?? "")}</View>
             )}
 
             {permission?.ADMIN ||
@@ -524,7 +527,7 @@ const LeadInfoScreen = () => {
                 </View>
               </>
             ) : null}
-            {selectedCardDataShow === 2 || selectedCardDataShow === 3 || selectedCardDataShow === 1 ? (
+            {selectedCardDataShow === 2 || selectedCardDataShow === 3 || selectedCardDataShow === 1 || selectedCardDataShow === 5 || selectedCardDataShow === 4 || selectedCardDataShow === 7 ? (
               <View>
                 <Text
                   style={[
@@ -860,7 +863,7 @@ const LeadInfoScreen = () => {
                     style={[globalStyles.h6, globalStyles.fs1, globalStyles.tc]}
                     allowFontScaling={false}
                   >
-                    {leadData.leadName}
+                    {leadData?.leadName}
                   </Text>
                   <Text
                     style={[
@@ -893,62 +896,23 @@ const LeadInfoScreen = () => {
               </View>
             </>
           ) : (
-            //           <View style={styles.header}>
-            //             <View style={styles.headerLeft}>
-            //               <View style={styles.statusBadge}>
-            //                 <Text
-            //                   style={[globalStyles.h8, globalStyles.tc4]}
-            //                   allowFontScaling={false}
-            //                 >
-            //                 {myLeadData?.stage
-            // ? myLeadData.stage.charAt(0).toUpperCase() + myLeadData.stage.slice(1)
-            // : ""}
-            //                 </Text>
-            //               </View>
-            //               <Text
-            //                 style={[globalStyles.h2, globalStyles.fs1]}
-            //                 allowFontScaling={false}
-            //               >
-            //                 {myLeadData.leadName}
-            //               </Text>
-            //               <Text
-            //                 style={[globalStyles.h7, globalStyles.fontfm]}
-            //                 allowFontScaling={false}
-            //               >
-            //                 {myLeadData.project_name}
-            //               </Text>
-            //               <Text
-            //                 style={[globalStyles.h7, globalStyles.fontfm]}
-            //                 allowFontScaling={false}
-            //               >
-            //                 {myLeadData.projecttype_name}
-            //               </Text>
-            //             </View>
-            //             <TouchableOpacity
-            //               onPress={() => handleDialPress(myLeadData.leadPhone)}
-            //             >
-            //               <View style={styles.callIconCircle}>
-            //                 <Feather name="phone-call" size={24} color="#00C853" />
-            //               </View>
-            //             </TouchableOpacity>
-            //           </View>)}
-
             (() => {
               const selectedLeadData =
-                selectedCardDataShow === 2
-                  ? allContectMy
-                  : selectedCardDataShow === 3
-                  ? myLeadData
-                  : selectedCardDataShow === 4
-                  ? myLeadProspectShow
-                  : selectedCardDataShow === 5
-                  ? myLeadOpportunity
-                  : selectedCardDataShow === 6
-                  ? myLeadClosure
-                  : selectedCardDataShow === null
-                  ? teamLeadData
-                  : "";
-
+              selectedCardDataShow === 2
+                ? allContectMy
+                : selectedCardDataShow === 3
+                ? myLeadData
+                : selectedCardDataShow === 4
+                ? myLeadProspectShow
+                : selectedCardDataShow === 5
+                ? myLeadOpportunity
+                : selectedCardDataShow === 6
+                ? myLeadClosure
+                : selectedCardDataShow === 7
+                ? mySatgeDataRedux
+                : selectedCardDataShow === null
+                ? teamLeadData
+                : {};
               return (
                 <View style={styles.header}>
                   <View style={styles.headerLeft}>
@@ -985,7 +949,7 @@ const LeadInfoScreen = () => {
                   <TouchableOpacity
                     onPress={() => {
                       if (selectedLeadData?.leadPhone) {
-                        handleDialPress(selectedLeadData.leadPhone);
+                        handleDialPress(selectedLeadData?.leadPhone);
                       } else {
                         console.warn("Lead phone number is missing");
                       }
@@ -1013,7 +977,7 @@ const LeadInfoScreen = () => {
                 (item) => item.content === selectedContent
               );
               if (selectedCard) {
-                handleCardPress(selectedCard.id);
+                handleCardPress(selectedCard?.id);
               }
             }}
           />
