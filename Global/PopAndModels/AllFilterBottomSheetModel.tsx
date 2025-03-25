@@ -18,6 +18,7 @@ import { Checkbox } from "react-native-paper";
 import {
   getOfficeDetails,
   getStage,
+  getStageType,
 } from "../../Components/Screens/LeadInfoScreenService";
 import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import { getAllForms } from "../../Components/Screens/DashboardService";
@@ -30,11 +31,19 @@ const { height: screenHeight } = Dimensions.get("window");
 
 const FilterBottomSheet: React.FC<{
   visible: boolean;
-  selectViewData
+  selectViewData;
   selectedStagesLocal: any[];
+  selectedTab;
   onClose: () => void;
   onApplyFilters: (filters: any) => void;
-}> = ({ visible, onClose, onApplyFilters, selectedStagesLocal ,selectViewData }) => {
+}> = ({
+  visible,
+  onClose,
+  onApplyFilters,
+  selectedStagesLocal,
+  selectViewData,
+  selectedTab,
+}) => {
   const translateY = useSharedValue(screenHeight);
   const [selectedCategory, setSelectedCategory] = useState("Stage");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
@@ -45,9 +54,10 @@ const FilterBottomSheet: React.FC<{
     useState<string[]>(selectedStagesLocal);
   const dispatch = useDispatch();
   const [userType, setUserType] = useState<string>("0");
-  const { selectedStagesAll ,allFormShowFiter } = useSelector((state: RootState) => state.auth);
-  console.log(allFormShowFiter,'allFormShowFiterallFormShowFiterallFormShowFiter');
-  
+  const { selectedStagesAll, allFormShowFiter } = useSelector(
+    (state: RootState) => state.auth
+  );
+
   useEffect(() => {
     setSelectedStages(selectedStagesAll);
   }, [selectedStagesAll]);
@@ -72,7 +82,6 @@ const FilterBottomSheet: React.FC<{
   useEffect(() => {
     fetchData();
   }, [selectedCategory]);
-
 
   const filterStagesByIsSale = (stages: any[], isSale: number): any[] => {
     return stages
@@ -106,7 +115,29 @@ const FilterBottomSheet: React.FC<{
         search: selectedCategory === "form" ? value : "",
       };
 
+      let type;
+      switch (selectedTab) {
+        case 2:
+          type = "Contact";
+          break;
+        case 7:
+          type = "Lead";
+          break;
+        case 4:
+          type = "Prospect";
+          break;
+        case 5:
+          type = "Opportunity";
+          break;
+        case 6:
+          type = "Closure";
+          break;
+        default:
+          type = "";
+      }
+
       if (selectedCategory === "Stage") {
+        // const stageData = await getStageType(type);
         const stageData = await getStage();
         const userData = store.getState().auth.userId;
         const response = await getOfficeDetails(userData);
@@ -133,6 +164,8 @@ const FilterBottomSheet: React.FC<{
 
   const memoizedFilteredData = useMemo(() => {
     if (selectedCategory === "Stage") {
+      console.log(allData,'allDataallDataallData::::::::');
+      
       return allData.filter((item) => item.stage_Name);
     }
     if (selectedCategory === "form") {
@@ -189,14 +222,16 @@ const FilterBottomSheet: React.FC<{
         );
 
   const filterOptions = [
-    ...(selectViewData === 1 ||selectViewData === 2 ? []: [{ label: "Stage", key: "Stage" }]), 
+    ...(selectViewData === 1 || selectViewData === 2
+      ? []
+      : [{ label: "Stage", key: "Stage" }]),
     { label: "Form", key: "form" },
     { label: "Date Range", key: "dateRange" },
   ];
 
   useEffect(() => {
-    if (!filterOptions.find(option => option.key === selectedCategory)) {
-      setSelectedCategory("form"); 
+    if (!filterOptions.find((option) => option.key === selectedCategory)) {
+      setSelectedCategory("form");
     }
   }, [filterOptions]);
 
@@ -368,44 +403,37 @@ const FilterBottomSheet: React.FC<{
 
                       {item.sub_Stage_name?.length > 0 && (
                         <View>
-                          {item.sub_Stage_name.map((subItem) => (
+                        {item.sub_Stage_name.map((subItem) => {
+                          console.log("SubItem ID:", subItem._id);
+                          console.log("Is Selected:", selectedFilters.includes(subItem._id) || selectedStagesAll.includes(subItem.stage_Name));
+                    
+                          return (
                             <View key={subItem._id} style={styles.checkboxRow}>
                               <View style={{ transform: [{ scale: 0.7 }] }}>
                                 <Checkbox
                                   status={
                                     selectedFilters.includes(subItem._id) ||
-                                    selectedStagesAll.includes(
-                                      subItem.stage_Name
-                                    )
+                                    selectedStagesAll.includes(subItem.stage_Name)
                                       ? "checked"
                                       : "unchecked"
                                   }
-                                  onPress={() =>
-                                    handleFilterSelectionStage(subItem)
-                                  }
+                                  onPress={() => handleFilterSelectionStage(subItem)}
                                   color="#3F8CFF"
                                   uncheckedColor="#A0A0A0"
                                 />
                               </View>
-                              <TouchableOpacity
-                                onPress={() =>
-                                  handleFilterSelectionStage(subItem)
-                                }
-                              >
+                              <TouchableOpacity onPress={() => handleFilterSelectionStage(subItem)}>
                                 <Text
-                                  style={[
-                                    globalStyles.h8,
-                                    globalStyles.fs3,
-                                    globalStyles.tc,
-                                  ]}
+                                  style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc]}
                                   allowFontScaling={false}
                                 >
                                   {subItem.stage_Name}
                                 </Text>
                               </TouchableOpacity>
                             </View>
-                          ))}
-                        </View>
+                          );
+                        })}
+                      </View>
                       )}
                     </View>
                   ))

@@ -24,6 +24,23 @@ export async function getAllStage() {
   }
 
 
+  export async function getStageType(type:any) {
+  
+    try {
+      const callParams = await getCallParams("GET");
+      const response = await makeCall(
+        
+        urls.GETSTAGEDATA +
+        `?type=${type}`,
+        callParams);
+      console.log(response,"reminderResponseData")
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
   export async function getTeamList() {
     try {
       const callParams = await getCallParams("GET");

@@ -39,8 +39,14 @@ import CustomCardNew from "../../NewDesine/GlobalComponets/CustomCardNew";
 import FotterDseine from "../../NewDesine/GlobalComponets/FotterDseine";
 import CustomBigCard from "../../NewDesine/GlobalComponets/CustomBigCard";
 import Footer from "../../Global/Components/Footer";
-import { getAllUsersMyLead } from "./LeadsService";
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import {
+  getAllMyLeadContactStage,
+  getAllMyLeadStageLead,
+  getAllUsersMyLead,
+  getLeadStageOpportunity,
+  getLeadStageProspect,
+} from "./LeadsService";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 const projectData = [
   {
@@ -77,12 +83,22 @@ const projectData = [
 const staticData = {
   leads: [
     {
+      id: 7,
+      content: "Lead",
+      cardColor: "#E3C9FF",
+      calendarBackgroundColor: "#E3C9FF",
+      leadDataKey: "",
+      myleadKey: "total",
+      lead_my_pipeline_count: "",
+    },
+
+    {
       id: 2,
       content: "Contact",
       cardColor: "#E8B86D",
       calendarBackgroundColor: "#E8B86D",
       leadDataKey: "lead_total_new_count",
-      myleadKey: "lead_my_new_count",
+      myleadKey: "total",
       lead_my_pipeline_count: "",
     },
     {
@@ -91,7 +107,7 @@ const staticData = {
       cardColor: "#99e6ff",
       calendarBackgroundColor: "#91DDCF",
       leadDataKey: "",
-      myleadKey: "",
+      myleadKey: "total",
       lead_my_pipeline_count: "",
     },
     {
@@ -100,26 +116,9 @@ const staticData = {
       cardColor: "#FFF3DF",
       calendarBackgroundColor: "#F19ED2",
       leadDataKey: "lead_total_pipeline_count",
-      myleadKey: "lead_my_pipeline_count",
+      myleadKey: "total",
     },
-    // {
-    //   id: 3,
-    //   content: "Closure",
-    //   cardColor: "#D4FFEA",
-    //   calendarBackgroundColor: "#EF9C66",
-    //   leadDataKey: "",
-    //   myleadKey: "",
-    //   lead_my_pipeline_count: "lead_my_pipeline_count",
-    // },
-    // {
-    //   id: 1,
-    //   content: "Visit Done",
-    //   cardColor: "#D4FFEA",
-    //   calendarBackgroundColor: "#AFD198",
-    //   leadDataKey: "lead_total_visit_done_count",
-    //   myleadKey: "",
-    //   visit_done_count: "lead_total_visit_done_count",
-    // },
+
     {
       id: 6,
       content: "Closure",
@@ -129,24 +128,6 @@ const staticData = {
       myleadKey: "lead_my_not_answered_count",
       visit_done_count: "lead_total_visit_done_count",
     },
-    // {
-    //   id: 7,
-    //   content: "Not Intrested",
-    //   cardColor: "#FFEFEC",
-    //   calendarBackgroundColor: "#FFCCA7",
-    //   leadDataKey: "lead_my_not_intrested_count",
-    //   myleadKey: "lead_my_not_intrested_count",
-    //   visit_done_count: "lead_total_visit_done_count",
-    // },
-    // {
-    //   id: 8,
-    //   content: "Call Back",
-    //   cardColor: "#FFF3DF",
-    //   calendarBackgroundColor: "#C5E0A3",
-    //   leadDataKey: "lead_total_call_back_count",
-    //   myleadKey: "lead_my_call_back_count",
-    //   visit_done_count: "lead_total_visit_done_count",
-    // },
   ],
   attendance: [
     {
@@ -263,10 +244,29 @@ const Dashboard: React.FC<CustomProps> = () => {
   const roleFromRedux = useSelector(selectRole);
   const [userRole, setUserRole] = useState<any>();
   const [refreshing, setRefreshing] = useState(false);
+  const [userType, setUserType] = useState<string>("0");
+  const [myleadSatgeShow, setMyLeadSatge] = useState<any>([]);
+  const [allContect, setAllContectData] = useState<any>([]);
+  const [myLeadProspect, setLeadProspect] = useState<any>([]);
+   const [myLeadStageOpportunity, setLeadStageOpportunity] = useState<any>([]);
+  
+
   const userId = store.getState().auth;
   const { authenticated, role, privileges } = useSelector(
     (state: RootState) => state.auth
   );
+
+  useEffect(() => {
+    getUserMatch();
+  }, []);
+
+  useEffect(() => {
+    if (userType === "0") {
+      featchAllData();
+    }
+    fetchData();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -279,7 +279,7 @@ const Dashboard: React.FC<CustomProps> = () => {
         }
         if (permission.HR || permission["MY-Dashboard"]) {
           apiCallBasedOnPermissionForView.push(fetchMy_Attendance());
-          apiCallBasedOnPermissionForView.push(fetchMyDashboardData());
+          // apiCallBasedOnPermissionForView.push(fetchMyDashboardData());
         }
         apiCallBasedOnPermissionForView.push(fetchDashboardCRM());
         apiCallBasedOnPermissionForView.push(fetchUserData());
@@ -305,7 +305,7 @@ const Dashboard: React.FC<CustomProps> = () => {
         userId: store.getState().auth.userId,
         startDate: "",
         endDate: "",
-        page : paginationModel.pageSize,
+        page: paginationModel.pageSize,
         pageSize: paginationModel.pageSize,
         teamId: "",
         search: "",
@@ -380,18 +380,51 @@ const Dashboard: React.FC<CustomProps> = () => {
         pageSize: paginationModel.pageSize,
       };
       const [myLeads, projects, teamLead] = await Promise.all([
-        // getDataMylead(),
         getAllUsersMyLead(payload),
         getDataProject(),
-        getAllTeamLeads(payload)
+        getAllTeamLeads(payload),
       ]);
-      // setDashboardDataMyLead(myLeads?.data[0] || []);
       setDashboardDataMyLead(myLeads?.data || []);
       setDashboardDataProject(projects?.data[0] || []);
-      setTeamLeadData(teamLead?.data || [])
+      setTeamLeadData(teamLead?.data || []);
     } catch (error) {
       console.error("Error fetching my dashboard data", error);
     }
+  };
+
+  const featchAllData = async () => {
+    try {
+      const payload = {
+        userId: store.getState().auth.userId,
+        pageNo: "",
+        pageSize: paginationModel.pageSize,
+        start_date: "",
+        end_date: "",
+      };
+      const response1 = await getAllUsersMyLead(payload);
+      setDashboardDataMyLead(response1?.metadata || []);
+      const response2 = await getAllMyLeadStageLead(payload);
+      setMyLeadSatge(response2?.metadata || []);
+      const response3 = await getAllMyLeadContactStage(payload);
+      setAllContectData(response3?.metadata || []);
+        const response4 = await getLeadStageProspect(payload)
+        setLeadProspect(response4?.metadata || [])
+        const response5  =  await getLeadStageOpportunity(payload)
+        setLeadStageOpportunity(response5?.metadata || [])
+    } catch (error) {}
+  };
+
+  const fetchData = async () => {
+    try {
+      const payload = {
+        userId: store.getState().auth.userId,
+        pageNo: "",
+        pageSize: paginationModel.pageSize,
+      };
+
+      const response2 = await getAllTeamLeads(payload);
+      setTeamLeadData(response2?.data || []);
+    } catch (error) {}
   };
 
   const fetchDashboardCRM = async () => {
@@ -423,21 +456,31 @@ const Dashboard: React.FC<CustomProps> = () => {
     } catch {}
   };
 
+  const getUserMatch = async () => {
+    try {
+      const paylode = store.getState().auth?.userId;
+      const resRole = await getPerosnalOffice(paylode);
+      if (resRole.data.teamRoleName.toLowerCase()?.includes("presales")) {
+        setUserType("0");
+      } else {
+        setUserType("1");
+      }
+    } catch (error) {}
+  };
+
   const navigateToSection = (id: number) => {
-    console.log(id," flexGrow:1 flexGrow:1 flexGrow:1 flexGrow:1 flexGrow:1 flexGrow:1");
-    
     if (id > 8) return;
     dispatch(setLeadId(id));
     navigation.navigate("Leads");
     setModalVisible(false);
   };
 
- const navigationTeamLead = () =>{
-  navigation.navigate("TeamLead", { selectedView : 2});
- }
- const allLeadNavigations = () => {
-  navigation.navigate("AllLeadScreen" , { selectedView : 1});
- }
+  const navigationTeamLead = () => {
+    navigation.navigate("TeamLead", { selectedView: 2 });
+  };
+  const allLeadNavigations = () => {
+    navigation.navigate("AllLeadScreen", { selectedView: 1 });
+  };
 
   const handleProfile = () => {
     navigation.navigate("MyProfile");
@@ -470,7 +513,7 @@ const Dashboard: React.FC<CustomProps> = () => {
     setRefreshing(true);
     try {
       await getValuepermission();
-      await fetchMyDashboardData();
+      // await fetchMyDashboardData();
       await fetchDashboardCRM();
       await fetchUserData();
       await handleCardClick("");
@@ -481,9 +524,6 @@ const Dashboard: React.FC<CustomProps> = () => {
     }
   };
 
-  // const testing = () => {
-  //   // navigation.navigate("DashboardNew");
-  // };
   return (
     <>
       {loading ? (
@@ -535,9 +575,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                 </View>
               ))}
             </ScrollView> */}
-
-            {/* Leads section */}
-            {permission?.ADMIN || permission.CRM ? (
+            {/* {permission?.ADMIN || permission.CRM ? (
               <>
                 <View style={styles.row}>
                   <View style={styles.textContainerAll}>
@@ -564,14 +602,6 @@ const Dashboard: React.FC<CustomProps> = () => {
                       {dashboardAllLead?.total}
                     </Text>
                   </View>
-                  {/* <View style={styles.iconFord}>
-                    <AntDesign
-                      name="right"
-                      size={20}
-                      color="black"
-                      onPress={() => navigateToSection(1)}
-                    />
-                  </View> */}
                   <TouchableOpacity
                     style={styles.viewAllContainer}
                     onPress={() => allLeadNavigations()}
@@ -618,18 +648,53 @@ const Dashboard: React.FC<CustomProps> = () => {
                           iconBackgroundColor={item.calendarBackgroundColor}
                           onCardPress={() => navigateToSection(Number(item.id))}
                         />
-                        {/* <CustomCard
-                          cardContent={<Text>{item.content}</Text>}
-                          cardColor={item.cardColor}
-                          calendarBackgroundColor={item.calendarBackgroundColor}
-                          calendarText={`${
-                            dashboardData.allLead[item.leadDataKey] || 0
-                          }`}
-                        /> */}
                       </View>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
+              </>
+            ) : (
+              ""
+            )} */}
+
+            {permission?.ADMIN || permission.CRM ? (
+              <>
+                <TouchableOpacity onPress={() => allLeadNavigations()}>
+                  <View style={styles.container}>
+                    <View style={styles.newCard}>
+                      <View style={styles.textContainer}>
+                        <Text
+                          style={[
+                            globalStyles.fs1,
+                            globalStyles.h7,
+                            globalStyles.tc,
+                          ]}
+                          allowFontScaling={false}
+                        >
+                          All Leads
+                        </Text>
+                        <Text
+                          style={[
+                            globalStyles.fs1,
+                            globalStyles.h7,
+                            globalStyles.tc,
+                            styles.role,
+                          ]}
+                          allowFontScaling={false}
+                        >
+                          {dashboardAllLead?.total}
+                        </Text>
+                      </View>
+                      <View style={styles.iconCircle}>
+                        <FontAwesome5
+                          name="user-alt"
+                          size={24}
+                          color="#8080ff"
+                        />
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </>
             ) : (
               ""
@@ -659,18 +724,9 @@ const Dashboard: React.FC<CustomProps> = () => {
                       ]}
                       allowFontScaling={false}
                     >
-                      {/* {dashboardDataMyLead.lead_my_total_count} */}
-                      {dashboardDataMyLead?.length}
+                      {dashboardDataMyLead?.total}
                     </Text>
                   </View>
-                  {/* <View style={styles.iconFord}>
-                    <AntDesign
-                      name="right"
-                      size={20}
-                      color="black"
-                      onPress={() => navigateToSection(3)}
-                    />
-                  </View> */}
                   <TouchableOpacity
                     style={styles.viewAllContainer}
                     onPress={() => navigateToSection(3)}
@@ -699,41 +755,53 @@ const Dashboard: React.FC<CustomProps> = () => {
                   showsHorizontalScrollIndicator={false}
                   style={styles.horizontalScroll}
                 >
-                  {staticData.leads.map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      onPress={() => {
-                        navigateToSection(Number(item.id));
-                      }}
-                    >
-                      <View style={styles.cardContainer}>
-                        {/* <CustomCard
-                          cardContent={<Text>{item.content}</Text>}
-                          cardColor={item.cardColor}
-                          calendarBackgroundColor={item.calendarBackgroundColor}
-                          calendarText={`${
-                            dashboardDataMyLead[item.myleadKey] || 0
-                          }`}
-                        /> */}
-
-                        <CustomCardNew
-                          id={item.id}
-                          title={item.content}
-                          count={`${dashboardDataMyLead[item.myleadKey] || 0}`}
-                          iconName="calendar"
-                          iconBackgroundColor={item.calendarBackgroundColor}
-                          onCardPress={() => navigateToSection(Number(item.id))}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  ))}
+                  {staticData.leads
+                    .filter(
+                      (item) =>
+                        (userType !== "1" || item.id !== 2) &&
+                        (userType !== "0" || (item.id !== 5 && item.id !== 6))
+                    )
+                    .map((item) => {
+                      let finalCount = 0;
+                      if (item.id === 7) {
+                        finalCount = myleadSatgeShow[item.myleadKey] || 0;
+                      } else if (item.id === 2) {
+                        finalCount = allContect[item.myleadKey] || 0;
+                      }else if(item.id === 4){
+                        finalCount = myLeadProspect[item.myleadKey] || 0
+                      }else if(item.id === 5){
+                        finalCount = myLeadStageOpportunity[item.myleadKey] || 0
+                      }
+                      return (
+                        <TouchableOpacity
+                          key={item.id}
+                          onPress={() => {
+                            navigateToSection(Number(item.id));
+                          }}
+                        >
+                          <View style={styles.cardContainer}>
+                            <CustomCardNew
+                              id={item.id}
+                              title={item.content}
+                              count={`${finalCount}`}
+                              iconName="calendar"
+                              iconBackgroundColor={item.calendarBackgroundColor}
+                              onCardPress={() =>
+                                navigateToSection(Number(item.id))
+                              }
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
                 </ScrollView>
               </>
             ) : (
               ""
             )}
 
-            {permission["MY-Dashboard"] && privileges["Team Leads"]?.length > 0 ? (
+            {permission["MY-Dashboard"] &&
+            privileges["Team Leads"]?.length > 0 ? (
               <>
                 <View style={styles.row}>
                   {/* <View style={styles.textContainerAll}>
@@ -789,7 +857,7 @@ const Dashboard: React.FC<CustomProps> = () => {
                   showsHorizontalScrollIndicator={false}
                   style={styles.horizontalScroll}
                 > */}
-                  {/* {staticData.leads.map((item) => (
+                {/* {staticData.leads.map((item) => (
                     <TouchableOpacity
                       key={item.id}
                       onPress={() => {
@@ -808,41 +876,42 @@ const Dashboard: React.FC<CustomProps> = () => {
                       </View>
                     </TouchableOpacity>
                   ))} */}
-  <TouchableOpacity    onPress={()=>navigationTeamLead()}>
-  <View style={styles.container}>
-      <View style={styles.newCard}>
-        {/* Text and Count Section */}
-        <View style={styles.textContainer}>
-          <Text 
-            style={[
-              globalStyles.fs1,
-              globalStyles.h7,
-              globalStyles.tc,
-            ]}
-            allowFontScaling={false}
-          >
-            Team Leads
-          </Text>
-          <Text
-            style={[
-              globalStyles.fs1,
-              globalStyles.h7,
-              globalStyles.tc,
-              styles.role,
-            ]}
-            allowFontScaling={false}
-          >
-            {teamLeadData?.length}
-          </Text>
-        </View>
-
-        {/* Circular Icon */}
-        <View style={styles.iconCircle}>
-          <FontAwesome5 name="user-alt" size={24} color="#8080ff" />
-        </View>
-      </View>
-    </View>
-  </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigationTeamLead()}>
+                  <View style={styles.container}>
+                    <View style={styles.newCard}>
+                      <View style={styles.textContainer}>
+                        <Text
+                          style={[
+                            globalStyles.fs1,
+                            globalStyles.h7,
+                            globalStyles.tc,
+                          ]}
+                          allowFontScaling={false}
+                        >
+                          Team Leads
+                        </Text>
+                        <Text
+                          style={[
+                            globalStyles.fs1,
+                            globalStyles.h7,
+                            globalStyles.tc,
+                            styles.role,
+                          ]}
+                          allowFontScaling={false}
+                        >
+                          {teamLeadData?.length}
+                        </Text>
+                      </View>
+                      <View style={styles.iconCircle}>
+                        <FontAwesome5
+                          name="user-alt"
+                          size={24}
+                          color="#8080ff"
+                        />
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
                 {/* </ScrollView> */}
               </>
             ) : (
@@ -1378,32 +1447,32 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
   newCard: {
-    width: '95%',
+    width: "95%",
     minHeight: 154,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
-    flexDirection: 'row', 
-    alignItems: 'center',
-    justifyContent: 'space-between', // ✅ Creates space between text and icon
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // ✅ Creates space between text and icon
     paddingHorizontal: 20,
-    shadowColor: '#000000',
+    shadowColor: "#000000",
     shadowOpacity: 0.06,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 10 },
     elevation: 2,
   },
   iconCircle: {
-    width: 50, 
-    height: 50, 
-    borderRadius: 25, 
-    backgroundColor: '#f0f4ff', 
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#f0f4ff",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

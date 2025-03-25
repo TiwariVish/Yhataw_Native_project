@@ -78,6 +78,23 @@ function Leads() {
   const [remider, setRemider] = useState<{ [key: string]: any }>({});
   const [userType,setUserType] = useState<string>("0")
   console.log(userType,'userTypeuserTypeuserType');
+
+  const [tabFilters, setTabFilters] = useState<{
+    [key: number]: {
+      search: string;
+      stage: string; 
+      formLead: any[];
+      selectedDateRange: { from: string; to: string };
+      selectedFilters: any[]; 
+    };
+  }>({
+    2: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
+    3: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
+    4: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
+    5: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
+    6: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
+    7: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
+  });
   
   const scrollViewRef = useRef<ScrollView>(null);
   useEffect(() => {
@@ -152,34 +169,59 @@ function Leads() {
       }
     }
 
-  const handleApplyFilters = (filters: any) => {
-    setFilters(filters);
-    setIsVisible(false);
+  // const handleApplyFilters = (filters: any) => {
+  //   setFilters(filters);
+  //   setIsVisible(false);
+  //   const selectedStages = filters.stage
+  //     ? filters.stage.split(",").map((stage) => stage.trim())
+  //     : [];
+  //   setSelectedStages(selectedStages);
+  //   const fetchFilteredLeads = async () => {
+  //     try {
+  //       const payload = {
+  //         userId: store.getState().auth.userId,
+  //         pageNo: 0,
+  //         pageSize: paginationModel.pageSize,
+  //         ...filters,
+  //       };
+  //       const res = await getAllUsersMyLead(payload);
+  //       setFilteredLeads(res.data);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
+
+  //   fetchFilteredLeads();
+  // };
+
+
+
+
+  const handleApplyFilters = async (filters: any) => {
+    console.log(filters, 'Applied Filters:::::::::::::::::::', selectedCard);
     const selectedStages = filters.stage
-      ? filters.stage.split(",").map((stage) => stage.trim())
-      : [];
-    setSelectedStages(selectedStages);
-    const fetchFilteredLeads = async () => {
-      try {
-        const payload = {
-          userId: store.getState().auth.userId,
-          pageNo: 0,
-          pageSize: paginationModel.pageSize,
-          ...filters,
-        };
-        const res = await getAllUsersMyLead(payload);
-        setFilteredLeads(res.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+        ? filters.stage.split(",").map((stage) => stage.trim())
+        : [];
+      // setSelectedStages(selectedStages);
+    setTabFilters((prev) => ({
+      ...prev,
+      [selectedCard]: {
+        ...prev[selectedCard],
+        ...filters, 
+        selectedFilters: selectedStages
+      },
+    }));
 
-    fetchFilteredLeads();
-  };
+    try {
+      await getAllLeadsData(false, 0, filters); 
+    } catch (error) {
+      console.error(error);
+    }
 
+    setIsVisible(false);
+};
   const handleReminder = async () => {
     let leads = [];
-
     if (selectedCard === 1) {
       leads = leadData;
     }else if(selectedCard === 2){
@@ -220,8 +262,9 @@ function Leads() {
     }
   };
 
-  const getAllLeadsData = async (isLoadMore = false, pageNo: number) => {
-    console.log(`Fetching page ${pageNo}`);
+  const getAllLeadsData = async (isLoadMore = false, pageNo: number, appliedFilters = tabFilters[selectedCard]) => {
+   console.log(appliedFilters,'appliedFiltersappliedFiltersappliedFiltersappliedFiltersappliedFilters');
+   
     if (isLoadMore && loadingMore) return;
     if (!isLoadMore && loading) return;
   
@@ -238,8 +281,9 @@ function Leads() {
         end_date: "",
         search: searchQuery,
         pageSize: paginationModel.pageSize,
-        ...filters,
+        ...appliedFilters,
       };
+  console.log(payload,'payloadpayloadpayloadpayloadpayload');
   
       let responses;
   
@@ -265,6 +309,7 @@ function Leads() {
   
       if (userType === "0") {
         const [response2, response4,response7,response8] = responses;
+        console.log(responses,"responsesresponsesresponses")
         setDataMyLead((prevData) => {
           const newData = [...prevData, ...(response2?.data || [])];
           return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
@@ -389,8 +434,21 @@ function Leads() {
         leadsToFilter = defaultNoData;
         break;
     }
-    if (filters.stage) {
-      const stageArray = filters.stage.split(",").map((stage) => stage.trim());
+    console.log(tabFilters,'filtersfiltersfiltersfiltersfiltersfilters::::::::::::');
+    
+    // if (filters.stage) {
+    //   const stageArray = filters.stage.split(",").map((stage) => stage.trim());
+    //   leadsToFilter = leadsToFilter.filter((lead) => {
+    //     const isMatch = stageArray.includes(lead.stage);
+    //     if (!isMatch && lead.stage) {
+    //       noStageMatch = true;
+    //     }
+    //     return isMatch;
+    //   });
+    // }
+
+    if (tabFilters?.[selectedCard]?.stage) {  
+      const stageArray = tabFilters[selectedCard].stage.split(",").map((stage) => stage.trim());
       leadsToFilter = leadsToFilter.filter((lead) => {
         const isMatch = stageArray.includes(lead.stage);
         if (!isMatch && lead.stage) {
@@ -415,6 +473,7 @@ function Leads() {
     dataMyLead,
     searchQuery,
     filters.stage,
+    tabFilters?.[selectedCard]?.stage,
     myLeadStageClosure,
     myLeadProspect,
     myLeadStageOpportunity,
@@ -581,8 +640,9 @@ function Leads() {
             visible={isVisible}
             onClose={() => setIsVisible(false)}
             onApplyFilters={handleApplyFilters}
-            selectedStagesLocal={selectedStages}
+            selectedStagesLocal={tabFilters[selectedCard]?.selectedFilters ?? []}
             selectViewData
+            selectedTab={selectedCard}
           />
         </View>
       </Modal>
