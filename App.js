@@ -8,8 +8,38 @@ import { store, persistor } from './utils/store';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { Video } from 'expo-av'; // Import Video from expo-av
+import {getAllTodayReminders} from './Global/Notifications/PushNotificationService'
+import Toast from 'react-native-toast-message';
 
 export default function App() {
+
+
+  const boldText = (text) => {
+    return text.replace(/<strong>(.*?)<\/strong>/g, (match, p1) => `${p1}`); 
+  };
+  
+  useEffect(() => {
+    const reminder = async () => {
+      let remindersRes = await getAllTodayReminders();
+      if ((remindersRes.data || [])?.length) {
+        const reminderMessages = remindersRes.data
+          .map(reminder => `• ${boldText(reminder.body)} 📅`) 
+          .join('\n\n');
+  
+        Toast.show({
+          type: 'success',
+          text1: 'Today Reminder Alert',
+          text2: reminderMessages,
+          position: 'bottom',
+          visibilityTime: 120000, 
+          textStyle: { textAlign: 'left' }
+        });
+      }
+    };
+  
+    reminder();
+  }, []);
+
   SplashScreen.preventAutoHideAsync();
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
 
@@ -59,6 +89,7 @@ export default function App() {
               <StatusBar style="auto" />
             </View>
           )}
+            <Toast />
         </View>
       </PersistGate>
     </Provider>

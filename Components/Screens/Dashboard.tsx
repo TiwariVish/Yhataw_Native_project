@@ -39,6 +39,7 @@ import CustomCardNew from "../../NewDesine/GlobalComponets/CustomCardNew";
 import FotterDseine from "../../NewDesine/GlobalComponets/FotterDseine";
 import CustomBigCard from "../../NewDesine/GlobalComponets/CustomBigCard";
 import Footer from "../../Global/Components/Footer";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   getAllMyLeadContactStage,
   getAllMyLeadStageLead,
@@ -47,6 +48,7 @@ import {
   getLeadStageProspect,
 } from "./LeadsService";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { getNotification } from "../../Global/Notifications/PushNotificationService";
 
 const projectData = [
   {
@@ -248,8 +250,16 @@ const Dashboard: React.FC<CustomProps> = () => {
   const [myleadSatgeShow, setMyLeadSatge] = useState<any>([]);
   const [allContect, setAllContectData] = useState<any>([]);
   const [myLeadProspect, setLeadProspect] = useState<any>([]);
-   const [myLeadStageOpportunity, setLeadStageOpportunity] = useState<any>([]);
-  
+  const [myLeadStageOpportunity, setLeadStageOpportunity] = useState<any>([]);
+  const [notifications, setNotifications] = useState([]);
+  console.log(
+    notifications,
+    "notificationsnotificationsnotificationsnotifications"
+  );
+  const notificationCount = notifications.filter(
+    (n: any) => n.status === "unread"
+  ).length;
+  console.log(notificationCount, "notificationCount");
 
   const userId = store.getState().auth;
   const { authenticated, role, privileges } = useSelector(
@@ -258,6 +268,7 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   useEffect(() => {
     getUserMatch();
+    getNotifications();
   }, []);
 
   useEffect(() => {
@@ -407,10 +418,10 @@ const Dashboard: React.FC<CustomProps> = () => {
       setMyLeadSatge(response2?.metadata || []);
       const response3 = await getAllMyLeadContactStage(payload);
       setAllContectData(response3?.metadata || []);
-        const response4 = await getLeadStageProspect(payload)
-        setLeadProspect(response4?.metadata || [])
-        const response5  =  await getLeadStageOpportunity(payload)
-        setLeadStageOpportunity(response5?.metadata || [])
+      const response4 = await getLeadStageProspect(payload);
+      setLeadProspect(response4?.metadata || []);
+      const response5 = await getLeadStageOpportunity(payload);
+      setLeadStageOpportunity(response5?.metadata || []);
     } catch (error) {}
   };
 
@@ -425,6 +436,12 @@ const Dashboard: React.FC<CustomProps> = () => {
       const response2 = await getAllTeamLeads(payload);
       setTeamLeadData(response2?.data || []);
     } catch (error) {}
+  };
+
+  const getNotifications = async () => {
+    const res = await getNotification();
+    console.log(res, "resresresresres");
+    setNotifications(res.data);
   };
 
   const fetchDashboardCRM = async () => {
@@ -453,6 +470,8 @@ const Dashboard: React.FC<CustomProps> = () => {
     try {
       const response = await getTeamWiseMember(team.id);
       setTeamWiseMember(response.data);
+      const res = await getNotification();
+      setNotifications(res.data);
     } catch {}
   };
 
@@ -477,6 +496,10 @@ const Dashboard: React.FC<CustomProps> = () => {
 
   const navigationTeamLead = () => {
     navigation.navigate("TeamLead", { selectedView: 2 });
+  };
+
+  const moveNotification = () => {
+    navigation.navigate("NotificationsScreen");
   };
   const allLeadNavigations = () => {
     navigation.navigate("AllLeadScreen", { selectedView: 1 });
@@ -539,27 +562,50 @@ const Dashboard: React.FC<CustomProps> = () => {
           >
             {/* Header section */}
             <View style={styles.header}>
-              <View style={styles.imageContainer}>
-                <Image
-                  source={require("../../assets/pulse_logo12.png")}
-                  style={styles.image}
-                />
+              {/* First Column (Image & Text) */}
+              <View
+                style={{ flex: 10, flexDirection: "row", alignItems: "center" }}
+              >
+                <View style={styles.imageContainer}>
+                  <Image
+                    source={require("../../assets/pulse_logo12.png")}
+                    style={styles.image}
+                  />
+                </View>
+                <View style={styles.textContainer}>
+                  <Text
+                    style={[globalStyles.fs1, globalStyles.h5, globalStyles.tc]}
+                    allowFontScaling={false}
+                  >
+                    {userData?.name}
+                  </Text>
+                  <Text
+                    style={[
+                      globalStyles.h8,
+                      globalStyles.fs3,
+                      globalStyles.tc1,
+                    ]}
+                    allowFontScaling={false}
+                  >
+                    {userRole?.hierarchyName}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.textContainer}>
-                <Text
-                  style={[globalStyles.fs1, globalStyles.h5, globalStyles.tc]}
-                  allowFontScaling={false}
-                >
-                  {userData?.name}
-                </Text>
-                <Text
-                  style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc1]}
-                  allowFontScaling={false}
-                >
-                  {/* {roleFromRedux} */}
-                  {userRole?.hierarchyName}
-                </Text>
-              </View>
+
+              <TouchableOpacity
+                style={styles.notificationCont}
+                onPress={moveNotification}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="notifications" size={30} color="black" />
+                {notificationCount > 0 && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText} allowFontScaling={false}>
+                      {notificationCount > 99 ? "99+" : notificationCount}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
             </View>
 
             {/* Horizontal cards section */}
@@ -767,10 +813,11 @@ const Dashboard: React.FC<CustomProps> = () => {
                         finalCount = myleadSatgeShow[item.myleadKey] || 0;
                       } else if (item.id === 2) {
                         finalCount = allContect[item.myleadKey] || 0;
-                      }else if(item.id === 4){
-                        finalCount = myLeadProspect[item.myleadKey] || 0
-                      }else if(item.id === 5){
-                        finalCount = myLeadStageOpportunity[item.myleadKey] || 0
+                      } else if (item.id === 4) {
+                        finalCount = myLeadProspect[item.myleadKey] || 0;
+                      } else if (item.id === 5) {
+                        finalCount =
+                          myLeadStageOpportunity[item.myleadKey] || 0;
                       }
                       return (
                         <TouchableOpacity
@@ -1458,7 +1505,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", // ✅ Creates space between text and icon
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     shadowColor: "#000000",
     shadowOpacity: 0.06,
@@ -1473,6 +1520,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f4ff",
     justifyContent: "center",
     alignItems: "center",
+  },
+  notificationCont: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badge: {
+    position: "absolute",
+    right: -5,
+    top: -5,
+    backgroundColor: "red",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 10,
+    fontWeight: "bold",
   },
 });
 

@@ -213,7 +213,7 @@ const ReminderBottomSheetModal: React.FC<ReminderBottomSheetModalProps> = ({
       style={styles.iconInsideInput}
     /> */}
                           <TextInput
-                            ref={inputRef} // Use ref to programmatically focus input
+                            // ref={inputRef} 
                             style={[styles.inputValue, globalStyles.h7]}
                             value={title}
                             placeholder="Enter Title"

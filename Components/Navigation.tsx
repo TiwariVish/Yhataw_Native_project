@@ -19,6 +19,7 @@ import DashboardNew from "../NewDesine/Dashboard/DashboardNew";
 import TeamLead from "./Screens/TeamLead";
 import AllLeadScreen from "./Screens/AllLeadScreen";
 import AddLeadManual from "./Screens/AddLeadManual";
+import NotificationsScreen from "./Screens/NotificationsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -213,6 +214,30 @@ const Navigation: React.FC = () => {
                     allowFontScaling={false}
                   >
                     Lead Info
+                  </Text>
+                ),
+                headerStyle: {
+                  backgroundColor: "white",
+                  ...({} as any),
+                },
+                headerShadowVisible: false,
+              }}
+            />
+
+<Stack.Screen
+              name="NotificationsScreen"
+              component={NotificationsScreen}
+              options={{
+                headerTitle: () => (
+                  <Text
+                    style={{
+                      marginLeft: -20,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                    allowFontScaling={false}
+                  >
+                    Notifcations
                   </Text>
                 ),
                 headerStyle: {

@@ -14,6 +14,7 @@ export type RootStackParamList = {
   TeamLead :{ selectedView: any }
   AllLeadScreen :{ selectedView: any }
   AddLeadManual:any
+  NotificationsScreen:any
 };
 
 // types.ts
@@ -31,6 +32,7 @@ export type RootStackParamList1 = {
   TeamLead : { selectedView: any }
   AllLeadScreen : { selectedView: any }
   AddLeadManual:any
+  NotificationsScreen :any
 };
 
 export type LoginScreenNavigationProp = StackNavigationProp<

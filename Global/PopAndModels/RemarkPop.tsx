@@ -180,7 +180,7 @@ const RemarkPop: React.FC<RemarkPop> = ({ visible, onClose, onSubmit,selectedCar
                       >
                         <View style={styles.inputWithIconContainer}>
                           <TextInput
-                            ref={inputRef}
+                            // ref={inputRef}
                             style={[
                               styles.inputValue,
                               globalStyles.h7,

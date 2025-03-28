@@ -43,7 +43,12 @@ import { LoginScreenNavigationProp } from "../type";
 import { LeadsSkeleton } from "../../Global/Components/SkeletonStructures";
 import LeadCard from "../../NewDesine/GlobalComponets/LeadCard";
 import Communications from "react-native-communications";
-import { getAllTeamLeads, getAllUsers, getPerosnalOffice, getReminder } from "./DashboardService";
+import {
+  getAllTeamLeads,
+  getAllUsers,
+  getPerosnalOffice,
+  getReminder,
+} from "./DashboardService";
 import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
 import CustomSearchBar from "../../NewDesine/GlobalComponets/CustomSearchBar";
 import CustomFlipBar from "../../NewDesine/GlobalComponets/CustomFlipBar";
@@ -73,29 +78,65 @@ function Leads() {
   const [myLeadProspect, setLeadProspect] = useState<any>([]);
   const [myLeadStageOpportunity, setLeadStageOpportunity] = useState<any>([]);
   const [myLeadStageClosure, setLeadStageClosure] = useState<any>([]);
-  const [myleadSatgeShow ,setMyLeadSatge] = useState<any>([])
-  const [allContect ,setAllContectData] = useState<any>([])
+  const [myleadSatgeShow, setMyLeadSatge] = useState<any>([]);
+  const [allContect, setAllContectData] = useState<any>([]);
   const [remider, setRemider] = useState<{ [key: string]: any }>({});
-  const [userType,setUserType] = useState<string>("0")
-  console.log(userType,'userTypeuserTypeuserType');
+  const [userType, setUserType] = useState<string>("0");
+  console.log(userType, "userTypeuserTypeuserType");
 
   const [tabFilters, setTabFilters] = useState<{
     [key: number]: {
       search: string;
-      stage: string; 
+      stage: string;
       formLead: any[];
       selectedDateRange: { from: string; to: string };
-      selectedFilters: any[]; 
+      selectedFilters: any[];
     };
   }>({
-    2: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
-    3: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
-    4: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
-    5: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
-    6: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
-    7: { search: "", stage: "", formLead: [], selectedDateRange: { from: "", to: "" }, selectedFilters: [] },
+    2: {
+      search: "",
+      stage: "",
+      formLead: [],
+      selectedDateRange: { from: "", to: "" },
+      selectedFilters: [],
+    },
+    3: {
+      search: "",
+      stage: "",
+      formLead: [],
+      selectedDateRange: { from: "", to: "" },
+      selectedFilters: [],
+    },
+    4: {
+      search: "",
+      stage: "",
+      formLead: [],
+      selectedDateRange: { from: "", to: "" },
+      selectedFilters: [],
+    },
+    5: {
+      search: "",
+      stage: "",
+      formLead: [],
+      selectedDateRange: { from: "", to: "" },
+      selectedFilters: [],
+    },
+    6: {
+      search: "",
+      stage: "",
+      formLead: [],
+      selectedDateRange: { from: "", to: "" },
+      selectedFilters: [],
+    },
+    7: {
+      search: "",
+      stage: "",
+      formLead: [],
+      selectedDateRange: { from: "", to: "" },
+      selectedFilters: [],
+    },
   });
-  
+
   const scrollViewRef = useRef<ScrollView>(null);
   useEffect(() => {
     if (!isVisible) {
@@ -112,7 +153,7 @@ function Leads() {
     useCallback(() => {
       let isActive = true;
       (async () => {
-        if (isActive) await   getAllLeadsData(false, 0);
+        if (isActive) await getAllLeadsData(false, 0);
       })();
 
       return () => {
@@ -120,7 +161,6 @@ function Leads() {
       };
     }, [searchQuery])
   );
-
 
   useEffect(() => {
     if (
@@ -132,9 +172,9 @@ function Leads() {
     }
   }, [dataMyLead, leadData, teamLeadData]);
 
-  useEffect(()=>{
-    getUserMatch()
-  },[])
+  useEffect(() => {
+    getUserMatch();
+  }, []);
 
   useEffect(() => {
     getAllLeadsData(false, 0);
@@ -153,21 +193,17 @@ function Leads() {
     }
   };
 
-    const getUserMatch = async() =>{
-      try {
-           const paylode = store.getState().auth?.userId;
-        const resRole = await getPerosnalOffice(paylode);
-        if(resRole.data.teamRoleName.toLowerCase()?.includes('presales')){
-          setUserType("0")
-        }
-        else{
-          setUserType("1")
-        }
-        
-      } catch (error) {
-        
+  const getUserMatch = async () => {
+    try {
+      const paylode = store.getState().auth?.userId;
+      const resRole = await getPerosnalOffice(paylode);
+      if (resRole.data.teamRoleName.toLowerCase()?.includes("presales")) {
+        setUserType("0");
+      } else {
+        setUserType("1");
       }
-    }
+    } catch (error) {}
+  };
 
   // const handleApplyFilters = (filters: any) => {
   //   setFilters(filters);
@@ -194,42 +230,39 @@ function Leads() {
   //   fetchFilteredLeads();
   // };
 
-
-
-
   const handleApplyFilters = async (filters: any) => {
-    console.log(filters, 'Applied Filters:::::::::::::::::::', selectedCard);
+    console.log(filters, "Applied Filters:::::::::::::::::::", selectedCard);
     const selectedStages = filters.stage
-        ? filters.stage.split(",").map((stage) => stage.trim())
-        : [];
-      // setSelectedStages(selectedStages);
+      ? filters.stage.split(",").map((stage) => stage.trim())
+      : [];
+    // setSelectedStages(selectedStages);
     setTabFilters((prev) => ({
       ...prev,
       [selectedCard]: {
         ...prev[selectedCard],
-        ...filters, 
-        selectedFilters: selectedStages
+        ...filters,
+        selectedFilters: selectedStages,
       },
     }));
 
     try {
-      await getAllLeadsData(false, 0, filters); 
+      await getAllLeadsData(false, 0, filters);
     } catch (error) {
       console.error(error);
     }
 
     setIsVisible(false);
-};
+  };
   const handleReminder = async () => {
     let leads = [];
     if (selectedCard === 1) {
       leads = leadData;
-    }else if(selectedCard === 2){
-      leads = allContect
-    }
-    
-    else if (selectedCard === 3) {
+    } else if (selectedCard === 2) {
+      leads = allContect;
+    } else if (selectedCard === 3) {
       leads = dataMyLead;
+    } else if (selectedCard === 4) {
+      leads = myLeadProspect;
     } else if (selectedCard === 7) {
       leads = myleadSatgeShow;
     }
@@ -262,18 +295,25 @@ function Leads() {
     }
   };
 
-  const getAllLeadsData = async (isLoadMore = false, pageNo: number, appliedFilters = tabFilters[selectedCard]) => {
-   console.log(appliedFilters,'appliedFiltersappliedFiltersappliedFiltersappliedFiltersappliedFilters');
-   
+  const getAllLeadsData = async (
+    isLoadMore = false,
+    pageNo: number,
+    appliedFilters = tabFilters[selectedCard]
+  ) => {
+    console.log(
+      appliedFilters,
+      "appliedFiltersappliedFiltersappliedFiltersappliedFiltersappliedFilters"
+    );
+
     if (isLoadMore && loadingMore) return;
     if (!isLoadMore && loading) return;
-  
+
     try {
       if (isLoadMore) setLoadingMore(true);
       else setLoading(true);
-  
+
       if (dataLoaded) return;
-  
+
       const payload = {
         userId: store.getState().auth.userId,
         pageNo,
@@ -283,16 +323,16 @@ function Leads() {
         pageSize: paginationModel.pageSize,
         ...appliedFilters,
       };
-  console.log(payload,'payloadpayloadpayloadpayloadpayload');
-  
+      console.log(payload, "payloadpayloadpayloadpayloadpayload");
+
       let responses;
-  
-      if (userType === "0") { 
+
+      if (userType === "0") {
         responses = await Promise.all([
           getAllUsersMyLead(payload),
           getLeadStageProspect(payload),
           getAllMyLeadContactStage(payload),
-          getAllMyLeadStageLead(payload)
+          getAllMyLeadStageLead(payload),
         ]);
       } else {
         responses = await Promise.all([
@@ -303,96 +343,105 @@ function Leads() {
           getLeadStageOpportunity(payload),
           getLeadStageClosure(payload),
           getAllMyLeadContactStage(payload),
-          getAllMyLeadStageLead(payload)
+          getAllMyLeadStageLead(payload),
         ]);
       }
-  
+
       if (userType === "0") {
-        const [response2, response4,response7,response8] = responses;
-        console.log(responses,"responsesresponsesresponses")
+        const [response2, response4, response7, response8] = responses;
+        console.log(responses, "responsesresponsesresponses");
         setDataMyLead((prevData) => {
           const newData = [...prevData, ...(response2?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
-  
+
         setLeadProspect((prevData) => {
           const newData = [...prevData, ...(response4?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
 
         setMyLeadSatge((prevData) => {
           const newData = [...prevData, ...(response8?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
         setAllContectData((prevData) => {
           const newData = [...prevData, ...(response7?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
       } else {
-        const [response1, response2, response3, response4, response5, response6, response7 ,response8] = responses;
-  
+        const [
+          response1,
+          response2,
+          response3,
+          response4,
+          response5,
+          response6,
+          response7,
+          response8,
+        ] = responses;
+
         setLeadData((prevData) => {
           const newData = [...prevData, ...(response1?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
-  
+
         setDataMyLead((prevData) => {
           const newData = [...prevData, ...(response2?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
-  
+
         setTeamLeadData((prevData: any) => {
           const newData = isLoadMore
             ? [...prevData, ...(response3?.data || [])]
             : [...(response3?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
-  
+
         setLeadProspect((prevData) => {
           const newData = [...prevData, ...(response4?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
-  
+
         setLeadStageOpportunity((prevData) => {
           const newData = [...prevData, ...(response5?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
-  
+
         setLeadStageClosure((prevData) => {
           const newData = [...prevData, ...(response6?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
-  
+
         setAllContectData((prevData) => {
           const newData = [...prevData, ...(response7?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
         setMyLeadSatge((prevData) => {
           const newData = [...prevData, ...(response8?.data || [])];
-          return [...new Set(newData.map((item) => JSON.stringify(item)))].map((item) =>
-            JSON.parse(item)
+          return [...new Set(newData.map((item) => JSON.stringify(item)))].map(
+            (item) => JSON.parse(item)
           );
         });
       }
@@ -403,7 +452,7 @@ function Leads() {
       setLoadingMore(false);
     }
   };
-  
+
   const filteredLeads = useMemo(() => {
     const defaultNoData = [{ id: 1, name: "NO DATA FOUND" }];
     let leadsToFilter: any[] = [];
@@ -434,8 +483,8 @@ function Leads() {
         leadsToFilter = defaultNoData;
         break;
     }
-    console.log(tabFilters,'filtersfiltersfiltersfiltersfiltersfilters::::::::::::');
-    
+
+
     // if (filters.stage) {
     //   const stageArray = filters.stage.split(",").map((stage) => stage.trim());
     //   leadsToFilter = leadsToFilter.filter((lead) => {
@@ -447,8 +496,10 @@ function Leads() {
     //   });
     // }
 
-    if (tabFilters?.[selectedCard]?.stage) {  
-      const stageArray = tabFilters[selectedCard].stage.split(",").map((stage) => stage.trim());
+    if (tabFilters?.[selectedCard]?.stage) {
+      const stageArray = tabFilters[selectedCard].stage
+        .split(",")
+        .map((stage) => stage.trim());
       leadsToFilter = leadsToFilter.filter((lead) => {
         const isMatch = stageArray.includes(lead.stage);
         if (!isMatch && lead.stage) {
@@ -478,7 +529,8 @@ function Leads() {
     myLeadProspect,
     myLeadStageOpportunity,
     teamLeadData,
-    allContect,myleadSatgeShow
+    allContect,
+    myleadSatgeShow,
   ]);
 
   const handleDialPress = useCallback(async (phoneNumber) => {
@@ -502,7 +554,7 @@ function Leads() {
         dispatch(setLeadDatad(item));
         break;
       case 2:
-        dispatch(setAllContectMy(item)); ;
+        dispatch(setAllContectMy(item));
         break;
       case 3:
         dispatch(setMyLeadData(item));
@@ -530,28 +582,30 @@ function Leads() {
       setPaginationModel((prevModel) => {
         const newPage = prevModel.page + 1;
         getAllLeadsData(true, newPage);
-        return { ...prevModel, page: newPage }; 
+        return { ...prevModel, page: newPage };
       });
     }
   };
 
   return (
     <View style={styles.mainCont}>
-   <ScrollView
-  contentContainerStyle={{ flexGrow: 1 }} 
-  onScroll={({ nativeEvent }) => {
-    if (dataLoaded) return;
-    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-    if (
-      layoutMeasurement.height + contentOffset.y >=
-      contentSize.height - 20
-    ) {
-      handleLoadMore();
-    }
-  }}
-  scrollEventThrottle={16}
-  refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
->
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        onScroll={({ nativeEvent }) => {
+          if (dataLoaded) return;
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          if (
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 20
+          ) {
+            handleLoadMore();
+          }
+        }}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.content}>
           {/* <LeadStatus
             selectedCard={selectedCard}
@@ -567,9 +621,9 @@ function Leads() {
             myLeadProspect={myLeadProspect}
             myLeadStageOpportunity={myLeadStageOpportunity}
             myLeadStageClosure={myLeadStageClosure}
-            allContect ={allContect}
-            userType ={userType}
-            myleadSatgeShow ={myleadSatgeShow}
+            allContect={allContect}
+            userType={userType}
+            myleadSatgeShow={myleadSatgeShow}
           />
           <CustomSearchBar
             value={searchQuery}
@@ -640,7 +694,9 @@ function Leads() {
             visible={isVisible}
             onClose={() => setIsVisible(false)}
             onApplyFilters={handleApplyFilters}
-            selectedStagesLocal={tabFilters[selectedCard]?.selectedFilters ?? []}
+            selectedStagesLocal={
+              tabFilters[selectedCard]?.selectedFilters ?? []
+            }
             selectViewData
             selectedTab={selectedCard}
           />

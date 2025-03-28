@@ -1,10 +1,11 @@
 import { StringConstants } from "./StringConstants";
 const ip1 = "http://13.200.251.4:5000"
 // const ip2 = "http://15.206.57.57:5000"
-const ip2 = "https://api.yhataw.com:5000"
-// const ip2 = "https://qa-api.yhataw.com:5000"
+// const ip2 = "https://api.yhataw.com:5000"
+const ip2 = "https://qa-api.yhataw.com:5000"
 // const ip2 = "http://localhost:5000"
 class UrlConstants extends StringConstants {
+  
   url_prod = ip2;
   url_dev = "https://api-uat.xyz.com/xyz";
   
@@ -266,6 +267,15 @@ class UrlConstants extends StringConstants {
 
   // Banner
   ADDBANNER = `${this.url_prod}/getBanner`
+
+  // Notifications
+  ADDPUSHNOTIFICATION = `${this.url_prod}/push-notification`;
+  ADDNOTIFICATIONTOKEN = `${this.url_prod}/auth/notification`;
+  UPDATEPUSHNOTIFICATION = `${this.url_prod}/updateNotificationStatus`;
+  GETTODAYREMINDERS = `${this.url_prod}/getAllTodayReminders`;
+  GETNOTIFICATION = `${this.url_prod}/getNotification`;
+ 
+
 }
 let urls = new UrlConstants();
 export default urls;

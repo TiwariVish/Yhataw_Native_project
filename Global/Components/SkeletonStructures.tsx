@@ -138,6 +138,19 @@ export const LeadsSkeleton = () =>{
   );
 }
 
+export const NotificationLoder = ()=>{
+  const rows = Array.from({ length: 10 }); 
+  return (
+    <View style={styles.wrapper}>
+      {rows.map((_, index) => (
+        <View key={index} style={styles.skeletonContainer}>
+          <View style={[styles.skeletonButton, { width: 370 }]} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
