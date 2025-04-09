@@ -10,14 +10,24 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Video } from 'expo-av'; // Import Video from expo-av
 import {getAllTodayReminders} from './Global/Notifications/PushNotificationService'
 import Toast from 'react-native-toast-message';
-
+import {generateToken} from './Global/Notifications/firebase'
 export default function App() {
+
+  // const requestUserPermission = async () =>{
+  //   const authStatus = await messahing().requestUserPermissioner;
+  //   const enabled = authStatus === messa
+  // }
 
 
   const boldText = (text) => {
     return text.replace(/<strong>(.*?)<\/strong>/g, (match, p1) => `${p1}`); 
   };
-  
+
+
+  useEffect(()=>{
+    generateToken()
+  },[])
+
   useEffect(() => {
     const reminder = async () => {
       let remindersRes = await getAllTodayReminders();

@@ -252,10 +252,7 @@ const Dashboard: React.FC<CustomProps> = () => {
   const [myLeadProspect, setLeadProspect] = useState<any>([]);
   const [myLeadStageOpportunity, setLeadStageOpportunity] = useState<any>([]);
   const [notifications, setNotifications] = useState([]);
-  console.log(
-    notifications,
-    "notificationsnotificationsnotificationsnotifications"
-  );
+
   const notificationCount = notifications.filter(
     (n: any) => n.status === "unread"
   ).length;

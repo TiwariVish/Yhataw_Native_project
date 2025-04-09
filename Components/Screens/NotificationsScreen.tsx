@@ -14,6 +14,10 @@ import {
 } from "../../Global/Notifications/PushNotificationService";
 import RenderHTML from "react-native-render-html";
 import { NotificationLoder } from "../../Global/Components/SkeletonStructures";
+import { useNavigation } from "@react-navigation/native";
+import { LoginScreenNavigationProp } from "../type";
+import { useSelector } from "react-redux";
+import { RootState } from "../../utils/store";
 
 interface Notification {
   _id: string;
@@ -24,6 +28,19 @@ interface Notification {
 }
 
 const NotificationsScreen = () => {
+  const {
+    leadData,
+    myLeadData,
+    teamLeadData,
+    myLeadProspectShow,
+    myLeadOpportunity,
+    myLeadClosure,
+    allContectMy,
+    mySatgeDataRedux
+  } = useSelector((state: RootState) => state.auth);
+  console.log(allContectMy,'myLeadDatamyLeadDatamyLeadDatamyLeadData');
+  
+    const navigation = useNavigation<LoginScreenNavigationProp>();
   const { width } = useWindowDimensions();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -66,6 +83,7 @@ const NotificationsScreen = () => {
         console.error("Error updating notification status:", error);
       }
     }
+    navigation.navigate("LeadInfoScreen", { selectedCard :notification });
   };
 
   const formatTimeAgo = (createdAt: string) => {

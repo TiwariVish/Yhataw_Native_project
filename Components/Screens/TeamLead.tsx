@@ -6,6 +6,7 @@ import {
   Linking,
   RefreshControl,
   Modal,
+  Image,
   TouchableWithoutFeedback,
   ActivityIndicator,
 } from "react-native";
@@ -53,7 +54,7 @@ function TeamLead() {
       pageSize: number = paginationModel.pageSize,
       append = false
     ) => {
-      if(!hasMoreData) return
+      if (!hasMoreData) return;
       try {
         setLoading(true);
         const payload = {
@@ -63,6 +64,7 @@ function TeamLead() {
           start_date: "",
           end_date: "",
           search: searchQuery,
+          formId: filters?.formId?.length ? filters.formId : null,
         };
         const response = await getAllTeamLeads(payload);
         const newData = response?.data || [];
@@ -83,11 +85,11 @@ function TeamLead() {
       } catch (error) {
         setLoading(false);
         console.error("Error fetching team lead data:", error);
-      }finally{
+      } finally {
         setLoading(false);
       }
     },
-    [paginationModel, searchQuery]
+    [paginationModel, searchQuery, filters]
   );
 
   const handleReminder = useCallback(async () => {
@@ -117,24 +119,32 @@ function TeamLead() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await  getTeamLeadData(0, paginationModel.pageSize, false);
+    await getTeamLeadData(0, paginationModel.pageSize, false);
     setRefreshing(false);
   };
 
-   useEffect(() => {
+  useEffect(() => {
     getTeamLeadData(0, paginationModel.pageSize, false);
-   }, []);
+  }, []);
   useEffect(() => {
     (async () => {
       await handleReminder();
     })();
   }, [teamLeadData]);
 
+  useEffect(() => {
+    console.log(filters, "filtersfiltersfiltersfilters");
+
+    if (filters && Object.keys(filters).length > 0) {
+      getTeamLeadData(0);
+    }
+  }, [filters]);
+
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
       (async () => {
-        if (isActive) await  getTeamLeadData(0, paginationModel.pageSize, false);
+        if (isActive) await getTeamLeadData(0, paginationModel.pageSize, false);
       })();
 
       return () => {
@@ -163,37 +173,13 @@ function TeamLead() {
   };
 
   const handleApplyFilters = (filters: any) => {
+    console.log(filters, "filtersfiltersfiltersfiltersfilters");
     setFilters(filters);
     setIsVisible(false);
-    const form_Name = filters.formId
+    const form_Name = Array.isArray(filters?.formId)
       ? filters.formId.map((formId: string) => formId.trim())
       : [];
     setSelectedStages(form_Name);
-
-    const fetchFilteredLeads = async () => {
-      try {
-        const response = await Promise.all(
-          form_Name.map(async (formId) => {
-            const payload = {
-              userId: store.getState().auth.userId,
-              pageNo: paginationModel.pageNo,
-              start_date: "",
-              end_date: "",
-              pageSize: paginationModel.pageSize,
-              formId,
-              ...filters,
-            };
-            console.log(payload);
-            return getAllTeamLeads(payload);
-          })
-        );
-        const allRes = response.map((res) => res?.data || []).flat();
-        setFilteredLeads(allRes);
-      } catch (error) {
-        console.error("Error fetching team lead data:", error);
-      }
-    };
-    fetchFilteredLeads();
   };
 
   const handleLoadMore = useCallback(() => {
@@ -214,26 +200,27 @@ function TeamLead() {
         onFilterPress={() => setIsVisible(true)}
       />
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 50 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onScroll={({ nativeEvent }) => {
-          if (!hasMoreData) return;
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+
           if (
             layoutMeasurement.height + contentOffset.y >=
-            contentSize.height - 20
+            contentSize.height - 100
           ) {
             handleLoadMore();
           }
         }}
-        scrollEventThrottle={400}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
       >
         {loading && paginationModel.pageNo === 0 ? (
           <LeadsSkeleton />
-        ) : (
+        ) : filteredLeadsnew.length > 0 || teamLeadData.length > 0 ? (
           (filteredLeadsnew.length > 0 ? filteredLeadsnew : teamLeadData).map(
             (lead, index) => (
               <CustomCardLead
@@ -252,7 +239,15 @@ function TeamLead() {
               />
             )
           )
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Image
+              source={require("../../assets/nodatafound.png")}
+              style={styles.image}
+            />
+          </View>
         )}
+
         {loading && paginationModel.pageNo > 0 && (
           <View style={styles.loadingMore}>
             <ActivityIndicator size={30} color="#0000ff" />
@@ -275,6 +270,8 @@ function TeamLead() {
             onApplyFilters={handleApplyFilters}
             selectedStagesLocal={selectedStages}
             selectViewData={selectViewData}
+            selectedFormdataFilter={filters.formId || []}
+            selectedTab
           />
         </View>
       </Modal>
@@ -305,6 +302,16 @@ const styles = StyleSheet.create({
   loadingMore: {
     marginVertical: 20,
     alignItems: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
   },
 });
 

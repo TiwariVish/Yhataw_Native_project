@@ -7,6 +7,7 @@ import {
   Linking,
   ActivityIndicator,
   Modal,
+  Image,
   TouchableWithoutFeedback,
 } from "react-native";
 import CustomSearchBar from "../../NewDesine/GlobalComponets/CustomSearchBar";
@@ -15,18 +16,23 @@ import CustomCardLead from "../../NewDesine/GlobalComponets/CustomCardLead";
 import store from "../../utils/store";
 import { getAllUsers } from "./DashboardService";
 import { getReminderCall } from "./LeadsService";
-import { RouteProp, useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import AllFilterBottomSheetModel from "../../Global/PopAndModels/AllFilterBottomSheetModel";
 import { setLeadDatad } from "../../Redux/authSlice";
 import { useDispatch } from "react-redux";
 import { LoginScreenNavigationProp, RootStackParamList } from "../type";
 
 const AllLeadScreen = () => {
-    const dispatch = useDispatch();
-      const navigation = useNavigation<LoginScreenNavigationProp>();
-      type RouteProps = RouteProp<RootStackParamList, "AllLeadScreen">;
-      const route = useRoute<RouteProps>();
-      const selectViewData = route.params?.selectedView || null;
+  const dispatch = useDispatch();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
+  type RouteProps = RouteProp<RootStackParamList, "AllLeadScreen">;
+  const route = useRoute<RouteProps>();
+  const selectViewData = route.params?.selectedView || null;
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -41,9 +47,11 @@ const AllLeadScreen = () => {
   const [filters, setFilters] = useState<any>({});
   const [filteredLeadsnew, setFilteredLeads] = useState<any[]>([]);
 
-  // useEffect(() => {
-  //   getLeadDataAll(0, paginationModel.pageSize, false);
-  // }, []);
+  useEffect(() => {
+    if (filters && Object.keys(filters).length > 0) {
+      getLeadDataAll(0);
+    }
+  }, [filters]);
 
   useFocusEffect(
     useCallback(() => {
@@ -69,10 +77,10 @@ const AllLeadScreen = () => {
     setRefreshing(false);
   };
 
-    const handleCardDataLeads = (item: any) => {
-          dispatch(setLeadDatad(item));
-      navigation.navigate("LeadInfoScreen",{selectedCard :1});
-    };
+  const handleCardDataLeads = (item: any) => {
+    dispatch(setLeadDatad(item));
+    navigation.navigate("LeadInfoScreen", { selectedCard: 1 });
+  };
 
   const getLeadDataAll = useCallback(
     async (
@@ -89,7 +97,9 @@ const AllLeadScreen = () => {
           search: searchQuery,
           start_date: "",
           end_date: "",
+          formId: filters?.formId?.length ? filters.formId : null,
         };
+
         const response = await getAllUsers(payload);
 
         if (append) {
@@ -110,50 +120,21 @@ const AllLeadScreen = () => {
         setLoading(false);
       }
     },
-    [searchQuery]
+    [searchQuery, filters]
   );
 
   const handleApplyFilters = (filters: any) => {
+    console.log(filters, "filtersfiltersfiltersfiltersfiltersfiltersfilters");
+
     setFilters(filters);
     setIsVisible(false);
-    const form_Name = filters.formId
+
+    const form_Name = Array.isArray(filters?.formId)
       ? filters.formId.map((formId: string) => formId.trim())
       : [];
+    console.log(form_Name, "form_Nameform_Nameform_Nameform_Name");
 
     setSelectedStages(form_Name);
-
-    const fetchFilteredLeads = async () => {
-      try {
-        const allResponses = await Promise.all(
-          form_Name.map(async (formId) => {
-            const payload = {
-              userId: store.getState().auth.userId,
-              pageNo: paginationModel.pageNo,
-              start_date: "",
-              end_date: "",
-              pageSize: paginationModel.pageSize,
-              formId,
-              ...filters,
-            };
-
-       
-
-            return getAllUsers(payload);
-          })
-        );
-
-        const allFilteredData = allResponses
-          .map((response) => response?.data || [])
-          .flat(); 
-
-        setFilteredLeads(allFilteredData);
-       
-      } catch (error) {
-        console.error("Error fetching filtered leads:", error);
-      }
-    };
-
-    fetchFilteredLeads();
   };
 
   const handleLoadMore = useCallback(() => {
@@ -211,20 +192,19 @@ const AllLeadScreen = () => {
         onChangeText={setSearchQuery}
         onFilterPress={() => setIsVisible(true)}
       />
-        <ScrollView
+      <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 50 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         onScroll={({ nativeEvent }) => {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          console.log("Scroll Data:", {
-            layoutHeight: layoutMeasurement.height,
-            contentOffsetY: contentOffset.y,
-            contentHeight: contentSize.height,
-          });
 
-          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 100) {
-            console.log("Triggering Load More...");
+          if (
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 100
+          ) {
             handleLoadMore();
           }
         }}
@@ -233,7 +213,7 @@ const AllLeadScreen = () => {
       >
         {loading && paginationModel.pageNo === 0 ? (
           <LeadsSkeleton />
-        ) : (
+        ) : filteredLeadsnew.length > 0 || allLeadData.length > 0 ? (
           (filteredLeadsnew.length > 0 ? filteredLeadsnew : allLeadData).map(
             (lead, index) => (
               <CustomCardLead
@@ -252,7 +232,15 @@ const AllLeadScreen = () => {
               />
             )
           )
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Image
+              source={require("../../assets/nodatafound.png")}
+              style={styles.image}
+            />
+          </View>
         )}
+
         {loading && paginationModel.pageNo > 0 && (
           <View style={styles.loadingMore}>
             <ActivityIndicator size={30} color="#0000ff" />
@@ -274,7 +262,9 @@ const AllLeadScreen = () => {
             onClose={() => setIsVisible(false)}
             onApplyFilters={handleApplyFilters}
             selectedStagesLocal={selectedStages}
-            selectViewData ={selectViewData}
+            selectViewData={selectViewData}
+            selectedFormdataFilter={filters.formId || []}
+            selectedTab
           />
         </View>
       </Modal>
@@ -293,12 +283,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: 20,
   },
-  noData: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 20,
-  },
   loadingMore: {
     marginVertical: 20,
     alignItems: "center",
@@ -311,6 +295,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     backgroundColor: "white",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
   },
 });
 

@@ -15,6 +15,7 @@ import {
   RefreshControl,
   Modal,
   TouchableWithoutFeedback,
+  Image,
 } from "react-native";
 import LeadStatus from "./LeadStatus";
 import { useSelector, useDispatch } from "react-redux";
@@ -205,43 +206,26 @@ function Leads() {
     } catch (error) {}
   };
 
-  // const handleApplyFilters = (filters: any) => {
-  //   setFilters(filters);
-  //   setIsVisible(false);
-  //   const selectedStages = filters.stage
-  //     ? filters.stage.split(",").map((stage) => stage.trim())
-  //     : [];
-  //   setSelectedStages(selectedStages);
-  //   const fetchFilteredLeads = async () => {
-  //     try {
-  //       const payload = {
-  //         userId: store.getState().auth.userId,
-  //         pageNo: 0,
-  //         pageSize: paginationModel.pageSize,
-  //         ...filters,
-  //       };
-  //       const res = await getAllUsersMyLead(payload);
-  //       setFilteredLeads(res.data);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
-
-  //   fetchFilteredLeads();
-  // };
-
   const handleApplyFilters = async (filters: any) => {
     console.log(filters, "Applied Filters:::::::::::::::::::", selectedCard);
     const selectedStages = filters.stage
       ? filters.stage.split(",").map((stage) => stage.trim())
       : [];
     // setSelectedStages(selectedStages);
+    console.log(selectedStages, "selectedStagesselectedStagesselectedStages");
+
+    const selectedForm = filters.formId
+      ? filters.formId.split(",").map((f) => f.trim())
+      : [];
+    console.log(selectedForm, "selectedFormselectedForm");
+
     setTabFilters((prev) => ({
       ...prev,
       [selectedCard]: {
         ...prev[selectedCard],
         ...filters,
         selectedFilters: selectedStages,
+        formLead: selectedForm,
       },
     }));
 
@@ -484,18 +468,6 @@ function Leads() {
         break;
     }
 
-
-    // if (filters.stage) {
-    //   const stageArray = filters.stage.split(",").map((stage) => stage.trim());
-    //   leadsToFilter = leadsToFilter.filter((lead) => {
-    //     const isMatch = stageArray.includes(lead.stage);
-    //     if (!isMatch && lead.stage) {
-    //       noStageMatch = true;
-    //     }
-    //     return isMatch;
-    //   });
-    // }
-
     if (tabFilters?.[selectedCard]?.stage) {
       const stageArray = tabFilters[selectedCard].stage
         .split(",")
@@ -507,6 +479,13 @@ function Leads() {
         }
         return isMatch;
       });
+    }
+
+    if (tabFilters?.[selectedCard]?.formLead?.length) {
+      const formIds = tabFilters[selectedCard].formLead;
+      leadsToFilter = leadsToFilter.filter((lead) =>
+        formIds.includes(lead.form_id || lead.formId)
+      );
     }
 
     if (searchQuery) {
@@ -523,8 +502,8 @@ function Leads() {
     leadData,
     dataMyLead,
     searchQuery,
-    filters.stage,
     tabFilters?.[selectedCard]?.stage,
+    tabFilters?.[selectedCard]?.formLead,
     myLeadStageClosure,
     myLeadProspect,
     myLeadStageOpportunity,
@@ -624,6 +603,7 @@ function Leads() {
             allContect={allContect}
             userType={userType}
             myleadSatgeShow={myleadSatgeShow}
+            filteredCount={filteredLeads.length}
           />
           <CustomSearchBar
             value={searchQuery}
@@ -633,8 +613,11 @@ function Leads() {
           {loading && !loadingMore ? (
             <LeadsSkeleton />
           ) : !filteredLeads || filteredLeads.length === 0 ? (
-            <View style={styles.noDataFound}>
-              <Text>No Data Found</Text>
+            <View style={styles.emptyContainer}>
+              <Image
+                source={require("../../assets/nodatafound.png")}
+                style={styles.image}
+              />
             </View>
           ) : (
             filteredLeads.map((item, index) => {
@@ -697,6 +680,7 @@ function Leads() {
             selectedStagesLocal={
               tabFilters[selectedCard]?.selectedFilters ?? []
             }
+            selectedFormdataFilter={tabFilters[selectedCard]?.formLead ?? []}
             selectViewData
             selectedTab={selectedCard}
           />
@@ -739,6 +723,17 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "white",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 500,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
   },
 });
 

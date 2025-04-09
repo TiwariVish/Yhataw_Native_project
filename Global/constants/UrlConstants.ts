@@ -1,8 +1,8 @@
 import { StringConstants } from "./StringConstants";
 const ip1 = "http://13.200.251.4:5000"
 // const ip2 = "http://15.206.57.57:5000"
-// const ip2 = "https://api.yhataw.com:5000"
-const ip2 = "https://qa-api.yhataw.com:5000"
+const ip2 = "https://api.yhataw.com:5000"
+// const ip2 = "https://qa-api.yhataw.com:5000"
 // const ip2 = "http://localhost:5000"
 class UrlConstants extends StringConstants {
   

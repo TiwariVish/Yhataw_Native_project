@@ -1,12 +1,9 @@
-import { initializeApp } from "firebase/app";
+
+
+import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 import { getMessaging, getToken } from "firebase/messaging";
-import { onMessage } from "firebase/messaging";
-import { getFirestore } from "firebase/firestore";
-
-import { useEffect } from "react";
-import store from "../../utils/store";
-import { addNotificationToken } from "./PushNotificationService";
-
+import { getApps, initializeApp } from "firebase/app";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBK-gITHyQRUAvdaLvGkkvrM7Z3MKig-PE",
@@ -18,40 +15,35 @@ const firebaseConfig = {
   measurementId: "G-MBBKXQ65DZ"
 };
 
-const app = initializeApp(firebaseConfig);
-export const messaging = getMessaging(app);
-export const db = getFirestore(app);
-console.log(db,"database")
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+
+
 
 export const generateToken = async () => {
-  if(store.getState().auth.userId){
-    const permission = await Notification.requestPermission();
-  
-    if (permission === "granted") {
-      const token = await getToken(messaging, {
-        vapidKey: "BH31ZiyuxzPG6DbL9H6idkj9h8h8I974z--vZiC5VyYoFYOVApNVR8rYtEN8T4FPf6Fw5Q4MJH0bQ6RIJR7WkvI",
-      });
-      console.log("Token:", token);
-      const payload = {
-        userId: store.getState().auth.userId,
-        token: token
-      }
-      console.log(payload, "payloadddddddddddddd");
-      
-      const notificationKey = `notificationTokenSaved_${payload.userId}`;
-      
-        const response = await addNotificationToken(payload);
-        console.log(response?.success === 1, "sdbsjdbksjdfsd");
-      
-    
-      
-      return token;
-    } else {
-      console.warn("Notification permission denied");
-      return null;
-    }
-
+  // Request permissions for notifications
+  const { status } = await Notifications.requestPermissionsAsync();
+  if (status !== "granted") {
+    console.warn("Permission not granted for notifications");
+    return;
   }
-  };
-  
-  
+
+  if (Platform.OS === "android") {
+    try {
+      const messaging = getMessaging();
+      const fcmToken = await getToken(messaging, {
+        vapidKey: "BH31ZiyuxzPG6DbL9H6idkj9h8h8I974z--vZiC5VyYoFYOVApNVR8rYtEN8T4FPf6Fw5Q4MJH0bQ6RIJR7WkvI", // Only required for Web
+      });
+
+      console.log("FCM Token:::::::::::::::::", fcmToken);
+      return fcmToken;
+    } catch (error) {
+      console.error("Error getting FCM token:", error);
+    }
+  } else {
+    const token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log("Expo Push Token:", token);
+    return token;
+  }
+};

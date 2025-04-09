@@ -24,7 +24,10 @@ import { globalStyles } from "../../GlobalCss/GlobalStyles";
 import { getAllForms } from "../../Components/Screens/DashboardService";
 import Feather from "react-native-vector-icons/Feather";
 import { useDispatch } from "react-redux";
-import { setSelectedStagesAll } from "../../Redux/authSlice";
+import {
+  setSelectedFormFilterAll,
+  setSelectedStagesAll,
+} from "../../Redux/authSlice";
 import { useSelector } from "react-redux";
 import store, { RootState } from "../../utils/store";
 const { height: screenHeight } = Dimensions.get("window");
@@ -33,6 +36,7 @@ const FilterBottomSheet: React.FC<{
   visible: boolean;
   selectViewData;
   selectedStagesLocal: any[];
+  selectedFormdataFilter :any[]
   selectedTab;
   onClose: () => void;
   onApplyFilters: (filters: any) => void;
@@ -41,43 +45,72 @@ const FilterBottomSheet: React.FC<{
   onClose,
   onApplyFilters,
   selectedStagesLocal,
+  selectedFormdataFilter,
   selectViewData,
   selectedTab,
 }) => {
+
+  console.log(selectedTab,'selectedTabselectedTabselectedTab');
+  console.log(selectedStagesLocal,'selectedStagesLocalselectedStagesLocalselectedStagesLocal')
+  console.log(selectedFormdataFilter,'selectedFormdataFilterselectedFormdataFilterselectedFormdataFilter');
+  
+  
   const translateY = useSharedValue(screenHeight);
   const [selectedCategory, setSelectedCategory] = useState("Stage");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  console.log(selectedFilters,'selectedFiltersselectedFilters');
+  
   const [allData, setAllData] = useState<any[]>([]);
   const [allFormData, setAllFormData] = useState<any[]>([]);
   const [value, setValue] = useState<string>("");
   const [selectedStages, setSelectedStages] =
     useState<string[]>(selectedStagesLocal);
+  const [selectedFilterForm, setselectedFilterForm] = useState<string[]>(selectedFormdataFilter);
   const dispatch = useDispatch();
   const [userType, setUserType] = useState<string>("0");
-  const { selectedStagesAll, allFormShowFiter } = useSelector(
+  const { selectedStagesAll, selectedFormFiltersAll } = useSelector(
     (state: RootState) => state.auth
   );
 
+  console.log(selectedFormFiltersAll,'selectedFormFiltersAll,selectedFormFiltersAll');
+  
+
+  useEffect(() => {
+    const updatedSelectedIds = allFormData
+      .filter((item) => selectedFormFiltersAll.includes(item._id))
+      .map((item) => item._id);
+    setSelectedFilters(updatedSelectedIds);
+  }, [selectedFormFiltersAll, allFormData]);
+
   useEffect(() => {
     setSelectedStages(selectedStagesAll);
-  }, [selectedStagesAll]);
+    setselectedFilterForm(selectedFormFiltersAll)
+  }, [selectedStagesAll,selectedFormFiltersAll]);
+
 
   useEffect(() => {
     dispatch(setSelectedStagesAll(selectedStages));
-  }, [selectedStages, dispatch]);
+    dispatch(setSelectedFormFilterAll(selectedFilterForm))
+  }, [selectedStages,selectedFilterForm, dispatch]);
+
+
   useEffect(() => {
     translateY.value = withSpring(visible ? 0 : screenHeight, {
       damping: 15,
       stiffness: 100,
     });
   }, [visible]);
+
+
   useEffect(() => {
     setSelectedStages(selectedStagesLocal);
-  }, [selectedStagesLocal]);
+    setselectedFilterForm(selectedFormdataFilter)
+  }, [selectedStagesLocal,selectedFormdataFilter]);
 
   useEffect(() => {
     dispatch(setSelectedStagesAll(selectedStages));
-  }, [selectedStagesAll, dispatch]);
+    dispatch(setSelectedFormFilterAll(selectedFilterForm))
+  }, [selectedStagesAll,selectedFormFiltersAll, dispatch,]);
 
   useEffect(() => {
     fetchData();
@@ -137,8 +170,7 @@ const FilterBottomSheet: React.FC<{
       }
 
       if (selectedCategory === "Stage") {
-        // const stageData = await getStageType(type);
-        const stageData = await getStage();
+        const stageData = await getStageType(type);
         const userData = store.getState().auth.userId;
         const response = await getOfficeDetails(userData);
         const teamRoleName = response.data.teamRoleName.toLowerCase();
@@ -164,8 +196,6 @@ const FilterBottomSheet: React.FC<{
 
   const memoizedFilteredData = useMemo(() => {
     if (selectedCategory === "Stage") {
-      console.log(allData,'allDataallDataallData::::::::');
-      
       return allData.filter((item) => item.stage_Name);
     }
     if (selectedCategory === "form") {
@@ -190,22 +220,24 @@ const FilterBottomSheet: React.FC<{
   };
 
   const handleSelectAll = () => {
-    let allIds = [];
-
+    let allIds: string[] = [];
     if (selectedCategory === "form") {
       allIds = allFormData.map((item) => item._id);
     } else {
-      allIds = memoizedFilteredData.flatMap((item) =>
-        item.sub_Stage_name
-          ? item.sub_Stage_name.map((subItem) => subItem._id)
-          : []
-      );
+      allIds = memoizedFilteredData.flatMap((item) => {
+        if (item.sub_Stage_name && item.sub_Stage_name.length > 0) {
+          return item.sub_Stage_name.map((subItem) => subItem._id);
+        } else {
+          return [item._id];
+        }
+      });
     }
 
     const isAllSelected =
       allIds.length > 0 && allIds.every((id) => selectedFilters.includes(id));
+
     setSelectedFilters(isAllSelected ? [] : allIds);
-    setSelectedStages(isAllSelected ? [] : allIds);
+    setSelectedStages(isAllSelected ? [] : allIds); 
   };
 
   const isAllSelected =
@@ -213,13 +245,15 @@ const FilterBottomSheet: React.FC<{
       ? allFormData.length > 0 &&
         allFormData.every((item) => selectedFilters.includes(item._id))
       : memoizedFilteredData.length > 0 &&
-        memoizedFilteredData.every((item) =>
-          item.sub_Stage_name
-            ? item.sub_Stage_name.every((subItem) =>
-                selectedFilters.includes(subItem._id)
-              )
-            : false
-        );
+        memoizedFilteredData.every((item) => {
+          if (item.sub_Stage_name && item.sub_Stage_name.length > 0) {
+            return item.sub_Stage_name.every((subItem) =>
+              selectedFilters.includes(subItem._id)
+            );
+          } else {
+            return selectedFilters.includes(item._id);
+          }
+        });
 
   const filterOptions = [
     ...(selectViewData === 1 || selectViewData === 2
@@ -252,6 +286,7 @@ const FilterBottomSheet: React.FC<{
   };
 
   const handleFilterSelectionStage = (subItem: any) => {
+    console.log(subItem, "subItemsubItem");
     const isSelected = selectedFilters.includes(subItem._id);
     setSelectedFilters((prev) =>
       isSelected
@@ -264,17 +299,25 @@ const FilterBottomSheet: React.FC<{
     setSelectedStages(updatedStages);
     dispatch(setSelectedStagesAll(updatedStages));
   };
-  const handleFilterData = useCallback(() => {
-    let formId;
-    let stage = selectedStages.join(",");
-    if (selectedCategory === "form") {
-      formId =
-        selectedFilters.length === getAllIds.length
-          ? getAllIds
-          : selectedFilters;
-    } else if (selectedCategory === "Stage") {
-    }
 
+  const handleFormSelectionFilter = (formData: any) => {
+    console.log(formData, "formDataformDataformData");
+    const safeSelectedFilters = Array.isArray(selectedFilters)
+      ? selectedFilters
+      : [];
+    const isSelected = safeSelectedFilters.includes(formData._id);
+    const updatedFilterIds = isSelected
+      ? safeSelectedFilters.filter((id) => id !== formData._id)
+      : [...safeSelectedFilters, formData._id];
+    setSelectedFilters(updatedFilterIds);
+    setselectedFilterForm(updatedFilterIds);
+    console.log(updatedFilterIds, "updatedFilterIds");
+    dispatch(setSelectedFormFilterAll(updatedFilterIds));
+  };
+
+  const handleFilterData = useCallback(() => {
+    let formId = Array.isArray(selectedFilterForm) ? selectedFilterForm.join(",") : "";
+    let stage = selectedStages.join(",");
     onApplyFilters({ formId, stage, selectedFilters });
     onClose();
   }, [selectedStages, selectedFilters, selectedCategory, getAllIds]);
@@ -349,8 +392,6 @@ const FilterBottomSheet: React.FC<{
                     />
                   </View>
                 </View>
-
-                {/* Select All Checkbox */}
                 {(memoizedFilteredData.length > 0 ||
                   (selectedCategory === "form" && allFormData.length > 0)) && (
                   <View>
@@ -384,56 +425,95 @@ const FilterBottomSheet: React.FC<{
                   </View>
                 )}
 
-                {/* Main List Rendering */}
                 {memoizedFilteredData.length > 0 ? (
                   memoizedFilteredData.map((item) => (
                     <View key={item._id} style={{ marginTop: 10 }}>
-                      <Text
-                        style={[
-                          globalStyles.h7,
-                          globalStyles.fs1,
-                          globalStyles.tc,
-                        ]}
-                        allowFontScaling={false}
-                      >
-                        {item.stage_Name ||
-                          item.form_name ||
-                          item.dateRange_Name}
-                      </Text>
-
-                      {item.sub_Stage_name?.length > 0 && (
+                      {item.sub_Stage_name &&
+                        item.sub_Stage_name.length > 0 && (
+                          <Text
+                            style={[
+                              globalStyles.h7,
+                              globalStyles.fs1,
+                              globalStyles.tc,
+                            ]}
+                            allowFontScaling={false}
+                          >
+                            {item.stage_Name ||
+                              item.form_name ||
+                              item.dateRange_Name}
+                          </Text>
+                        )}
+                      {item.sub_Stage_name && item.sub_Stage_name.length > 0 ? (
                         <View>
-                        {item.sub_Stage_name.map((subItem) => {
-                          console.log("SubItem ID:", subItem._id);
-                          console.log("Is Selected:", selectedFilters.includes(subItem._id) || selectedStagesAll.includes(subItem.stage_Name));
-                    
-                          return (
+                          {item.sub_Stage_name.map((subItem) => (
                             <View key={subItem._id} style={styles.checkboxRow}>
                               <View style={{ transform: [{ scale: 0.7 }] }}>
                                 <Checkbox
                                   status={
                                     selectedFilters.includes(subItem._id) ||
-                                    selectedStagesAll.includes(subItem.stage_Name)
+                                    selectedStagesAll.includes(
+                                      subItem.stage_Name
+                                    )
                                       ? "checked"
                                       : "unchecked"
                                   }
-                                  onPress={() => handleFilterSelectionStage(subItem)}
+                                  onPress={() =>
+                                    handleFilterSelectionStage(subItem)
+                                  }
                                   color="#3F8CFF"
                                   uncheckedColor="#A0A0A0"
                                 />
                               </View>
-                              <TouchableOpacity onPress={() => handleFilterSelectionStage(subItem)}>
+                              <TouchableOpacity
+                                onPress={() =>
+                                  handleFilterSelectionStage(subItem)
+                                }
+                              >
                                 <Text
-                                  style={[globalStyles.h8, globalStyles.fs3, globalStyles.tc]}
+                                  style={[
+                                    globalStyles.h8,
+                                    globalStyles.fs3,
+                                    globalStyles.tc,
+                                  ]}
                                   allowFontScaling={false}
                                 >
                                   {subItem.stage_Name}
                                 </Text>
                               </TouchableOpacity>
                             </View>
-                          );
-                        })}
-                      </View>
+                          ))}
+                        </View>
+                      ) : (
+                        // If no sub stages, render a single checkbox for the main item
+                        <View style={styles.checkboxRow}>
+                          <View style={{ transform: [{ scale: 0.7 }] }}>
+                            <Checkbox
+                              status={
+                                selectedFilters.includes(item._id) ||
+                                selectedStagesAll.includes(item.stage_Name)
+                                  ? "checked"
+                                  : "unchecked"
+                              }
+                              onPress={() => handleFilterSelectionStage(item)}
+                              color="#3F8CFF"
+                              uncheckedColor="#A0A0A0"
+                            />
+                          </View>
+                          <TouchableOpacity
+                            onPress={() => handleFilterSelectionStage(item)}
+                          >
+                            <Text
+                              style={[
+                                globalStyles.h8,
+                                globalStyles.fs3,
+                                globalStyles.tc,
+                              ]}
+                              allowFontScaling={false}
+                            >
+                              {item.stage_Name}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
                       )}
                     </View>
                   ))
@@ -452,25 +532,13 @@ const FilterBottomSheet: React.FC<{
                                     ? "checked"
                                     : "unchecked"
                                 }
-                                onPress={() =>
-                                  setSelectedFilters((prev) =>
-                                    prev.includes(item._id)
-                                      ? prev.filter((id) => id !== item._id)
-                                      : [...prev, item._id]
-                                  )
-                                }
+                                onPress={() => handleFormSelectionFilter(item)}
                                 color="#3F8CFF"
                                 uncheckedColor="#A0A0A0"
                               />
                             </View>
                             <TouchableOpacity
-                              onPress={() =>
-                                setSelectedFilters((prev) =>
-                                  prev.includes(item._id)
-                                    ? prev.filter((id) => id !== item._id)
-                                    : [...prev, item._id]
-                                )
-                              }
+                              onPress={() => handleFormSelectionFilter(item)}
                             >
                               <Text
                                 style={[
@@ -532,7 +600,6 @@ const FilterBottomSheet: React.FC<{
 const styles = StyleSheet.create({
   blurView: {
     flex: 1,
-    // position: "absolute",
     top: 0,
     left: 0,
     right: 0,
