@@ -36,7 +36,7 @@ const FilterBottomSheet: React.FC<{
   visible: boolean;
   selectViewData;
   selectedStagesLocal: any[];
-  selectedFormdataFilter :any[]
+  selectedFormdataFilter: any[];
   selectedTab;
   onClose: () => void;
   onApplyFilters: (filters: any) => void;
@@ -49,31 +49,27 @@ const FilterBottomSheet: React.FC<{
   selectViewData,
   selectedTab,
 }) => {
-
-  console.log(selectedTab,'selectedTabselectedTabselectedTab');
-  console.log(selectedStagesLocal,'selectedStagesLocalselectedStagesLocalselectedStagesLocal')
-  console.log(selectedFormdataFilter,'selectedFormdataFilterselectedFormdataFilterselectedFormdataFilter');
-  
-  
   const translateY = useSharedValue(screenHeight);
   const [selectedCategory, setSelectedCategory] = useState("Stage");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  console.log(selectedFilters,'selectedFiltersselectedFilters');
-  
+  const [selectedFiltersMap, setSelectedFiltersMap] = useState<{
+    [key: string]: string[];
+  }>({});
+
   const [allData, setAllData] = useState<any[]>([]);
   const [allFormData, setAllFormData] = useState<any[]>([]);
   const [value, setValue] = useState<string>("");
   const [selectedStages, setSelectedStages] =
     useState<string[]>(selectedStagesLocal);
-  const [selectedFilterForm, setselectedFilterForm] = useState<string[]>(selectedFormdataFilter);
+  const [selectedFilterForm, setselectedFilterForm] = useState<string[]>(
+    selectedFormdataFilter
+  );
+  console.log(selectedStages,selectedFilterForm,"selecteddddddddddddddddddddddddd")
   const dispatch = useDispatch();
   const [userType, setUserType] = useState<string>("0");
   const { selectedStagesAll, selectedFormFiltersAll } = useSelector(
     (state: RootState) => state.auth
   );
-
-  console.log(selectedFormFiltersAll,'selectedFormFiltersAll,selectedFormFiltersAll');
-  
 
   useEffect(() => {
     const updatedSelectedIds = allFormData
@@ -84,15 +80,13 @@ const FilterBottomSheet: React.FC<{
 
   useEffect(() => {
     setSelectedStages(selectedStagesAll);
-    setselectedFilterForm(selectedFormFiltersAll)
-  }, [selectedStagesAll,selectedFormFiltersAll]);
-
+    setselectedFilterForm(selectedFormFiltersAll);
+  }, [selectedStagesAll, selectedFormFiltersAll]);
 
   useEffect(() => {
     dispatch(setSelectedStagesAll(selectedStages));
-    dispatch(setSelectedFormFilterAll(selectedFilterForm))
-  }, [selectedStages,selectedFilterForm, dispatch]);
-
+    dispatch(setSelectedFormFilterAll(selectedFilterForm));
+  }, [selectedStages, selectedFilterForm, dispatch]);
 
   useEffect(() => {
     translateY.value = withSpring(visible ? 0 : screenHeight, {
@@ -101,16 +95,15 @@ const FilterBottomSheet: React.FC<{
     });
   }, [visible]);
 
-
   useEffect(() => {
     setSelectedStages(selectedStagesLocal);
-    setselectedFilterForm(selectedFormdataFilter)
-  }, [selectedStagesLocal,selectedFormdataFilter]);
+    setselectedFilterForm(selectedFormdataFilter);
+  }, [selectedStagesLocal, selectedFormdataFilter]);
 
   useEffect(() => {
     dispatch(setSelectedStagesAll(selectedStages));
-    dispatch(setSelectedFormFilterAll(selectedFilterForm))
-  }, [selectedStagesAll,selectedFormFiltersAll, dispatch,]);
+    dispatch(setSelectedFormFilterAll(selectedFilterForm));
+  }, [selectedStagesAll, selectedFormFiltersAll, dispatch]);
 
   useEffect(() => {
     fetchData();
@@ -217,27 +210,45 @@ const FilterBottomSheet: React.FC<{
   const handleClearAll = () => {
     setSelectedFilters([]);
     setSelectedStages([]);
+    setSelectedFiltersMap({});
+    setselectedFilterForm([]);
   };
 
   const handleSelectAll = () => {
     let allIds: string[] = [];
+
     if (selectedCategory === "form") {
       allIds = allFormData.map((item) => item._id);
     } else {
       allIds = memoizedFilteredData.flatMap((item) => {
         if (item.sub_Stage_name && item.sub_Stage_name.length > 0) {
-          return item.sub_Stage_name.map((subItem) => subItem._id);
+          return item.sub_Stage_name.map((subItem) => subItem.stage_Name);
         } else {
-          return [item._id];
+          return [item.stage_Name];
         }
       });
     }
 
+    const currentSelected = selectedFiltersMap[selectedCategory] || [];
     const isAllSelected =
-      allIds.length > 0 && allIds.every((id) => selectedFilters.includes(id));
+      allIds.length > 0 && allIds.every((id) => currentSelected.includes(id));
 
-    setSelectedFilters(isAllSelected ? [] : allIds);
-    setSelectedStages(isAllSelected ? [] : allIds); 
+    const updatedTabFilters = isAllSelected ? [] : allIds;
+
+    const updatedFiltersMap = {
+      ...selectedFiltersMap,
+      [selectedCategory]: updatedTabFilters,
+    };
+
+    setSelectedFiltersMap(updatedFiltersMap);
+    const allSelectedFilters = Object.values(updatedFiltersMap).flat();
+
+    setSelectedFilters(allSelectedFilters);
+    setSelectedStages(allSelectedFilters);
+
+    if (selectedCategory === "form") {
+      setselectedFilterForm(updatedTabFilters);
+    }
   };
 
   const isAllSelected =
@@ -248,10 +259,10 @@ const FilterBottomSheet: React.FC<{
         memoizedFilteredData.every((item) => {
           if (item.sub_Stage_name && item.sub_Stage_name.length > 0) {
             return item.sub_Stage_name.every((subItem) =>
-              selectedFilters.includes(subItem._id)
+              selectedFilters.includes(subItem.stage_Name)
             );
           } else {
-            return selectedFilters.includes(item._id);
+            return selectedFilters.includes(item.stage_Name);
           }
         });
 
@@ -286,41 +297,62 @@ const FilterBottomSheet: React.FC<{
   };
 
   const handleFilterSelectionStage = (subItem: any) => {
-    console.log(subItem, "subItemsubItem");
-    const isSelected = selectedFilters.includes(subItem._id);
-    setSelectedFilters((prev) =>
-      isSelected
-        ? prev.filter((id) => id !== subItem._id)
-        : [...prev, subItem._id]
-    );
-    const updatedStages = isSelected
-      ? selectedStages.filter((stage) => stage !== subItem.stage_Name)
+    const isSelected = selectedStages.includes(subItem.stage_Name);
+    const updatedStageIds = isSelected
+      ? selectedStages.filter((name) => name !== subItem.stage_Name)
       : [...selectedStages, subItem.stage_Name];
-    setSelectedStages(updatedStages);
-    dispatch(setSelectedStagesAll(updatedStages));
+
+    setSelectedStages(updatedStageIds);
+    dispatch(setSelectedStagesAll(updatedStageIds));
+    if (selectedCategory === "Stage") {
+      setSelectedFilters(updatedStageIds);
+    }
   };
 
   const handleFormSelectionFilter = (formData: any) => {
-    console.log(formData, "formDataformDataformData");
-    const safeSelectedFilters = Array.isArray(selectedFilters)
-      ? selectedFilters
-      : [];
-    const isSelected = safeSelectedFilters.includes(formData._id);
-    const updatedFilterIds = isSelected
-      ? safeSelectedFilters.filter((id) => id !== formData._id)
-      : [...safeSelectedFilters, formData._id];
-    setSelectedFilters(updatedFilterIds);
-    setselectedFilterForm(updatedFilterIds);
-    console.log(updatedFilterIds, "updatedFilterIds");
-    dispatch(setSelectedFormFilterAll(updatedFilterIds));
+    const isSelected = selectedFilterForm.includes(formData._id);
+    const updatedFormIds = isSelected
+      ? selectedFilterForm.filter((id) => id !== formData._id)
+      : [...selectedFilterForm, formData._id];
+
+    setselectedFilterForm(updatedFormIds);
+    dispatch(setSelectedFormFilterAll(updatedFormIds));
+    if (selectedCategory === "form") {
+      setSelectedFilters(updatedFormIds);
+    }
+  };
+
+  const handleSwitchTab = (option: any) => {
+    setSelectedCategory(option.key);
+    if (option.key === "form") {
+      setSelectedFilters(selectedFilterForm);
+    } else if (option.key === "Stage") {
+      setSelectedFilters(selectedStages);
+    }
   };
 
   const handleFilterData = useCallback(() => {
-    let formId = Array.isArray(selectedFilterForm) ? selectedFilterForm.join(",") : "";
-    let stage = selectedStages.join(",");
-    onApplyFilters({ formId, stage, selectedFilters });
+    let formId = "";
+    let stage = "";
+  
+    if (selectedCategory === "form" && selectedFilterForm?.length > 0) {
+      formId = selectedFilterForm.join(",");
+    }
+  
+    if (selectedCategory === "Stage" && selectedStages?.length > 0) {
+      stage = selectedStages.join(",");
+    }
+    if (
+      selectedFilterForm?.length > 0 &&
+      selectedStages?.length > 0
+    ) {
+      formId = selectedFilterForm.join(",");
+      stage = selectedStages.join(",");
+    }
+  console.log(formId,stage,"aaaaaaaaaaaaaa")
+    onApplyFilters({ formId, stage });
     onClose();
-  }, [selectedStages, selectedFilters, selectedCategory, getAllIds]);
+  }, [selectedFilterForm, selectedStages, selectedCategory]);
 
   return (
     <>
@@ -355,7 +387,7 @@ const FilterBottomSheet: React.FC<{
                       selectedCategory === option.key &&
                         styles.selectedCategory,
                     ]}
-                    onPress={() => setSelectedCategory(option.key)}
+                    onPress={() => handleSwitchTab(option)}
                   >
                     <Text
                       style={[
